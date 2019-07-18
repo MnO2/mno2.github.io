@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>Paul Meng's Blog</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="Paul Meng's Blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
+</head>
+
+    <body>
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <div class="content">
+              <h1 class="post-title is-center">Hakell Library Survey: Async</h1>
+              <div class="pure-g">
+                <div class="pure-u-md-1-5"></div>
+                <div class="pure-u-1 pure-u-md-3-5">
+                  <div class="slot-content">
+                    <article>
+                      <p>My friends and I have been working on a haskell binding to libpulse, in the hope to provide a much thorough API than pulse-simple, which only bound the limited simple API but not the async API Due to the innate asynchronous architecture of libpulse and the emulated synchronous interface we want to provide to the users, we have to deal with a lot of dirty jobs with respect to asynchronous behaviours. We did some surveys and here is a little memo I decide to write it down.</p>
+<p>Suppose you want to concurrently download the content of two links, take whatever return first and drop the other one. How would you implement this in Haskell? One way is to implement a select in haskell, the select is named after the select from POSIX</p>
+<pre><code>import Control.Concurrent
+import Control.Concurrent.STM
+import Network.Curl.Download
+import qualified Data.ByteString.Char8 as B
+
+downloadThread :: String -&gt; TMVar B.ByteString -&gt; IO ()
+downloadThread url tmvar = do
+    page &lt;- openURI url
+    case page of 
+        Left s -&gt; return ()
+        Right c -&gt; atomically $ putTMVar tmvar c
+
+select :: [TMVar a] -&gt; STM a
+select = foldr1 orElse . map takeTMVar
+
+main = do
+    tmvar1 &lt;- atomically $ newEmptyTMVar
+    tmvar2 &lt;- atomically $ newEmptyTMVar
+    forkIO $ downloadThread &quot;http://www.google.com&quot; tmvar1
+    forkIO $ downloadThread &quot;http://www.yahoo.com&quot; tmvar2 
+    page &lt;- atomically $ select [tmvar1, tmvar2]
+    B.putStrLn page</code></pre>
+<p>With the help of TMVar, we can wait for the completion of the forked jobs, hence we can emulate a synchronous behaviour building on the top of this.</p>
+<p>When you come up with an idea, a high probability is it have been already implemented by somebody else and been uploaded to hackage. Here is an interfance provided by async, which is implemented by Simon Marlow</p>
+<pre><code>import Network.Curl.Download
+import Control.Concurrent.Async
+import qualified Data.ByteString.Char8 as B
+
+downloadThread :: String -&gt; IO B.ByteString
+downloadThread url = do
+    page &lt;- openURI url
+    case page of 
+        Left s -&gt; error s
+        Right c -&gt; return c
+
+main = do
+    withAsync (downloadThread &quot;http://www.google.com&quot;) $ \a1 -&gt; do
+    withAsync (downloadThread &quot;http://www.yahoo.com&quot;) $ \a2 -&gt; do
+    res &lt;- waitEither a1 a2
+    case res of
+        Left page1 -&gt; B.putStrLn page1
+        Right page2 -&gt; B.putStrLn page2</code></pre>
+<p>The package adds a thin layer over the concurrency operations provided by Contrlo.Concurrent. It defines type Async to provide some safety. Basically it works the same way underlying, using STM for synchronization and using fork# instead of forkIO for optimization.</p>
+<p>Some disadvantages of this library is that it is tightly-coupled with IO, if you want to define MonadIO, it is not currently supported. It also uses lightweight thread, so in the case of libpulse, which uses OS threads on its own. Interacting with it through foreign function interface would be a problem.</p>
+<p>If you are interested in our project, you can fork us on pulse. It has not completed yet, but we devoted a lot of time working on it. Hope soon it would be in beta stage.</p>
+
+                    </article>
+                  </div>
+                </div>
+                <div class="pure-u-md-1-5"></div>
+              </div>
+            </div>
+        </div>
+    </body>
+</html>

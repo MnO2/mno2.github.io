@@ -1,0 +1,195 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>Paul Meng's Blog</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="Paul Meng's Blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
+</head>
+
+    <body>
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <div class="content">
+              <h1 class="post-title is-center">Digging Deeper at Haskell Instance Definition</h1>
+              <div class="pure-g">
+                <div class="pure-u-md-1-5"></div>
+                <div class="pure-u-1 pure-u-md-3-5">
+                  <div class="slot-content">
+                    <article>
+                      <p>If you try to compiler the following clip of code with ghc</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+instance C String where
+    toString = id
+
+main = do
+    putStrLn $ toString &quot;Hello World&quot;</code></pre>
+<p>The compiler will pop out the error message.</p>
+<pre><code>test01.hs:4:10:
+    Illegal instance declaration for `C String'
+    (All instance types must be of the form (T t1 ... tn)
+     where T is not a synonym.
+     Use -XTypeSynonymInstances if you want to disable this.)
+In the instance declaration for `C String'</code></pre>
+<p>What does it mean? Let’s try another run with much simpler type.</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+instance C Int where
+    toString = show
+
+instance C Double where
+    toString = show
+
+main = do
+    putStrLn $ toString (123::Int)
+    putStrLn $ toString (123.123::Double)</code></pre>
+<p>What? it works very well.</p>
+<p>Give another try. We replace String to [Char].</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+instance C [Char] where
+    toString = id
+
+main = do
+    putStrLn $ toString &quot;Hello World&quot;</code></pre>
+<p>But it still doesn’t work.</p>
+<pre><code>test03.hs:4:10:
+    Illegal instance declaration for `C [Char]'
+    (All instance types must be of the form (T a1 ... an)
+     where a1 ... an are *distinct type variables*,
+     and each type variable appears at most once in the instance head.
+     Use -XFlexibleInstances if you want to disable this.)
+
+In the instance declaration for `C [Char]'</code></pre>
+<p>Suprisingly, this does work.</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+instance Show a =&gt; C [a] where
+    toString = concat . (map show)
+
+main = do
+    putStrLn $ toString ([1,2,3,4]::[Int])</code></pre>
+<p>So the problem is not about list constructor []?</p>
+<p>Let’s go to a simple cure directly. That is to add {-# LANGUAGE FlexibleInstances #-}, i.e. use FlexibleInstances GHC extension.</p>
+<pre><code>{-# LANGUAGE FlexibleInstances #-}
+class C a where
+    toString :: a -&gt; String
+
+instance C Int where
+    toString = show
+
+instance C Double where
+    toString = show
+
+instance C [Char] where
+    toString = id
+
+instance C [Int] where
+    toString = concat . (map show)
+
+main = do
+    putStrLn $ toString (123::Int)
+    putStrLn $ toString &quot;Hello World&quot;
+    putStrLn $ toString ([1,2,3,4,5]::[Int])</code></pre>
+<p>That works for C [Char], but still doesn’t work for C String</p>
+<pre><code>{-# LANGUAGE FlexibleInstances #-}
+class C a where
+    toString :: a -&gt; String
+
+instance C String where
+    toString = id
+
+main = do
+    putStrLn $ toString &quot;Hello World&quot;
+test06.hs:5:10:
+    Illegal instance declaration for `C String'
+    (All instance types must be of the form (T t1 ... tn)
+     where T is not a synonym.
+     Use -XTypeSynonymInstances if you want to disable this.)</code></pre>
+<p>In the instance declaration for `C String’ What’s going on? Let’s check the Haskell 98 Report Sec. 4.3.2</p>
+<p>The type (T u1 … uk) must take the form of a type constructor T applied to simple type variables u1, … uk; furthermore, T must not be a type synonym, and the ui must all be distinct. This prohibits instance declarations such as:</p>
+<pre><code>instance C (a,a) where …
+instance C (Int,a) where …
+instance C [[a]] where …</code></pre>
+<p>So according to the report, C [a] is legal, since [a] = [] a where T = [] and u1 = a. But String = [Char] = [] Char, where T = [] and Char is not a type variable. As to why the specific type is invalid. Suppose we have</p>
+<pre><code>instance C [Char] where ... instance C [Int] where ...</code></pre>
+<p>A given constraint of C [a] for some type variable a, we cannot decide which instance declaration to use unless we know about a. And in Haskell 98 the comittee consider to avoid that. For detailed explanation, go ahead to read SPJ’s paper Sec.4.5</p>
+<p>The result is as expected if we try Type synonym, as the standard said the Type synonym is forbidden.</p>
+<pre><code>type Identifier = String
+
+class C a where
+    toString :: a -&gt; String
+
+instance C Identifier where
+    toString = show
+
+main = do
+    putStrLn $ toString (&quot;Hello World&quot;::Identifier)</code></pre>
+<p>Flexible Instances GHC extension is to give us more flexible instance defition form, but I didn’t check how the issue above was resolved.</p>
+<p>Excerpt from Flexible Instances GHC extension &gt; GHC 6.5 &gt; … &gt; &gt; This rule allows instances accepted by the previous rule and more, including &gt; &gt; instance C a &gt; &gt; instance Show (s a) =&gt; Show (Sized s a) &gt; &gt; instance (C1 a, C2 b) =&gt; C a b &gt; &gt; instance C1 Int a =&gt; C2 Bool [a] &gt; &gt; instance C1 Int a =&gt; C2 [a] b &gt; &gt; instance C a a =&gt; C [a] [a]</p>
+<p>To resolve the issue and at the same time conforming Haskell 98, This link listed two methods.</p>
+<p>One is to use newtype</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+newtype Identifier = Identifier String deriving (Show)
+
+instance C Identifier where
+    toString = show
+
+main = do
+    putStrLn $ toString (Identifier &quot;Hello&quot;)</code></pre>
+<p>Another way is to define another listToString</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+    listToString :: [a] -&gt; String
+
+instance C Char where
+    toString = show
+    listToString = id
+
+instance C a =&gt; C [a] where
+    toString = listToString
+
+main = do
+    putStrLn $ toString (&quot;Hello&quot;::[Char])</code></pre>
+
+                    </article>
+                  </div>
+                </div>
+                <div class="pure-u-md-1-5"></div>
+              </div>
+            </div>
+        </div>
+    </body>
+</html>

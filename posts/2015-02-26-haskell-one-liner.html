@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>Paul Meng's Blog</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="Paul Meng's Blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
+</head>
+
+    <body>
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <div class="content">
+              <h1 class="post-title is-center">Haskell One Liners</h1>
+              <div class="pure-g">
+                <div class="pure-u-md-1-5"></div>
+                <div class="pure-u-1 pure-u-md-3-5">
+                  <div class="slot-content">
+                    <article>
+                      <p>The scripting languages like Perl and Ruby are very well-known for expressing the data crunching task into one-liner. With their command line flags like -p, -e and default variable $_ with regular expression. The job just gets easier. I believe functional languages are also good at one-liner, since lambda-like structure are good in data transformation. Here is a few I would do with Haskell.</p>
+<h3 id="number-each-line-of-files">number each line of files</h3>
+<pre><code>ghc -e &quot;print . (zip [1..]) . lines =&lt;&lt; getContents&quot;
+ghc -e &quot;print . (filter (/= '\n'))  =&lt;&lt; getContents&quot;</code></pre>
+<h3 id="count-lines">count lines</h3>
+<pre><code>ghc -e &quot;print . length . lines =&lt;&lt; getContents&quot;</code></pre>
+<h3 id="print-specific-line">print specific line</h3>
+<pre><code>ghc -e &quot;print . (filter (\x -&gt; (fst x) == 1)) . (zip [1..]) . lines =&lt;&lt; getContents&quot;</code></pre>
+<h3 id="regular-expression-is-relatively-painful-in-haskell.-in-order-to-use-it-you-have-to-add-the-modules-you-would-like-to-load-in-evaluation-mode-first.">Regular expression is relatively painful in Haskell. In order to use it you have to add the modules you would like to load in evaluation mode first.</h3>
+<pre><code>:m +Text.Regex</code></pre>
+<p>Then hit with POSIX regular expression syntax.</p>
+<pre><code>ghc -e 'print . (map (\s -&gt; subRegex (mkRegex &quot;^[[:space:]]+&quot;) s &quot;&quot;)) . lines =&lt;&lt; getContents'</code></pre>
+<p>I would add more if I can think of others.</p>
+
+                    </article>
+                  </div>
+                </div>
+                <div class="pure-u-md-1-5"></div>
+              </div>
+            </div>
+        </div>
+    </body>
+</html>

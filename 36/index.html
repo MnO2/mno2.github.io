@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>Paul Meng's Blog</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="Paul Meng's Blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
+</head>
+
+    <body class="home-template nav-closed">
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="https://paulme.ng" class="pure-menu-link">About</a></li>
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+                <li class="pure-menu-item"><a href="../rss/feed.xml" class="pure-menu-link">Subscribe</a></li>
+            </ul>
+        </div>
+        <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2015-02-15-hangul-indian.html">The Korean 한글 Han-gul Indian Connection</a></h1>
+    <div class="post-meta"><time datetime="2015-02-15 17:30">2015-02-15 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>In this video Stuart Jay Raj briefed about the relationship between 한글 and sanskrit. Basically when king 조선 세종 created the han-gul. They learned it from Mangolia’s Phags-pa, which could be dated back to sanskrit. Therefore, looking at the picture you could see common patterns between the two of writing alphabets. Inspiring watch!</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*ZHKHv0MqKKA6xjjl.jpg" /></p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2015-02-14-haskell-online-judge.html">Online Judge Systems accepting Haskell</a></h1>
+    <div class="post-meta"><time datetime="2015-02-14 17:30">2015-02-14 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>Online judge system is a good way to hone your problem solving skills and sharp your expressibility in specific languages. Back in school, I was always using C++98 as the main programming language for submission, but purely based on the reason that it is the main stream choice. Now, many years later, with the proliferation of online judge system, many niche or less popular languages are supported as well. And my favorite is Haskell. The problem is that most of the judge system does not keep up the speed of the growth of GHC, with their compilers used for judging not as the latest one. For example, Sphere Online Judge does support Haskell, but it only support ghc-7.6, and without haskell-platform installed.Codeforces has the similar issue since the last time I checked</p>
+<p>Good news is, rennovated TIOJ is now support ghc-7.8.3 + Haskell Platform. I picked a dynamic programming problem and was judged without issue. Just it might be because it was run on an older machine, it is bit of slow. Otherwise, it did go very well.</p>
+<p>My Program:</p>
+<pre><code>{-# LANGUAGE OverloadedStrings, MultiWayIf #-}
+import Control.Monad
+import Control.Monad.Trans
+import Control.Monad.Trans.Maybe
+import qualified Data.ByteString.Char8 as B
+import Data.Array.Unboxed
+import Data.Array.MArray as MArray
+import Data.Array.ST (runSTArray)
+import Data.Char (digitToInt)
+
+go :: ByteString -&gt; Int -&gt; Int -&gt; Int
+go s n =
+  let arr :: Array Int Int
+      arr = listArray (0, n) [f i | i &lt;- [0 .. n]]
+      f :: Int -&gt; Int
+      f i
+        | i &lt;= 1 = 1
+        | otherwise =
+            let c1 = digitToInt $ B.index s (i-2)
+                c2 = digitToInt $ B.index s (i-1)
+                in if | c2 == 0 -&gt; arr ! (i-2)
+                      | (c1 == 1) || (c1 == 2 &amp;&amp; c2 &gt;= 1 &amp;&amp; c2 &lt;= 6) -&gt; (arr ! (i-1)) + (arr ! (i-2))
+                      | otherwise -&gt; arr ! (i-1)
+  in \x -&gt; arr ! x
+
+solve :: ByteString -&gt; Int
+solve s =
+  let l = B.length s
+  in (go s l)  l
+
+main = runMaybeT $ forever $ do
+  s &lt;- lift B.getLine
+  when (s == “0”) $ mzero
+  let sol = solve s
+  lift $ print sol</code></pre>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+        </main>
+
+        <div class="pure-g">
+          <div class="pure-u-md-1-5"></div>
+          <div class="pure-u-md-3-5">
+          <nav class="main-nav">
+            
+            <span class="newer-posts">
+              <a href="../35/">&larr; Newer Posts</a>
+            </span>
+            
+            
+            <span class="older-posts" style="float:right">
+              <a href="../37/">Older Posts &rarr;</a>
+            </span>
+            
+          </nav>
+          </div>
+          <div class="pure-u-md-1-5"></div>
+        </div>
+
+        <div class="pure-g">
+          <div class="pure-u-md-1-5"></div>
+          <div class="pure-u-1 pure-u-md-3-5">
+            <div class="page-number is-center">Page 36 of 48</div>
+            <footer class="site-footer">
+              <div class="inner is-center">
+                <section class="copyright">All content copyright <a href></a>© 2019 • All rights reserved.</section>
+              </div>
+            </footer>
+          </div>
+          <div class="pure-u-md-1-5"></div>
+        </div>
+    </body>
+</html>

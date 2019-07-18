@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>Paul Meng's Blog</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="Paul Meng's Blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
+</head>
+
+    <body class="home-template nav-closed">
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="https://paulme.ng" class="pure-menu-link">About</a></li>
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+                <li class="pure-menu-item"><a href="../rss/feed.xml" class="pure-menu-link">Subscribe</a></li>
+            </ul>
+        </div>
+        <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2015-03-27-zookeeper.html">Notes on Apache Zookeeper</a></h1>
+    <div class="post-meta"><time datetime="2015-03-27 17:30">2015-03-27 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>As an implementation of Paxos algorithm, Apache zookeeper has been incorporated into different distributed system as a configuration server or synchronization server. Apache Kafka and Solr Cloud are two of prominent open source examples, if you includes inhouse software for service discovery etc there would be more. However, the zookeeper has been known as a headache among Ops people. It is picky about the latency between different instances, and recovery and monitoring are also painful. Netflix released exhibitor ease the pain a little bit, but here I would still jot down the knowledge I am aware so far.</p>
+<p>For a five instances zookeeper cluster, the zoo.cfg look like this, you have to specifying the server’s ip and port in the configuration</p>
+<pre><code>server.1=10.0.5.219\:2888\:3888
+server.2=10.0.5.219\:2889\:3889
+server.3=10.0.5.219\:2890\:3890
+server.4=10.0.5.219\:2891\:3891
+server.5=10.0.5.219\:2892\:3892
+clientPort=2181
+dataDir=/var/zookeeper/1
+syncLimit=5
+tickTime=2000
+initLimit=10
+dataLogDir=/var/zookeeper/1</code></pre>
+<p>If something very serious just happened, you have to cleanup the snapshot, you have to clean up the version-2 dir in the server’s directory. Then restart the servers. This only applies when you are unable to recover the consistency, using these commands would wipe out everything. Use it carefully.</p>
+<pre><code>cd /opt/zookeeper/zookeeper-3.4.5/
+sudo bin/zkServer.sh stop conf/zoo.cfg
+sudo bin/zkServer.sh stop conf/zoo2.cfg
+sudo bin/zkServer.sh stop conf/zoo3.cfg
+sudo bin/zkServer.sh stop conf/zoo4.cfg
+sudo bin/zkServer.sh stop conf/zoo5.cfg
+
+cd /var/zookeeper/1
+sudo rm -rf version-2
+cd /var/zookeeper/2
+sudo rm -rf version-2
+cd /var/zookeeper/3
+sudo rm -rf version-2
+cd /var/zookeeper/4
+sudo rm -rf version-2
+cd /var/zookeeper/5
+sudo rm -rf version-2
+
+sudo bin/zkServer.sh start conf/zoo.cfg
+sudo bin/zkServer.sh start conf/zoo2.cfg
+sudo bin/zkServer.sh start conf/zoo3.cfg
+sudo bin/zkServer.sh start conf/zoo4.cfg
+sudo bin/zkServer.sh start conf/zoo5.cfg</code></pre>
+<p>Zookeeper wouldn’t automatically cleanup the accumulated snapshots and log files. You have to manually clean them. -n 10 means only keep the most recent 10 records. In use case like kafka, the space could be consumed very fast, be sure to leave the enough of space for the partition.</p>
+<pre><code>sudo java -cp zookeeper-3.4.5.jar:lib/log4j-1.2.15.jar:conf:lib/slf4j-api-1.6.1.jar:lib/slf4j-log4j12-1.6.1.jar org.apache.zookeeper.server.PurgeTxnLog /var/zookeeper/1/ /var/zookeeper/1/ -n 10</code></pre>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2015-03-25-python35.html">Features worth mentioning in Python 3.5</a></h1>
+    <div class="post-meta"><time datetime="2015-03-25 17:30">2015-03-25 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>Yesterday Python 3.5 was released for its first beta. I think it’s a great release version with two important features I have been expected for a long time. They are Type Hinting and Await and Async syntax for coroutine. With these two features, I think programming in Python would be more productive in terms of safty and performance-wise.</p>
+<p>Before type hinting was part of the official PEP, I always went to mypy for type hinting. And it turns out the finalized PEP was strongly inspired by mypy. With a few of import you could mark your program like this.</p>
+<pre><code>def fib(n: int) -&gt; Iterator[int]: 
+  a, b = 0, 1 
+  while a &lt; n: 
+    yield a 
+    a, b = b, a+b</code></pre>
+<p>This would provide static checking tool and IDE more information to do the inference, and detect the potential error. But unfortunately, these information is still not accepted for generating more efficient bytecode or getting more performant JIT. Just like Facebook’s Hack language does providing gradual typing for PHP. I hope in the near future it would eventually reflect on runtime performance.</p>
+<p>Another is async and await syntax allowing you to mark function as coroutine.</p>
+<pre><code>async def read_data(db): 
+  data = await db.fetch('SELECT ...') 
+  ...</code></pre>
+<p>Previously you could achieve the same effect with enhanced generator with yield and yield from. But without a doubt, marking async and await would make the program easier to read.</p>
+<p>I am pretty looking forward to Python 3.5 being production ready.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+        </main>
+
+        <div class="pure-g">
+          <div class="pure-u-md-1-5"></div>
+          <div class="pure-u-md-3-5">
+          <nav class="main-nav">
+            
+            <span class="newer-posts">
+              <a href="../28/">&larr; Newer Posts</a>
+            </span>
+            
+            
+            <span class="older-posts" style="float:right">
+              <a href="../30/">Older Posts &rarr;</a>
+            </span>
+            
+          </nav>
+          </div>
+          <div class="pure-u-md-1-5"></div>
+        </div>
+
+        <div class="pure-g">
+          <div class="pure-u-md-1-5"></div>
+          <div class="pure-u-1 pure-u-md-3-5">
+            <div class="page-number is-center">Page 29 of 48</div>
+            <footer class="site-footer">
+              <div class="inner is-center">
+                <section class="copyright">All content copyright <a href></a>© 2019 • All rights reserved.</section>
+              </div>
+            </footer>
+          </div>
+          <div class="pure-u-md-1-5"></div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,484 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>Paul Meng's Blog</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="Paul Meng's Blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
+</head>
+
+    <body class="home-template nav-closed">
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="https://paulme.ng" class="pure-menu-link">About</a></li>
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+                <li class="pure-menu-item"><a href="../rss/feed.xml" class="pure-menu-link">Subscribe</a></li>
+            </ul>
+        </div>
+        <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2011-12-07-haskell-instance.html">Digging Deeper at Haskell Instance Definition</a></h1>
+    <div class="post-meta"><time datetime="2011-12-07 17:30">2011-12-07 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>If you try to compiler the following clip of code with ghc</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+instance C String where
+    toString = id
+
+main = do
+    putStrLn $ toString &quot;Hello World&quot;</code></pre>
+<p>The compiler will pop out the error message.</p>
+<pre><code>test01.hs:4:10:
+    Illegal instance declaration for `C String'
+    (All instance types must be of the form (T t1 ... tn)
+     where T is not a synonym.
+     Use -XTypeSynonymInstances if you want to disable this.)
+In the instance declaration for `C String'</code></pre>
+<p>What does it mean? Let’s try another run with much simpler type.</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+instance C Int where
+    toString = show
+
+instance C Double where
+    toString = show
+
+main = do
+    putStrLn $ toString (123::Int)
+    putStrLn $ toString (123.123::Double)</code></pre>
+<p>What? it works very well.</p>
+<p>Give another try. We replace String to [Char].</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+instance C [Char] where
+    toString = id
+
+main = do
+    putStrLn $ toString &quot;Hello World&quot;</code></pre>
+<p>But it still doesn’t work.</p>
+<pre><code>test03.hs:4:10:
+    Illegal instance declaration for `C [Char]'
+    (All instance types must be of the form (T a1 ... an)
+     where a1 ... an are *distinct type variables*,
+     and each type variable appears at most once in the instance head.
+     Use -XFlexibleInstances if you want to disable this.)
+
+In the instance declaration for `C [Char]'</code></pre>
+<p>Suprisingly, this does work.</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+instance Show a =&gt; C [a] where
+    toString = concat . (map show)
+
+main = do
+    putStrLn $ toString ([1,2,3,4]::[Int])</code></pre>
+<p>So the problem is not about list constructor []?</p>
+<p>Let’s go to a simple cure directly. That is to add {-# LANGUAGE FlexibleInstances #-}, i.e. use FlexibleInstances GHC extension.</p>
+<pre><code>{-# LANGUAGE FlexibleInstances #-}
+class C a where
+    toString :: a -&gt; String
+
+instance C Int where
+    toString = show
+
+instance C Double where
+    toString = show
+
+instance C [Char] where
+    toString = id
+
+instance C [Int] where
+    toString = concat . (map show)
+
+main = do
+    putStrLn $ toString (123::Int)
+    putStrLn $ toString &quot;Hello World&quot;
+    putStrLn $ toString ([1,2,3,4,5]::[Int])</code></pre>
+<p>That works for C [Char], but still doesn’t work for C String</p>
+<pre><code>{-# LANGUAGE FlexibleInstances #-}
+class C a where
+    toString :: a -&gt; String
+
+instance C String where
+    toString = id
+
+main = do
+    putStrLn $ toString &quot;Hello World&quot;
+test06.hs:5:10:
+    Illegal instance declaration for `C String'
+    (All instance types must be of the form (T t1 ... tn)
+     where T is not a synonym.
+     Use -XTypeSynonymInstances if you want to disable this.)</code></pre>
+<p>In the instance declaration for `C String’ What’s going on? Let’s check the Haskell 98 Report Sec. 4.3.2</p>
+<p>The type (T u1 … uk) must take the form of a type constructor T applied to simple type variables u1, … uk; furthermore, T must not be a type synonym, and the ui must all be distinct. This prohibits instance declarations such as:</p>
+<pre><code>instance C (a,a) where …
+instance C (Int,a) where …
+instance C [[a]] where …</code></pre>
+<p>So according to the report, C [a] is legal, since [a] = [] a where T = [] and u1 = a. But String = [Char] = [] Char, where T = [] and Char is not a type variable. As to why the specific type is invalid. Suppose we have</p>
+<pre><code>instance C [Char] where ... instance C [Int] where ...</code></pre>
+<p>A given constraint of C [a] for some type variable a, we cannot decide which instance declaration to use unless we know about a. And in Haskell 98 the comittee consider to avoid that. For detailed explanation, go ahead to read SPJ’s paper Sec.4.5</p>
+<p>The result is as expected if we try Type synonym, as the standard said the Type synonym is forbidden.</p>
+<pre><code>type Identifier = String
+
+class C a where
+    toString :: a -&gt; String
+
+instance C Identifier where
+    toString = show
+
+main = do
+    putStrLn $ toString (&quot;Hello World&quot;::Identifier)</code></pre>
+<p>Flexible Instances GHC extension is to give us more flexible instance defition form, but I didn’t check how the issue above was resolved.</p>
+<p>Excerpt from Flexible Instances GHC extension &gt; GHC 6.5 &gt; … &gt; &gt; This rule allows instances accepted by the previous rule and more, including &gt; &gt; instance C a &gt; &gt; instance Show (s a) =&gt; Show (Sized s a) &gt; &gt; instance (C1 a, C2 b) =&gt; C a b &gt; &gt; instance C1 Int a =&gt; C2 Bool [a] &gt; &gt; instance C1 Int a =&gt; C2 [a] b &gt; &gt; instance C a a =&gt; C [a] [a]</p>
+<p>To resolve the issue and at the same time conforming Haskell 98, This link listed two methods.</p>
+<p>One is to use newtype</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+newtype Identifier = Identifier String deriving (Show)
+
+instance C Identifier where
+    toString = show
+
+main = do
+    putStrLn $ toString (Identifier &quot;Hello&quot;)</code></pre>
+<p>Another way is to define another listToString</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+    listToString :: [a] -&gt; String
+
+instance C Char where
+    toString = show
+    listToString = id
+
+instance C a =&gt; C [a] where
+    toString = listToString
+
+main = do
+    putStrLn $ toString (&quot;Hello&quot;::[Char])</code></pre>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2011-11-28-dynamic-programming-haskell.html">Writing Dynamic Programming in Haskell</a></h1>
+    <div class="post-meta"><time datetime="2011-11-28 17:30">2011-11-28 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>From the fact that the function is the composing unit in haskell, you can quickly guess that the most intuitive way to implement dynamic programming is through memoization. Of course you can implement through state modification if you insist, but that is just coding a C program in haskell.</p>
+<p>The core of dynamic programming is recursion, but with the exploitation of overlapping subproblem. Such that we can add another layer of data structure to memorize the previosuly calculated subproblem results. The power of haskell lies at you can just implement the brute force recursive version, then with little modification it just provides you the semantics of dynamic programming. There exists two most used library on hackage. They are data-memocombinators, and MemoTrie. Both uses the similar internal mechanism. MemoTrie is easier to use if you don’t need to memorize your own data type, data-memocombinators satisfies your need if you really want that.</p>
+<p>The following lists six implementations of problem31 of project euler in haskell, one uses data-memocombinators, one uses MemoTrie, another from HaskellWiki exploits lazy evaluation, one uses immutable array to implement that. The rest two are from stackoverflow provided by John Lato.</p>
+<pre><code>import qualified Data.MemoCombinators as Memo
+
+coins = [1,2,5,10,20,50,100,200]
+
+sol1 = f
+    where f :: Int -&gt; Int -&gt; Int
+          f = Memo.memo2 Memo.integral (Memo.arrayRange (0,7)) mf
+            where mf :: Int -&gt; Int -&gt; Int
+                  mf n k | (k &gt;= 8) || (n &lt; 0) = 0
+                         | n == 0 = 1
+                         | otherwise = (f n (k+1)) + (f (n - coins !! k) k)
+
+main = do
+    print $ sol1 200 0
+./sol01 +RTS -sstderr 
+       4,901,540 bytes allocated in the heap
+         220,696 bytes copied during GC
+          82,112 bytes maximum residency (1 sample(s))
+          22,864 bytes maximum slop
+               1 MB total memory in use (0 MB lost due to fragmentation)
+
+  Generation 0:     9 collections,     0 parallel,  0.00s,  0.00s elapsed
+  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
+
+  INIT  time    0.00s  (  0.00s elapsed)
+  MUT   time    0.01s  (  0.01s elapsed)
+  GC    time    0.00s  (  0.00s elapsed)
+  RP    time    0.00s  (  0.00s elapsed)
+  PROF  time    0.00s  (  0.00s elapsed)
+  EXIT  time    0.00s  (  0.00s elapsed)
+  Total time    0.01s  (  0.01s elapsed)
+
+  %GC time       6.9%  (7.3% elapsed)
+
+  Alloc rate    389,289,174 bytes per MUT second
+
+  Productivity  85.8% of total user, 91.4% of total elapsed
+coins = [1,2,5,10,20,50,100,200]
+
+sol2 = mf
+    where memo :: (Num a, Enum a) =&gt; (a -&gt; b) -&gt; [b]
+          memo f = map f (enumFrom 0)
+          mf :: Int -&gt; Int -&gt; Int
+          mf = \n k -&gt; fvalue !! n !! k
+          fvalue = fmap memo (memo f)
+          f :: Int -&gt; Int -&gt; Int
+          f n k | (k &gt;= 8) || (n &lt; 0) = 0
+                | n == 0 = 1
+                | otherwise = (if k &lt; 7 then mf n (k+1) else 0) + (if n - coins!!k &gt;= 0 then mf (n - coins !! k) k else 0)
+
+main = do
+    print $ sol2 200 0
+./sol02 +RTS -sstderr 
+         334,684 bytes allocated in the heap
+           2,096 bytes copied during GC
+          43,012 bytes maximum residency (1 sample(s))
+          26,620 bytes maximum slop
+               1 MB total memory in use (0 MB lost due to fragmentation)
+
+  Generation 0:     0 collections,     0 parallel,  0.00s,  0.00s elapsed
+  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
+
+  INIT  time    0.00s  (  0.00s elapsed)
+  MUT   time    0.00s  (  0.00s elapsed)
+  GC    time    0.00s  (  0.00s elapsed)
+  RP    time    0.00s  (  0.00s elapsed)
+  PROF  time    0.00s  (  0.00s elapsed)
+  EXIT  time    0.00s  (  0.00s elapsed)
+  Total time    0.01s  (  0.01s elapsed)
+
+  %GC time       1.9%  (2.3% elapsed)
+
+  Alloc rate    57,142,564 bytes per MUT second
+
+  Productivity  80.1% of total user, 94.6% of total elapsed
+coins = [1,2,5,10,20,50,100,200]
+
+sol3 = (!!) (ways [1,2,5,10,20,50,100,200])
+    where ways [] = 1 : repeat 0
+          ways (coin:coins) = n
+              where n = zipWith (+) (ways coins) (replicate coin 0 ++ n)
+
+main = do
+    print $ sol3 200
+./sol03 +RTS -sstderr 
+         248,052 bytes allocated in the heap
+           2,096 bytes copied during GC
+          43,012 bytes maximum residency (1 sample(s))
+          26,620 bytes maximum slop
+               1 MB total memory in use (0 MB lost due to fragmentation)
+
+  Generation 0:     0 collections,     0 parallel,  0.00s,  0.00s elapsed
+  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
+
+  INIT  time    0.00s  (  0.00s elapsed)
+  MUT   time    0.00s  (  0.00s elapsed)
+  GC    time    0.00s  (  0.00s elapsed)
+  RP    time    0.00s  (  0.00s elapsed)
+  PROF  time    0.00s  (  0.00s elapsed)
+  EXIT  time    0.00s  (  0.00s elapsed)
+  Total time    0.00s  (  0.00s elapsed)
+
+  %GC time       3.2%  (4.0% elapsed)
+
+  Alloc rate    66,041,533 bytes per MUT second
+
+  Productivity  72.3% of total user, 91.1% of total elapsed
+import qualified Data.MemoTrie as MT
+
+coins = [1,2,5,10,20,50,100,200]
+
+sol4 = f
+    where f :: Int -&gt; Int -&gt; Int
+          f = MT.memo2 mf
+            where mf :: Int -&gt; Int -&gt; Int
+                  mf n k | (k &gt;= 8) || (n &lt; 0) = 0
+                         | n == 0 = 1
+                         | otherwise = (f n (k+1)) + (f (n - coins !! k) k)
+
+main = do
+    print $ sol4 200 0
+./sol04 +RTS -sstderr 
+       3,992,108 bytes allocated in the heap
+         874,084 bytes copied during GC
+         185,192 bytes maximum residency (1 sample(s))
+          26,680 bytes maximum slop
+               2 MB total memory in use (0 MB lost due to fragmentation)
+
+  Generation 0:     7 collections,     0 parallel,  0.00s,  0.00s elapsed
+  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
+
+  INIT  time    0.00s  (  0.00s elapsed)
+  MUT   time    0.01s  (  0.01s elapsed)
+  GC    time    0.00s  (  0.00s elapsed)
+  RP    time    0.00s  (  0.00s elapsed)
+  PROF  time    0.00s  (  0.00s elapsed)
+  EXIT  time    0.00s  (  0.00s elapsed)
+  Total time    0.01s  (  0.01s elapsed)
+
+  %GC time      22.3%  (24.8% elapsed)
+
+  Alloc rate    505,650,158 bytes per MUT second
+
+  Productivity  66.4% of total user, 73.3% of total elapsed
+import Data.Maybe
+import qualified Data.Map as M
+
+
+coins = [1,2,5,10,20,50,100,200]
+
+sol5 = mf
+    where memo :: (Num a, Enum a) =&gt; (a -&gt; b) -&gt; [b]
+          memo f = map f (enumFrom 0)
+          gwvals = fmap memo (memo f)
+          gwByMap :: Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int
+          gwByMap maxX maxY = \x y -&gt;  fromMaybe (f x y) $ M.lookup (x,y) memomap
+            where memomap = M.fromList $ concat [[((x',y'), z) | (y',z) &lt;- zip [0..maxY] ys] | (x',ys) &lt;- zip [0..maxX] gwvals]
+          mf :: Int -&gt; Int -&gt; Int
+          mf = gwByMap 205 8
+          f :: Int -&gt; Int -&gt; Int
+          f n k | (k &gt;= 8) || (n &lt; 0) = 0
+                | n == 0 = 1
+                | otherwise = (if k &lt; 7 then mf n (k+1) else 0) + (if n - coins!!k &gt;= 0 then mf (n - coins !! k) k else 0)
+
+main = do
+    print $ sol5 200 0
+./sol05 +RTS -sstderr 
+       1,856,632 bytes allocated in the heap
+         265,496 bytes copied during GC
+          87,788 bytes maximum residency (1 sample(s))
+          22,236 bytes maximum slop
+               1 MB total memory in use (0 MB lost due to fragmentation)
+
+  Generation 0:     3 collections,     0 parallel,  0.00s,  0.00s elapsed
+  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
+
+  INIT  time    0.00s  (  0.00s elapsed)
+  MUT   time    0.01s  (  0.01s elapsed)
+  GC    time    0.00s  (  0.00s elapsed)
+  RP    time    0.00s  (  0.00s elapsed)
+  PROF  time    0.00s  (  0.00s elapsed)
+  EXIT  time    0.00s  (  0.00s elapsed)
+  Total time    0.01s  (  0.01s elapsed)
+
+  %GC time       8.0%  (8.7% elapsed)
+
+  Alloc rate    197,011,035 bytes per MUT second
+
+  Productivity  82.3% of total user, 89.4% of total elapsed</code></pre>
+<pre><code>import Data.Array.IArray
+
+coins = [1,2,5,10,20,50,100,200]
+
+sol6 = ans
+    where ans :: Int -&gt; Int -&gt; Int
+          ans n k = table ! (n, k)
+            where table :: Array (Int, Int) Int
+                  table = listArray ((0,0), (300,7)) [f i j | i &lt;- [0..n], j &lt;- [0..7]]
+                  f n k | (k &gt;= 8) || (n &lt; 0) = 0
+                        | n == 0 = 1
+                        | otherwise = (if k &lt; 7 then table ! (n, (k+1)) else 0) + (if (n - coins!!k) &gt;= 0 then table ! ((n - coins !! k), k) else 0)
+
+main = do
+    print $ sol6 200 0
+./sol06 +RTS -sstderr 
+         280,488 bytes allocated in the heap
+           2,096 bytes copied during GC
+          43,012 bytes maximum residency (1 sample(s))
+          26,620 bytes maximum slop
+               1 MB total memory in use (0 MB lost due to fragmentation)
+
+  Generation 0:     0 collections,     0 parallel,  0.00s,  0.00s elapsed
+  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
+
+  INIT  time    0.00s  (  0.00s elapsed)
+  MUT   time    0.00s  (  0.00s elapsed)
+  GC    time    0.00s  (  0.00s elapsed)
+  RP    time    0.00s  (  0.00s elapsed)
+  PROF  time    0.00s  (  0.00s elapsed)
+  EXIT  time    0.00s  (  0.00s elapsed)
+  Total time    0.01s  (  0.00s elapsed)
+
+  %GC time       2.4%  (2.9% elapsed)
+
+  Alloc rate    51,674,281 bytes per MUT second
+
+  Productivity  78.1% of total user, 93.7% of total elapsed</code></pre>
+<p>One thing to notice is these two are not equivalent.</p>
+<pre><code>m1      = ((filter odd [1..]) !!)
+
+m2 n    = ((filter odd [1..]) !! n)</code></pre>
+<p>This problem is related to Eta Expansion. You could probably re-evaluate a lamda function without caution. Or just checkout the discussion on stackoverflow.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+        </main>
+
+        <div class="pure-g">
+          <div class="pure-u-md-1-5"></div>
+          <div class="pure-u-md-3-5">
+          <nav class="main-nav">
+            
+            <span class="newer-posts">
+              <a href="../45/">&larr; Newer Posts</a>
+            </span>
+            
+            
+            <span class="older-posts" style="float:right">
+              <a href="../47/">Older Posts &rarr;</a>
+            </span>
+            
+          </nav>
+          </div>
+          <div class="pure-u-md-1-5"></div>
+        </div>
+
+        <div class="pure-g">
+          <div class="pure-u-md-1-5"></div>
+          <div class="pure-u-1 pure-u-md-3-5">
+            <div class="page-number is-center">Page 46 of 48</div>
+            <footer class="site-footer">
+              <div class="inner is-center">
+                <section class="copyright">All content copyright <a href></a>© 2019 • All rights reserved.</section>
+              </div>
+            </footer>
+          </div>
+          <div class="pure-u-md-1-5"></div>
+        </div>
+    </body>
+</html>

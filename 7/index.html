@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>Paul Meng's Blog</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="Paul Meng's Blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
+</head>
+
+    <body class="home-template nav-closed">
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="https://paulme.ng" class="pure-menu-link">About</a></li>
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+                <li class="pure-menu-item"><a href="../rss/feed.xml" class="pure-menu-link">Subscribe</a></li>
+            </ul>
+        </div>
+        <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2018-12-29-turning-windows-10-for-productivity.html">Tuning Windows 10 for Productivity</a></h1>
+    <div class="post-meta"><time datetime="2018-12-29 17:30">2018-12-29 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>As a developer I used OS X for my daily work. Apart from that, with the risk of being tagged as non-hardcore developers by using Windows, I do used Windows 10 a lot for my own private setup. It’s easier to setup the hardware you prefer including graphic cards within a much affordable budget by choosing a PC, and even though I am a big supporter of free software. It’s also painful to worry about Linux desktop environment stopped working due to a recent upgrade. With the introduction of the Linux subsystem on Windows 10 last year, another barrier was removed. It has become more stable now and I would like to put down the note on how to make Windows 10 more pleasant to use to serve as a memo.</p>
+<p>The game changing component on Windows 10 is definitely the Windows Subsystem on Linux. I installed beta and took a brief look at the time when it was released. There was a lot of minor issues back then, but after a year of releases. It is now more stable and you have various choices on Linux. You could install not only the latest distribution of Ubuntu, you could also use Kali Linux and others as well. I could easily move my command line experience to Windows easily by importing the dotfiles I maintained. The only thing that missing is Docker, after all it is just a subsystem and the underlying is still Windows Kernel. You could rely on Docker on Windows but that requires Professional version and Hypervisor and I don’t want to pay for that. Installing a Linux server on Virtualbox is more cost effective just for development.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2600/1*OHQiPTLPKvZCyjRvCLEO3w.png" /></p>
+<p>For a long period of time, the downside of Windows system is the lack of package managers, where you could skip the process of going to the website and download the corresponding installers. With Chocolatey you could install all those programs as you do on Linux distributions now. Hit the Powershell in Administrator mode and type choco install with package name, everything would be done in a minute.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2600/1*NvweODiISDEHfQyWF4j7SA.png" /></p>
+<p>Windows key could replace what you have on OS X, with Window + s, you could just launch the search bar and search for anything you would like, pretty much close to Spotlight you have on OS X. Also you could drag the programs you commonly used to the bottom bar, with Window + <num> then you could launch the program without your hands leaving the keyboard.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*sF5hdXyor8Bb2JzKdFL6PQ.png" /></p>
+<p>A few of long wanted hotkeys was also added: like Window + up to maximize the window, Window + left or right to align the focus window to half of the screen. Window + tab to the task view, and Window + Ctrl + D to create a virtual desktop, and Window + Ctrl + left or right to switch between virtual desktops.</p>
+<p>I often also choose Create Shortcut from Chrome to create the desktop icon to website, so that I could open the website simply by clicking Window + <num> key. As you saw I put youtube and facebook in the bottom bar.</p>
+<p>With the native support of SAMBA it is great that I could simply type \NAS to open the NAS server talking in SAMBA in the same LAN. On Linux you probably need to install extra packages to enable it. Instead of it just comes for as default.</p>
+<p>Windows as a popular OS, it comes with various vulnerability. I downloaded Windows <a href="https://github.com/securitywithoutborders/hardentools">hardentools</a>to disable certain features. It is easily reverted the change. It also disabled the command line execution so it might be inconvenient if you need to run command line, but you could simply revert the change when you need it for infrequent users.</p>
+<p>Other than the OS itself, just want to mention that I found that <a href="https://chrome.google.com/webstore/detail/bookmark-search/hhmokalkpaiacdofbcddkogifepbaijk?hl=en">chrome bookmark search</a> is a useful tool. You could simply press Alt + D when you are using Chrome and it would jump to the Omnibar, then you could just type bm then press tab you could search the bookmarks by pattern matching keywords. It works like Alfred in Chrome. Not Windows specific but just want to mention it since useful.</p>
+<p>That’s all the tips.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2018-11-17-how-to-pack-light-i.html">How to Pack Light (1)</a></h1>
+    <div class="post-meta"><time datetime="2018-11-17 17:30">2018-11-17 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>I have been to roughly 50 countries now and I often being asked about this question when people see I travel only with my 30L Osprey backpack. It’s a fair question and it is the result of iterative optimization. It’s not for everyone since everyone’s situation is different. I can clearly see the limitation and take it as a grain of salt to understand that it is optimized for a single male at age 30 ish, travelling to the places where temperature is above zero celcius and mainly battle-tested in Asia, North America, Middle-East and Europe.</p>
+<p>First of all, I would list the reasons for travelling light. A few bullet points,</p>
+<ol type="1">
+<li>No check-in luggage therefore for some of the airline you could do web check-in and skip the counter step. Save your time at the airport. Also, you could save the time of waiting at the luggage carousel.</li>
+<li>No check-in luggage means you risk no chance of losing your check-in luggage, or it is delayed and sent to the wrong place.</li>
+<li>Since you travel light then you have more negotiation advantage to those greedy taxi drivers trying to rip you off. You could just walk 1km from the bus stations or airport to hail other taxi. Or even better, it is only 15 mins of walk to the city center you could just simply walk.</li>
+<li>Sometimes there is a gap between your hotel checkout time and your intet-city bus time. You could just carry your bag with you instead leaven your luggage at the hotel after checking out. No need to go back and pick up your luggage and add more risk factors on transportation.</li>
+</ol>
+<p>There are also a few downside as well.</p>
+<ol type="1">
+<li>Since only cabin bag you could not carry scissors and razors etc. Also the total amount of liquid is also restricted by flight rule. Fingernail clip is alright though.</li>
+<li>The room for souvenir would be limited.</li>
+</ol>
+<p>With the above goods and bads said, let’s start by introducingy bag. It’s 30L Osprey Comet.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*CtXGJp6a6WKo3eDQvWrqfg@2x.jpeg" /></p>
+<p>Before digging into the individual items, I would like to address the rule of packing. That is Modulization with displine. You need to categorize your belongings into groups and keep them in smaller bags. Like electronics and batteries in one bag. Socks and undies in another etc. Also, you have to follow the discipline during your trip, whenever you take out some stuffs from the bag, you have to put them back to their original place, so that you could minimize your chance of leaving your belongings behind. Every time I lose some of my belongings, I broke the rule.</p>
+<p>To secure my bag, I would carry two padlocks with me. I could use them for the hostel’s lockers in case they charge you on padlocks. Note that choose the one with wire steel, since you wouldn’t know what the hole looks like for the closet. And use password padlock so you don’t have to worry about losing the key</p>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*Q_q8jq5Tc6YxSr291o2w-A@2x.jpeg" /></p>
+<p>Just secure your bag with padlock with play as a signal that you are prepared a traveller so that pick pocketer would choose an easier target. Even if a simple padlock is not that secure in the eye of a skilled locksmith (or they could simply destroy your bag), it shows as a security theater.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*8j6Lh6y5VB1jHJB7PiTmqA@2x.jpeg" /></p>
+<p>Next I would like to talk about the clothes. How to minimize the weights while keep yourself warm. The simple rule of clothing is to make it multi-layer: Putting more on when it’s freezing and taking the outer layer off when it is warm. To cope with windy and drizzling rain, I bought the NorthFace shell. It doesn’t keep you warm but necessary when it’s windy and rainy.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*8bb92twS0D9wLg6ytyJ5vw@2x.jpeg" /></p>
+<p>The shell is very light weight and you could fold it up and stuck it into the bag. However, you also need a layer to keep yourself warm, where I chose Uniqlo’s ultra-light down. You could also fold it as well and good for temperature above single digit.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*AuQnsUlprvaMNrGTm9nheA@2x.jpeg" /></p>
+<p>For temperature on mid-teen, I could basically handle it by my Route-8 base layer, it’s designed for hikers and it could handle to about 11–12 celcius in unwindy circumstances.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*cLKREE_3-z_vb1IdbQ0HOQ@2x.jpeg" /></p>
+<p>For the clothes with direct contact to the body, I chose Uniqlo’s dry-fit. Since it’s the inner most layer, in most of the cases you only need to change this layer. And it is easy to dry up overnight. All you have to do is just put around three of them in your luggage and it’s enough for your long term traveling.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*j3iEtM3pwnG7xztoNCYCLQ@2x.jpeg" /></p>
+<p>For pants, the inner layer I also chose Route-8 in case the temperature is pretty low. With Merrell’s Zip-off trousers. You could simply turn it into shorts if it is hot, or while you sleep. The material is quite comfortable so you could use it as pajama and therefore you don’t need extra set of pants.</p>
+<p>I use Merrell’s hiking shoes as well. Sometimes you have light hiking in your trip, and it could handle well muddy roads and lightly raining. The downside is that it is not that comfortable as running shoes. You might want to take it off while you are on long distance bus ride.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*-Kq8HMqIZ0tydhYVdXYtRg@2x.jpeg" /></p>
+<p>To be continued.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+        </main>
+
+        <div class="pure-g">
+          <div class="pure-u-md-1-5"></div>
+          <div class="pure-u-md-3-5">
+          <nav class="main-nav">
+            
+            <span class="newer-posts">
+              <a href="../6/">&larr; Newer Posts</a>
+            </span>
+            
+            
+            <span class="older-posts" style="float:right">
+              <a href="../8/">Older Posts &rarr;</a>
+            </span>
+            
+          </nav>
+          </div>
+          <div class="pure-u-md-1-5"></div>
+        </div>
+
+        <div class="pure-g">
+          <div class="pure-u-md-1-5"></div>
+          <div class="pure-u-1 pure-u-md-3-5">
+            <div class="page-number is-center">Page 7 of 48</div>
+            <footer class="site-footer">
+              <div class="inner is-center">
+                <section class="copyright">All content copyright <a href></a>© 2019 • All rights reserved.</section>
+              </div>
+            </footer>
+          </div>
+          <div class="pure-u-md-1-5"></div>
+        </div>
+    </body>
+</html>

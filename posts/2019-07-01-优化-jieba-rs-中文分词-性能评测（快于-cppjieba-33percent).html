@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>Paul Meng's Blog</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="Paul Meng's Blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
+</head>
+
+    <body>
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <div class="content">
+              <h1 class="post-title is-center">优化 jieba-rs 中文分词性能评测 (快于 cppjieba 33%)</h1>
+              <div class="pure-g">
+                <div class="pure-u-md-1-5"></div>
+                <div class="pure-u-1 pure-u-md-3-5">
+                  <div class="slot-content">
+                    <article>
+                      <p>昨晚写了一篇关于优化 <a href="https://github.com/messense/jieba-rs">jieba-rs</a> 英文的<a href="https://blog.paulme.ng/posts/2019-06-30-optimizing-jieba-rs-to-be-33percents-faster-than-cppjieba.html">介绍</a>，但想说 jieba 的使用者多半还是在中文圈，对于宣传来讲 hacker news 跟 reddit 可能无法触及到真正会使用的用户群，于是为了宣传，也是为了让 search engine 可以搜索到，就来把性能的部分另外写成中文的一篇。关于过程我就不再重新用中文再写一次了，实在太累人。有兴趣的人可以阅读<a href="https://blog.paulme.ng/posts/2019-06-30-optimizing-jieba-rs-to-be-33percents-faster-than-cppjieba.html">英文版</a></p>
+<p>测试机器的机器规格如下</p>
+<pre><code>MacBook Pro (13-inch, 2017, Two Thunderbolt 3 ports)
+2.5 GHz Intel Core i7
+16 GB 2133 MHz LPDDR3</code></pre>
+<p>测试过程仿照<a href="http://yanyiwu.com/work/2015/06/14/jieba-series-performance-test.html">结巴(Jieba)中文分词系列性能评测</a>所描述，先按行读取文本围城到一个数组里，然后循环 50 次对围城每行文字作为一个句子进行分词。 分词算法都是采用精确模式，也就是包含了 HMM 的部分。</p>
+<p>耗时数据如下，从高到低排序</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">实作</th>
+<th style="text-align: left;">耗时</th>
+<th style="text-align: left;">版本 .</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">cppjieba</td>
+<td style="text-align: left;">6.219s</td>
+<td style="text-align: left;">866d0e8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">jieba-rs (master)</td>
+<td style="text-align: left;">4.330s</td>
+<td style="text-align: left;">a198e44</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">jieba-rs (darts)</td>
+<td style="text-align: left;">4.138s</td>
+<td style="text-align: left;">ab2fbfe</td>
+</tr>
+</tbody>
+</table>
+<p>以上耗时都是计算分词过程的耗时，不包括词典载入的耗时。</p>
+<p>这篇会着重于评测只是为了宣传，并不想陷入语言之争，这也是我英文版有写主要是分享关于用 Rust 优化的经验，也是为了我自己衡量可以在工作中多认真使用 Rust 为目的。</p>
+
+                    </article>
+                  </div>
+                </div>
+                <div class="pure-u-md-1-5"></div>
+              </div>
+            </div>
+        </div>
+    </body>
+</html>

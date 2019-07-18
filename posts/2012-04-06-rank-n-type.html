@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>Paul Meng's Blog</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="Paul Meng's Blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
+</head>
+
+    <body>
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <div class="content">
+              <h1 class="post-title is-center">What is Rank-N Types in Haskell</h1>
+              <div class="pure-g">
+                <div class="pure-u-md-1-5"></div>
+                <div class="pure-u-1 pure-u-md-3-5">
+                  <div class="slot-content">
+                    <article>
+                      <p>For a beginner of haskell coming from popular imperative languages with “Generic” or “Template” construct in them, like C++, Java, it is not too hard to accept the parametric polymorphism at first glance. The type signature of id :: a -&gt; a can quickly remind him of C++ template.</p>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+using namespace std;
+
+template &lt;typename T&gt;
+T id(const T &amp;x)
+{
+        return x; 
+}
+
+int main()
+{
+        cout &lt;&lt; id(1) &lt;&lt; endl;
+        cout &lt;&lt; id(string(&quot;foo&quot;)) &lt;&lt; endl;
+        return 0;
+}</code></pre>
+<p>However, the thing would become complicated when he bumped to the type signature of runST</p>
+<pre><code>runST :: (forall s. ST s a) -&gt; a</code></pre>
+<p>A few questions pop out. What the hell is that forall, and what are Rank2Types and RankNTypes documented in the GHC manual?</p>
+<h3 id="higher-rank-polymorphism">Higher Rank Polymorphism</h3>
+<p>The parametric polymorphism you usually see is actually Rank-1 Polymorphism. There is actually Rank-2 polymorphism … to Rank-N polymorphism. In not quite exact language, a Rank-1 polymorphic function is that it doesn’t depend on its input/output types. The type become parameters, and when you call the function, the types are “instantiated.” And Rank-2 polymorphic function is a function gets called with its parameters parameterized, or to be Rank-1 polymorphic. So on, Rank-N polymorphic function is a function gets called with its parameters to be Rank-(N-1) polymorphic.</p>
+<p>Let’s look at a Rank-2 example. Suppose we have a list of Int and a list of Char, we want to write a function to check if the results of applying a function to both lists are equal. Use case would look like this.</p>
+<pre><code>check f l1 l2 = (f l1) == (f l2)
+
+main = do
+    print $ check length [1,2,3,4] ['a','b','c','d']
+    print $ check ((+2) . length) [1,2] ['a']</code></pre>
+<p>We can see that we want parameter f of check to be a Rank-1 polymorphic function, so that we can apply it to both [Int] and [Char]. In such case, what would be the type signature of check? Let’s look at how we can declare it in haskell.</p>
+<h3 id="forall">forall</h3>
+<p>Parametric polymorphism is implicit in haskell. When you write a -&gt; a, actually it is forall a. a -&gt; a. forall is the keyword to explicitly declare what is your type parameter, or type variable. A few examples from standard lib can be explicitly written like this.</p>
+<pre><code>length :: forall a. [a] -&gt; Int
+fst :: forall a b. (a,b) -&gt; a
+map :: forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]</code></pre>
+<p>Writing out explicitly, we declare the type signature of check as check :: (forall a. [a] -&gt; Int) -&gt; forall b. [b] -&gt; forall c. [c] -&gt; Bool. Notice that the effective range of forall greedily extends to the most right end, so the type signature above is equivalent to check :: (forall a. a -&gt; [Int]) -&gt; (forall b. [b] -&gt; (forall c. [c] -&gt; Bool)). But so many forall in the type signature, you would ask where should I put the forall to express a Rank-2 polymorphic function. Just as this link said, you can consider forall as a type level lambda /. This lambda / has some operational similarity with , instead of declare a variable binding, it binds type variables. A parallel in C++ would be binding T of template <typename T> to the corresponding template.</p>
+<p>With this in mind, basically we can write out the type variables and normal variables at the same time in / and . It would look like check = &gt; /&gt; 1 -&gt; /&gt; 2 -&gt; Bool, where f is a function which is /-&gt; -&gt; Int.</p>
+<p>Here is a working example:</p>
+<pre><code>{-# LANGUAGE RankNTypes #-}
+module Main(main) where
+
+import Prelude hiding (length)
+
+length :: forall a. [a] -&gt; Int 
+length (x:xs) = 1 + (length xs)
+length [] = 0
+
+check :: (forall a. [a] -&gt; Int) -&gt; forall b. [b] -&gt; forall c. [c] -&gt; Bool
+check f l1 l2 = (f l1) == (f l2)
+
+main = do
+    print $ check length [1] ['a','b']</code></pre>
+<p>You can play with Rank-N Type with N greater than 2. The spirit is the same. This is an example from here.</p>
+<pre><code>{-# LANGUAGE RankNTypes #-}
+module Main (main) where
+
+g1 :: a -&gt; a 
+g1 x = x
+
+g2 :: (forall a. a -&gt; a) -&gt; (Bool, Char)
+g2 f = (f True, f 'a')
+
+g3 :: ((forall a. a -&gt; a) -&gt; (Bool, Char)) -&gt; (Char, Bool)
+g3 f = (\x -&gt; (snd x, fst x)) (f g1)
+
+g4 :: (((forall a. a-&gt; a) -&gt; (Bool, Char)) -&gt; (Char, Bool)) -&gt; (Bool, Char)
+g4 f = (\x -&gt; (snd x, fst x)) (f g2)
+
+main = do
+    putStrLn &quot;Rank-2:&quot;
+    putStrLn . show . fst $ (g2 g1)
+    putStrLn . show . snd $ (g2 g1)
+    putStrLn &quot;Rank-3:&quot;
+    putStrLn . show . fst . g3 $ g2
+    putStrLn . show . snd . g3 $ g2
+    putStrLn &quot;Rank-4:&quot;
+    putStrLn . show . fst . g4 $ g3
+    putStrLn . show . snd . g4 $ g3Possible Confusion</code></pre>
+<h3 id="possible-confusion">Possible Confusion</h3>
+<p>Due to the usage of forall keyword, it is very easy to confuse RankNTypes, Existential Types and Scoped Type Variables. You can go to check out an excellent discussion on stackoverflow. Also don’t miss out John Lato’s and ezyang’s explanations on Existenatial Types.</p>
+
+                    </article>
+                  </div>
+                </div>
+                <div class="pure-u-md-1-5"></div>
+              </div>
+            </div>
+        </div>
+    </body>
+</html>

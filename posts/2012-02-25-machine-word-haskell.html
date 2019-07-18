@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>Paul Meng's Blog</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="Paul Meng's Blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
+</head>
+
+    <body>
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <div class="content">
+              <h1 class="post-title is-center">Keeping An Eye Out for the Difference between Machine Word and Fixed Word in Haskell</h1>
+              <div class="pure-g">
+                <div class="pure-u-md-1-5"></div>
+                <div class="pure-u-1 pure-u-md-3-5">
+                  <div class="slot-content">
+                    <article>
+                      <p>In this discussion thread, Daniel Fischer marked the difference between Machine Word type and Fixed-Width Word type in haskell. I summarize them in a list, and attach to it with my own little experiment on the performance issue.</p>
+<p>In haskell, the signed and unsigned integer type correspond to Int of Data.Int and Word of Data.Word respectively. * The guaranteed range of Int is [-2²⁹ .. 2²⁹-1], and Word is the same size as Int. * Normally the size of Int and Word are the word size of the underlying architecture. * In general, the WordXX with XX less than the architecture machine word size, the machine word size is used for computation. * WordXX with XX greater than machine word size, it could be a library implementation. Hence slower than using XX as machine word size. * WordXX and Word with XX equals to machine word size, there is no difference.</p>
+<p>Here comes a summation of 10⁹ 1 with different word types. The experiment is run on ThinkPad X61, Core 2 Duo, 32 bits, with Ubuntu GNU/Linux Natty.</p>
+<pre><code>-# LANGUAGE BangPatterns #-}
+import Data.Word
+import Data.List
+
+sum_word :: Word -&gt; Word
+sum_word n = k n 0
+    where k 0 s = s
+          k !n !s = k (n-1) (s+1)
+
+main = do
+  print $ sum_word 1000000000</code></pre>
+<pre><code>$ ghc -O2 -ddump-simpl Word.hs
+$ time ./Word
+1000000000
+
+real 0m 6.094s
+user 0m 6.088s
+sys 0m 0.000s</code></pre>
+<pre><code>{-# LANGUAGE BangPatterns #-}
+import Data.Word
+import Data.List
+
+sum_word32 :: Word32 -&gt; Word32
+sum_word32 n = k n 0
+    where k 0 s = s
+          k !n !s = k (n-1) (s+1)
+
+main = do
+    print $ sum_word32 1000000000</code></pre>
+<pre><code>$ ghc -O2 -ddump-simpl Word32.hs
+$ time ./Word32
+1000000000
+
+real 0m 6.110s
+user 0m 6.080s
+sys 0m 0.012s</code></pre>
+<pre><code>{-# LANGUAGE BangPatterns #-}
+import Data.Word
+import Data.List
+
+sum_word64 :: Word64 -&gt; Word64
+sum_word64 n = k n 0
+    where k 0 s = s
+          k !n !s = k (n-1) (s+1)
+
+main = do
+    print $ sum_word64 1000000000</code></pre>
+<pre><code>$ ghc -O2 -ddump-simpl Word64.hs
+$ time ./Word64
+1000000000
+
+real 1m 52.981s
+user 1m 52.743s
+sys  0m 0.152s</code></pre>
+<p>Obviously, the Word64 version is much slower. If we vimdiff the core language of Word, Word16, Word32 versions, there is barely difference. The common main part is this:</p>
+<pre><code>Rec {
+Main.$wk [Occ=LoopBreaker]
+  :: GHC.Prim.Word# -&gt; GHC.Prim.Word# -&gt; GHC.Prim.Word#
+[GblId, Arity=2, Caf=NoCafRefs, Str=DmdType LL]
+Main.$wk =
+  \ (ww_sXF :: GHC.Prim.Word#) (ww1_sXJ :: GHC.Prim.Word#) -&gt;
+    case GHC.Prim.eqWord# ww_sXF __word 0 of _ {
+      GHC.Bool.False -&gt;
+        Main.$wk
+          (GHC.Prim.minusWord# ww_sXF __word 1)
+          (GHC.Prim.plusWord# ww1_sXJ __word 1);
+      GHC.Bool.True -&gt; ww1_sXJ
+    }
+end Rec }</code></pre>
+<p>We can see the unboxed GHC.Prim.Word# is used.</p>
+<p>As to Word64 version, we can see __pkg_ccall everywhere in the generated core language.</p>
+<pre><code>Main.main4 :: GHC.Word.Word64
+[GblId,
+ Str=DmdType,
+ Unf=Unf{Src=&lt;vanilla&gt;, TopLvl=True, Arity=0, Value=False,
+         ConLike=False, Cheap=False, Expandable=False,
+         Guidance=IF_ARGS [] 11 2}]
+Main.main4 =
+  case {__pkg_ccall ghc-prim hs_intToInt64 GHC.Prim.Int#
+                                    -&gt; GHC.Prim.State# GHC.Prim.RealWorld
+                                    -&gt; (# GHC.Prim.State# GHC.Prim.RealWorld, GHC.Prim.Int64# #)}_ayE
+         1 GHC.Prim.realWorld#
+  of _ { (# _, ds2_ayL #) -&gt;
+  case {__pkg_ccall ghc-prim hs_int64ToWord64 GHC.Prim.Int64#
+                                       -&gt; GHC.Prim.State# GHC.Prim.RealWorld
+                                       -&gt; (# GHC.Prim.State# GHC.Prim.RealWorld,
+                                             GHC.Prim.Word64# #)}_ayJ
+         ds2_ayL GHC.Prim.realWorld#
+  of _ { (# _, ds4_ayQ #) -&gt;
+  GHC.Word.W64# ds4_ayQ
+  }
+}</code></pre>
+<p>Everything matches to what Daniel Fischer has described.</p>
+
+                    </article>
+                  </div>
+                </div>
+                <div class="pure-u-md-1-5"></div>
+              </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>Paul Meng's Blog</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="Paul Meng's Blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
+</head>
+
+    <body>
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <div class="content">
+              <h1 class="post-title is-center">LG G Pad 8.3 の オペレーティング·システムをCyanogenmod に作る</h1>
+              <div class="pure-g">
+                <div class="pure-u-md-1-5"></div>
+                <div class="pure-u-1 pure-u-md-3-5">
+                  <div class="slot-content">
+                    <article>
+                      <p>日本語を勉強したから、専門的の文が日本語で書くのやってみます。文法は違うが多いと思います。しかし、練習すれば練習するほど、時間をかけて上手になる。</p>
+<p>LG G Pad 8.3 を持っていたは一年があります。大体の使用は問題じゃない、 一つ迷惑な問題はSD CardがAndroidシステムに頻繁に見つけないでした。この悩んだ問題はLG提供されたのアップグレードで解決されない。それ以上、誰よりも知っているLGのアップデートが遅いでした。昨年十一月について、GoogleはAndroid Lollipopを発表した。私のNexus 4はLG G Padより一番OTA受け取った。Android Lollipopが好きでした。Android 4.2と比べも長い電池寿命がありました。だから、LG G Pad 8.3はAndroid Lollipopに搭載されたときめました。</p>
+<p>Android向けカスタムROMとして最もメジャーはCyanogenmodですが、Cyanogenmod 12をAndroid Lollipopのシステムをとして決めました。しかし、インストは難しさがたくさんある。誰かも同じの問題を悩んだのため、ここで書きました。</p>
+<p>まずは設定用の画面出てくるして、あなたのAndroidのバージョンを調べした。もしもあなたのバージョンはV50020D、システムをダワングレードする必要があります。理由はLGの更新がバグを修正するでした。アップデートを行うれば以下の操作が無効になった。わたしはV50010Cをダワングレードした。</p>
+<p>Stock Firmwareを回復して,LG Flash Tool 2014を使用すればいい。この XDA Stock Firmware話し合いスレッドは説明でした。ただしStock Firmwareを見つける。</p>
+<p>古いバージョンがインストールを確認したあと、Androidをroot化したは簡単な部分です。まずは、IORootをダウンロードした、プログラムを実行した。予期しないの意外がありませんなら、rootの権限が取得するでした。</p>
+<p>次に、Flashifyをインストールする。このアプリケーションはリカバリーのソフトウェアの難易度が下げるでした。わたしはTeamWinをリカバリーとして選ぶんた。2.6.3.0のバージョンをインストールが必要があります。それよりもおおきなバージョンがダメです。ぞれバージョンはv510に作りました。もしも大きなバージョンをインストールでしたら、「Secure booting error! Cause: boot certification verify」のメッセージを起動時に表示された。</p>
+<p>2.6.3.0のTWRPをインストール成功したあと、もたCyanogenmodを搭載したできない。このバージョンのTWRPはawifiのデバイスIDを検査して、コミュニティ作るのROMをインストールできない。Googleでv500-TWRP_2.6.3.2-recovery.zip検索して、デバイスIDがv500を目標された作るのTWRPをダワンロードしてください。zipファイルはSDカードにロードして、TWRPリカバリー起動して、リカバリーにあのv500-TWRP_2.6.3.2-recovery.zipをインストールしてください。adb shellでインストールの方法がダメです。理由が不明。</p>
+<p>それでは、cm-12–20150128-NIGHTLY-v500.zipはCyanogenmodのウェブサイトからダワンロードしてください。同じのような、zipファイルはSDカードにロードして、TWRPリカバリーにzipファイルをインストールする。その後、Cyanogenmod 12を受け取るでした。</p>
+<p>Google Appが欲しいなら、pa_gapps-modular-micro-5.0.1-RC2–20150125a-signed.zipを検索して、5.0.1のmodularバージョンをインストール。大体は同じの手順でした。</p>
+
+                    </article>
+                  </div>
+                </div>
+                <div class="pure-u-md-1-5"></div>
+              </div>
+            </div>
+        </div>
+    </body>
+</html>

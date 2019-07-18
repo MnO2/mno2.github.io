@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>Paul Meng's Blog</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="Paul Meng's Blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
+</head>
+
+    <body>
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <div class="content">
+              <h1 class="post-title is-center">PostGIS with SQLAlchemy</h1>
+              <div class="pure-g">
+                <div class="pure-u-md-1-5"></div>
+                <div class="pure-u-1 pure-u-md-3-5">
+                  <div class="slot-content">
+                    <article>
+                      <p>Postgres is often said as the open-source world Oracle DB. It is shipped with different kind of index type. The default is B-tree, the others are R-Tree and GIST and GIN respectively. PostGIS is built for indexing geometry objects, and it is built on Postgres’s GIST type index. On AWS RDS you could also switch it on by following the instructions</p>
+<p>To take the most of it and build fast prototypes, we still need ORM abstraction for PostGIS extension. The popular Sqlalchemy ORM in python world comes with geoalchemy extension. It provides functions from PostGIS.</p>
+<p>To use it, you have to import it into your model file</p>
+<pre><code>from geoalchemy2 import Geometry</code></pre>
+<p>And define the column with Geometry class</p>
+<pre><code>geom = Column(Geometry(‘POINT’), nullable=False)</code></pre>
+<p>And insert to the model by assigning it a WKTElement with correct srid</p>
+<pre><code>s = ‘POINT(%s %s)’ %(geocode[“latitude”], geocode[“longitude”]) l.geom = WKTElement(s, srid=4326)</code></pre>
+<p>Then you could do the common operation using spatial functions</p>
+<pre><code>from geoalchemy2 import functions</code></pre>
+
+                    </article>
+                  </div>
+                </div>
+                <div class="pure-u-md-1-5"></div>
+              </div>
+            </div>
+        </div>
+    </body>
+</html>

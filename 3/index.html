@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>Paul Meng's Blog</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="Paul Meng's Blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
+</head>
+
+    <body class="home-template nav-closed">
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="https://paulme.ng" class="pure-menu-link">About</a></li>
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+                <li class="pure-menu-item"><a href="../rss/feed.xml" class="pure-menu-link">Subscribe</a></li>
+            </ul>
+        </div>
+        <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2019-06-16-cjk-unified-ideograph-developers-should-know.html">CJK Unified Ideograph developers should know</a></h1>
+    <div class="post-meta"><time datetime="2019-06-16 21:51">2019-06-16 21:51</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>I have been working on <a href="https://github.com/messense/jieba-rs">jieba-rs</a> these few weeks and traced the code from the original python <a href="https://github.com/fxsjy/jieba">implementation</a>. I found a wrong assumption in the code that is by assuming the unicode scalar only ranges from U+4E00 to U+9FD5</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb1-1" title="1">re_han_default <span class="op">=</span> re.<span class="bu">compile</span>(<span class="st">&quot;([</span><span class="ch">\u4E00</span><span class="st">-</span><span class="ch">\u9FD5</span><span class="st">a-zA-Z0-9+#&amp;\._%\-]+)&quot;</span>, re.U)</a></code></pre></div>
+<p>The same kind of mistakes have been made on Chinese websites, where developers don’t even bother to put minimum effort to understand what the unicode standard is, and therefore only assumes that the unicode range only from the BMP. They don’t know as of Unicode 12.0, it has defined a total of 87887 CJK Unifided Ideograph. And there are charaters defined in Extension A to Extension F, and the upcoming planned Extension G. What falls in the BMP was mainly the result of <a href="https://en.wikipedia.org/wiki/Han_unification">Han Unification</a></p>
+<p>To correctly defined the range of the unicode for CJK as the time of Unicode 12, you have to define at least the following ranges.</p>
+<ul>
+<li>U+3400…U+4DBF (Extesnion A)</li>
+<li>U+4E00…U+9FFF (BMP)</li>
+<li>U+F900…U+FAFF (Compatibilty Ideograph)</li>
+<li>U+20000…U+2A6DF (Extension B)</li>
+<li>U+2A700…U+2B73F (Extension C)</li>
+<li>U+2B740…U+2B81F (Extension D)</li>
+<li>U+2B820…U+2CEAF (Extension E)</li>
+<li>U+2CEB0…U+2EBEF (Extension F)</li>
+<li>U+2F800…U+2FA1F (Compatibility Supplement)</li>
+</ul>
+<p>It would cover the test cases like so that you would have your logic built on the correct foundation.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb2-1" title="1">   <span class="kw">let</span> <span class="kw">mut</span> jieba = <span class="pp">Jieba::</span>new();</a>
+<a class="sourceLine" id="cb2-2" title="2"></a>
+<a class="sourceLine" id="cb2-3" title="3">    <span class="co">//add fake word into dictionary</span></a>
+<a class="sourceLine" id="cb2-4" title="4">    jieba.add_word(<span class="st">&quot;䶴䶵𦡦&quot;</span>, <span class="cn">Some</span>(<span class="dv">1000</span>), <span class="cn">None</span>);</a>
+<a class="sourceLine" id="cb2-5" title="5">    jieba.add_word(<span class="st">&quot;讥䶯䶰䶱䶲䶳&quot;</span>, <span class="cn">Some</span>(<span class="dv">1000</span>), <span class="cn">None</span>);</a>
+<a class="sourceLine" id="cb2-6" title="6"></a>
+<a class="sourceLine" id="cb2-7" title="7">    <span class="kw">let</span> words = jieba.cut(<span class="st">&quot;讥䶯䶰䶱䶲䶳䶴䶵𦡦&quot;</span>, <span class="cn">false</span>);</a>
+<a class="sourceLine" id="cb2-8" title="8">    <span class="pp">assert_eq!</span>(words, <span class="pp">vec!</span><span class="op">[</span><span class="st">&quot;讥䶯䶰䶱䶲䶳&quot;</span>, <span class="st">&quot;䶴䶵𦡦&quot;</span><span class="op">]</span>);</a></code></pre></div>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2019-06-05-switch-from-chrome-to-mozilla-firefox.html">Switch from Chrome to Mozilla Firefox</a></h1>
+    <div class="post-meta"><time datetime="2019-06-05 21:17">2019-06-05 21:17</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>Not only I am leaving Medium, I am also switching my default browser from Chrome to Firefox, due to the concerns that Google is creeping in and intrude the my privacy and trust after reading the news <a href="https://news.ycombinator.com/item?id=18052923">1</a> and <a href="https://news.ycombinator.com/item?id=20044430">2</a>.</p>
+<p>It’s not the first time I tried to switch my main browser to Firefox, the last time I tried was when the first version of <a href="https://wiki.mozilla.org/Quantum">Quantum</a>’s release. I heard it was shipped with its CSS engine from servo, I couldn’t help to download it and try it out. However, it wasn’t a successful attempt. There was bugs and issues I run into, apart from that, all of the extensions need to be migrated since the APIs and architectures are totally different. At the time when it was released, there wasn’t many good extensions migrated yet. But now most of my commonly used extensions are supported.</p>
+<h2 id="extensions">Extensions</h2>
+<p>Here are the list of the extensions I’ve installed so far.</p>
+<ul>
+<li>Facebook Containers</li>
+<li>Multi-Account Containers</li>
+<li>Firefox Lockwise</li>
+<li>OneTab</li>
+<li>Tampermonkey</li>
+<li>IG Helper</li>
+<li>Neat URL</li>
+</ul>
+<p>I found that Facebook Containers is extremely useful, it works pretty much like sandbox account in Android. Neat URL is also convenient in that I don’t have to manually remove those tracking parameters when I copy &amp; paste the url to others.</p>
+<h2 id="issues">Issues</h2>
+<p>It’s not working perfectly without any issue though. I’ve run into the following situations.</p>
+<ul>
+<li>FB Messenger not able to load, not sure it is because I set the content blocking rules too strict.</li>
+<li>Google Drive often hits to high cpu usage when the folders have many items.</li>
+<li>Random high cpu spike when open on certain web pages.</li>
+</ul>
+<p>It seems that when I open web pages that heavily use javascript or css, my laptop’s fan would inevitably start to work. Unlike Chrome it would also eat up battery but not to the extent of triggering the cpu’s fan running. Not sure it is due to both of browsers’ javascript engines difference.</p>
+<h2 id="summary">Summary</h2>
+<p>It is not without issue but it is good enough that I am happy to set it as my main browser, and get rid of the sneaky Google.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+        </main>
+
+        <div class="pure-g">
+          <div class="pure-u-md-1-5"></div>
+          <div class="pure-u-md-3-5">
+          <nav class="main-nav">
+            
+            <span class="newer-posts">
+              <a href="../2/">&larr; Newer Posts</a>
+            </span>
+            
+            
+            <span class="older-posts" style="float:right">
+              <a href="../4/">Older Posts &rarr;</a>
+            </span>
+            
+          </nav>
+          </div>
+          <div class="pure-u-md-1-5"></div>
+        </div>
+
+        <div class="pure-g">
+          <div class="pure-u-md-1-5"></div>
+          <div class="pure-u-1 pure-u-md-3-5">
+            <div class="page-number is-center">Page 3 of 48</div>
+            <footer class="site-footer">
+              <div class="inner is-center">
+                <section class="copyright">All content copyright <a href></a>© 2019 • All rights reserved.</section>
+              </div>
+            </footer>
+          </div>
+          <div class="pure-u-md-1-5"></div>
+        </div>
+    </body>
+</html>
