@@ -41,14 +41,22 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-05-31-anki.html">Anki 使用して言語を勉強する</a></h1>
+    <h1 class="post-title is-center"><a href="../posts/2015-05-31-day-of-week-in-japanese.html">Day of week in Japanese</a></h1>
     <div class="post-meta"><time datetime="2015-05-31 17:30">2015-05-31 17:30</time> </span>
     <div class="slot-content">
       <article>
-        <p>Anki は教材のカードのソフトウエアにとして便利です。何でも言語の学習者へお進めます。カードの重複は科学に基づいたの Spaced Repetition 方法です。答えを見せてあと、簡単、普通、難しの中で貴方の意見選択ます。難しを選ぶんたら、カード現れる再びの可能性は高いです。しかし、ほとんどの人は Anki に使用して、言語の語彙を復習だけです。間違ってはないけど、正しではないです。文にユニットとして覚えた方がいい。ぞれでは、単語の使用の方法がわかります。</p>
-<p>Mike Campbellは大量な文トレーニングメソッドの方法論を提出しました。私もこの方法論を支持します。Mike Campbell 設立の会社 Glossika は色んな言語の大量な文の教材を出版した。教材が品質を持ったけれども、文のトピックは私の興味をあわせないです。自分のトランプを作りしたいです、ニュースから、慣用句の本から文を集めたい。それでは、教科書を使うより、モチベーションが強いです。しかし、質良いネイティブスピーカーで録音したのオーディオを捨てたくない。オーディオは文を覚えることが役立ちます。</p>
-<p>心配しない、Anki は Awesome TTS のプラグインをインストールできます。インストールあと、文を Google Translate の API で唱えられる。オーデイオはカードと一緒に保存することがでります。もちろん、TTSの声は録音の声ほど自然ではないけれども、空ほど良いです。それでは、自分の大量な面白い文と読み出しのオーディオを作ることが安いなります。</p>
-<p>Anki は iOS と Android のバージョンがあります。ダワンロードとインストール後、Ankiweb のアカウントでカードのデータがシンクできる。自分で作るの文を携帯電話に復習できます。</p>
+        <p>最近才發現原來日文的 day of the week 其實是延續深厚的希臘羅馬傳統的，跟英文中的 Sunday - Saturyday 一致。之前看到漢字總是會聯想到五行，金木水火土，但背起來順序根本就不一樣。</p>
+<pre><code>日曜日（にちようび) 
+月曜日（げつようび) 
+火曜日（かようび) 
+水曜日（すいようび) 
+木曜日（もくようび) 
+金曜日（きんようび) 
+土曜日（どようび)</code></pre>
+<p>這邊的金木水火土不是五行，而是「行星」。也就是是 火星日，金星日，水星日等等。 看看拉丁文的 day of the week 來對照就知道了</p>
+<pre><code>dies Sōlis 太陽 dies Lūnae 月亮 dies Martis 火星 dies Mercuriī 水星 dies Iovis 木星 dies Veneris 金星 dies Saturnī 土星</code></pre>
+<p>順序完全一模一樣，估計是西化的時候直接採用。而英文中的順序其實也是一樣的，只是差別在隨著羅馬帝國的解體，被日耳曼變成主體的過程中，原本這些希臘中的神，被日耳曼人更改過加入了自己的元素，或是北歐 Norse 的元素，最後變成有點不一樣的名字。大概可以看得出來的只剩下 Saturday = Saturn day. Sunday = Sun day. 而 Wednesday 其實 Wodan’s day，而 Wodan 其實是北歐神話主神奧丁 Óðinn 的不同轉寫。而延續日耳曼血統的英文自然就繼承了這樣的拼法。</p>
+<p>語言真是太有趣。</p>
 
       </article>
     </div>
@@ -62,48 +70,14 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-05-30-elasticsearch_dsl.html">elasticsearch_dsl: Domain Specific Language in Python for Elasticsearch</a></h1>
-    <div class="post-meta"><time datetime="2015-05-30 17:30">2015-05-30 17:30</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2015-05-31-anki.html">Anki 使用して言語を勉強する</a></h1>
+    <div class="post-meta"><time datetime="2015-05-31 17:30">2015-05-31 17:30</time> </span>
     <div class="slot-content">
       <article>
-        <p>An emerging trend in recent year for software, including mongodb, elasticsearch and Chef, is to expose an JSON interface to accept complex requests. They give up the traditional SQL query and adopt JSON as the text encoding of abstract syntax tree. Therefore, whenever you are making up a request to these services, you are actually hand coding an abstract syntax tree in JSON. Although it is flexible and easy to extend, it is also error prone and hard to maintain. A common solution for this is to write a Domain Specific Language. And with python’s language design, a naive and natural solution is to use Class to denote AST node and Visitor pattern to code-generate the underlying JSON. And above is the reason I created elasticsearch_dsl</p>
-<p>Think that you type the program this way:</p>
-<pre><code>nested_agg = ast.NestedAggregation(&quot;name&quot;, &quot;tags&quot;, ast.TermsAggregation(&quot;tags.name&quot;, size=20, order_type=&quot;_count&quot;, order=&quot;desc&quot;, min_doc_count=100))
-aggregation = ast.TopLevelAggregation(&quot;tag&quot;, nested_agg)
-ast_root = ast.TopLevelQuery(MatchAllQuery(), aggs=[aggregation])
-
-codegen = CodeGeneratorVisitor()
-codegen.visit(ast_root)
-query_py_obj = codegen.query
-and_clauses = []
-and_clauses.append(ast.GeoDistanceFilter(&quot;geocode&quot;, user.geocode[&quot;latitude&quot;], user.geocode[&quot;longitude&quot;], 10))
-
-tag_names = []
-should_clauses= []
-for t, ind in tags:
-    should_clauses.append(ast.TermQuery(&quot;tags.name&quot;, t.name.lower()))
-
-nested_queries= ast.BoolQuery(should=should_clauses)
-f = ast.NestedQuery(&quot;tags&quot;, nested_queries)
-
-query = ast.FilteredQuery(f, ast.AndFilter(and_clauses))
-query_size = 20
-query_from = 0
-ast_root = ast.TopLevelQuery(query, query_size, query_from, sort={&quot;_score&quot;: {&quot;order&quot;: &quot;desc&quot;}})
-
-codegen = CodeGeneratorVisitor()
-codegen.visit(ast_root)
-query_py_obj = codegen.query</code></pre>
-<p>But not this way</p>
-<pre><code>query = {}
-query[&quot;tags&quot;] = []
-for t, ind in tags:
-    query[&quot;tags].append({&quot;tags.name&quot;: t.name.lower()})
-
-query[&quot;size&quot;] = query_size
-query[&quot;from&quot;] = query_from
-query[&quot;sort&quot;] = {&quot;_score&quot;: {&quot;order&quot;: &quot;desc&quot;}}</code></pre>
-<p>which is error prone, and hard to know the intention of each query. There has been a elasticsearch-dsl package on pypi, but one thing I don’t like is the big runtime that comes with it. If anything gets wrong, you have to read almost all of its implementation to know what is error and how to fix it. And this version of elasticsearch_dsl is just a thin wrapper to compile the class into JSON. You could even do it in the command line.</p>
+        <p>Anki は教材のカードのソフトウエアにとして便利です。何でも言語の学習者へお進めます。カードの重複は科学に基づいたの Spaced Repetition 方法です。答えを見せてあと、簡単、普通、難しの中で貴方の意見選択ます。難しを選ぶんたら、カード現れる再びの可能性は高いです。しかし、ほとんどの人は Anki に使用して、言語の語彙を復習だけです。間違ってはないけど、正しではないです。文にユニットとして覚えた方がいい。ぞれでは、単語の使用の方法がわかります。</p>
+<p>Mike Campbellは大量な文トレーニングメソッドの方法論を提出しました。私もこの方法論を支持します。Mike Campbell 設立の会社 Glossika は色んな言語の大量な文の教材を出版した。教材が品質を持ったけれども、文のトピックは私の興味をあわせないです。自分のトランプを作りしたいです、ニュースから、慣用句の本から文を集めたい。それでは、教科書を使うより、モチベーションが強いです。しかし、質良いネイティブスピーカーで録音したのオーディオを捨てたくない。オーディオは文を覚えることが役立ちます。</p>
+<p>心配しない、Anki は Awesome TTS のプラグインをインストールできます。インストールあと、文を Google Translate の API で唱えられる。オーデイオはカードと一緒に保存することがでります。もちろん、TTSの声は録音の声ほど自然ではないけれども、空ほど良いです。それでは、自分の大量な面白い文と読み出しのオーディオを作ることが安いなります。</p>
+<p>Anki は iOS と Android のバージョンがあります。ダワンロードとインストール後、Ankiweb のアカウントでカードのデータがシンクできる。自分で作るの文を携帯電話に復習できます。</p>
 
       </article>
     </div>

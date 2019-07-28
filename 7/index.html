@@ -41,6 +41,117 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2019-01-06-moving-personal-website-to-kubernetes.html">Moving Personal Website to Kubernetes</a></h1>
+    <div class="post-meta"><time datetime="2019-01-06 17:30">2019-01-06 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>I’ve read people talking about Kubernetes for some time, and it does sound appealing to me when I know that it incorporates most of the design from Google’s Borg. Due to the needs from my job, I started reading the materials from Kubernetes and was intrigued to study the underlying implementation, on how it designs its container network and orchestration. It’s very complicated but also rewarding to get the knowledge of that. In order to get my hands dirty on exercise, I used DigitalOcean’s managed Kubernetes and migrate my personal website from a Chef managed instance to Docker. It’s simple enough for me to understand the basic concept and make me able to dabble it and to understand how complicated it is to have a TLS static website setup.</p>
+<p>It’s quite easy to launch a managed Kubernetes on DigitalOcean, a few clickthrough then I have two instances running my dockers. I created a base docker image just to host my personal website’s static html. And a custom setting with virtual hosts on nginx so that I could forward the domain managed by me to redirect to the right places.</p>
+<pre><code>FROM nginx
+EXPOSE 80
+COPY _site/ /usr/share/nginx/html
+COPY default.conf /etc/nginx/conf.d/default.conf</code></pre>
+<p>For the running service, it is not hard. By copying the standard Service and Deployment object from Kubernetes would suffice to get it done.</p>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: homepage 
+spec:
+  ports:
+  - port: 80
+    targetPort: 80 
+  selector:
+    app: homepage 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage 
+spec:
+  selector:
+    matchLabels:
+      app: homepage 
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: homepage
+    spec:
+      containers:
+      - name: homepage
+        image: paulmeng/homepage:v1.0.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5678</code></pre>
+<p>It is more difficult to understand the Ingress, since I would like to have the letsencrypt to terminate at the load balancer layer. Fortunately, DigitalOcean have a tutorial setup on how to decorate the Ingress spec with cert manager, and install the necessary component by helm.</p>
+<p>How to Set Up an Nginx Ingress with Cert-Manager on DigitalOcean Kubernetes | DigitalOcean Kubernetes Ingresses allow you to flexibly route traffic from outside your Kubernetes cluster to Services inside of…www.digitalocean.com</p>
+<p>By referencing the tutorial, I managed to change the templates to suit my needs.</p>
+<pre><code>apiVersion: certmanager.k8s.io/v1alpha1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    # The ACME server URL
+    server: https://acme-v02.api.letsencrypt.org/directory
+    # Email address used for ACME registration
+    email: me@paulme.ng 
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    # Enable the HTTP-01 challenge provider
+    http01: {}
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: homepage-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - paulme.ng
+    - haskell.tw
+    - haskell.sg
+    secretName: letsencrypt-prod
+  rules:
+  - host: paulme.ng
+    http:
+      paths:
+      - backend:
+          serviceName: homepage
+          servicePort: 80
+  - host: haskell.sg 
+    http:
+      paths:
+      - backend:
+          serviceName: homepage
+          servicePort: 80
+  - host: haskell.tw 
+    http:
+      paths:
+      - backend:
+          serviceName: homepage
+          servicePort: 80</code></pre>
+<p>Overall it works, with HTTP port auto-redirected to TLS, but somehow the Certmanager kept failing on the ACME challenge required by Letsencrypt. I did make sure I updated my DNS record to the correct External IP address exposed by DigitalOcean load balancer. When I run</p>
+<pre><code>kubectl describe ingress</code></pre>
+<p>It kept saying the ACME test01 failed, but I couldn’t manage to find the more detailed log by either running kubectl log or others. It made the troubleshooting extremely hard and you have no idea why it failed. Surprisingly, when I just left it there for one day due to I need to do the work at day time. It is just automatically fixed, and the same kind of issue was reported on certmanager’s github issue tracker. I am not sure it is due to the implementation for certmanager is bad or where there are critical informations that I left out.</p>
+<p>Kubernetes is an interesting technology to learn, especially when you would like to manage your app by container. It is a proven container orchestration technology. However, the underlying system is quite complicated and you have to bend your head understand how the internals work, otherwise you would left blind out when the systems go unexpected output.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
     <h1 class="post-title is-center"><a href="../posts/2018-12-29-turning-windows-10-for-productivity.html">Tuning Windows 10 for Productivity</a></h1>
     <div class="post-meta"><time datetime="2018-12-29 17:30">2018-12-29 17:30</time> </span>
     <div class="slot-content">
@@ -58,55 +169,6 @@
 <p>Windows as a popular OS, it comes with various vulnerability. I downloaded Windows <a href="https://github.com/securitywithoutborders/hardentools">hardentools</a>to disable certain features. It is easily reverted the change. It also disabled the command line execution so it might be inconvenient if you need to run command line, but you could simply revert the change when you need it for infrequent users.</p>
 <p>Other than the OS itself, just want to mention that I found that <a href="https://chrome.google.com/webstore/detail/bookmark-search/hhmokalkpaiacdofbcddkogifepbaijk?hl=en">chrome bookmark search</a> is a useful tool. You could simply press Alt + D when you are using Chrome and it would jump to the Omnibar, then you could just type bm then press tab you could search the bookmarks by pattern matching keywords. It works like Alfred in Chrome. Not Windows specific but just want to mention it since useful.</p>
 <p>That’s all the tips.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2018-11-17-how-to-pack-light-i.html">How to Pack Light (1)</a></h1>
-    <div class="post-meta"><time datetime="2018-11-17 17:30">2018-11-17 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>I have been to roughly 50 countries now and I often being asked about this question when people see I travel only with my 30L Osprey backpack. It’s a fair question and it is the result of iterative optimization. It’s not for everyone since everyone’s situation is different. I can clearly see the limitation and take it as a grain of salt to understand that it is optimized for a single male at age 30 ish, travelling to the places where temperature is above zero celcius and mainly battle-tested in Asia, North America, Middle-East and Europe.</p>
-<p>First of all, I would list the reasons for travelling light. A few bullet points,</p>
-<ol type="1">
-<li>No check-in luggage therefore for some of the airline you could do web check-in and skip the counter step. Save your time at the airport. Also, you could save the time of waiting at the luggage carousel.</li>
-<li>No check-in luggage means you risk no chance of losing your check-in luggage, or it is delayed and sent to the wrong place.</li>
-<li>Since you travel light then you have more negotiation advantage to those greedy taxi drivers trying to rip you off. You could just walk 1km from the bus stations or airport to hail other taxi. Or even better, it is only 15 mins of walk to the city center you could just simply walk.</li>
-<li>Sometimes there is a gap between your hotel checkout time and your intet-city bus time. You could just carry your bag with you instead leaven your luggage at the hotel after checking out. No need to go back and pick up your luggage and add more risk factors on transportation.</li>
-</ol>
-<p>There are also a few downside as well.</p>
-<ol type="1">
-<li>Since only cabin bag you could not carry scissors and razors etc. Also the total amount of liquid is also restricted by flight rule. Fingernail clip is alright though.</li>
-<li>The room for souvenir would be limited.</li>
-</ol>
-<p>With the above goods and bads said, let’s start by introducingy bag. It’s 30L Osprey Comet.</p>
-<p><img src="https://cdn-images-1.medium.com/max/2400/1*CtXGJp6a6WKo3eDQvWrqfg@2x.jpeg" /></p>
-<p>Before digging into the individual items, I would like to address the rule of packing. That is Modulization with displine. You need to categorize your belongings into groups and keep them in smaller bags. Like electronics and batteries in one bag. Socks and undies in another etc. Also, you have to follow the discipline during your trip, whenever you take out some stuffs from the bag, you have to put them back to their original place, so that you could minimize your chance of leaving your belongings behind. Every time I lose some of my belongings, I broke the rule.</p>
-<p>To secure my bag, I would carry two padlocks with me. I could use them for the hostel’s lockers in case they charge you on padlocks. Note that choose the one with wire steel, since you wouldn’t know what the hole looks like for the closet. And use password padlock so you don’t have to worry about losing the key</p>
-<p><img src="https://cdn-images-1.medium.com/max/2400/1*Q_q8jq5Tc6YxSr291o2w-A@2x.jpeg" /></p>
-<p>Just secure your bag with padlock with play as a signal that you are prepared a traveller so that pick pocketer would choose an easier target. Even if a simple padlock is not that secure in the eye of a skilled locksmith (or they could simply destroy your bag), it shows as a security theater.</p>
-<p><img src="https://cdn-images-1.medium.com/max/2400/1*8j6Lh6y5VB1jHJB7PiTmqA@2x.jpeg" /></p>
-<p>Next I would like to talk about the clothes. How to minimize the weights while keep yourself warm. The simple rule of clothing is to make it multi-layer: Putting more on when it’s freezing and taking the outer layer off when it is warm. To cope with windy and drizzling rain, I bought the NorthFace shell. It doesn’t keep you warm but necessary when it’s windy and rainy.</p>
-<p><img src="https://cdn-images-1.medium.com/max/2400/1*8bb92twS0D9wLg6ytyJ5vw@2x.jpeg" /></p>
-<p>The shell is very light weight and you could fold it up and stuck it into the bag. However, you also need a layer to keep yourself warm, where I chose Uniqlo’s ultra-light down. You could also fold it as well and good for temperature above single digit.</p>
-<p><img src="https://cdn-images-1.medium.com/max/2400/1*AuQnsUlprvaMNrGTm9nheA@2x.jpeg" /></p>
-<p>For temperature on mid-teen, I could basically handle it by my Route-8 base layer, it’s designed for hikers and it could handle to about 11–12 celcius in unwindy circumstances.</p>
-<p><img src="https://cdn-images-1.medium.com/max/2400/1*cLKREE_3-z_vb1IdbQ0HOQ@2x.jpeg" /></p>
-<p>For the clothes with direct contact to the body, I chose Uniqlo’s dry-fit. Since it’s the inner most layer, in most of the cases you only need to change this layer. And it is easy to dry up overnight. All you have to do is just put around three of them in your luggage and it’s enough for your long term traveling.</p>
-<p><img src="https://cdn-images-1.medium.com/max/2400/1*j3iEtM3pwnG7xztoNCYCLQ@2x.jpeg" /></p>
-<p>For pants, the inner layer I also chose Route-8 in case the temperature is pretty low. With Merrell’s Zip-off trousers. You could simply turn it into shorts if it is hot, or while you sleep. The material is quite comfortable so you could use it as pajama and therefore you don’t need extra set of pants.</p>
-<p>I use Merrell’s hiking shoes as well. Sometimes you have light hiking in your trip, and it could handle well muddy roads and lightly raining. The downside is that it is not that comfortable as running shoes. You might want to take it off while you are on long distance bus ride.</p>
-<p><img src="https://cdn-images-1.medium.com/max/2400/1*-Kq8HMqIZ0tydhYVdXYtRg@2x.jpeg" /></p>
-<p>To be continued.</p>
 
       </article>
     </div>
