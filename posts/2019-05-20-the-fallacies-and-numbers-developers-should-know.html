@@ -22,9 +22,20 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://blog.paulme.ng" />
 
+  <link href="https://fonts.googleapis.com/css?family=EB+Garamond|Roboto&display=swap" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
   <link rel="stylesheet" href="../stylesheets/customize.css">
+  <style>
+    html, button, input, select, textarea,
+    .pure-g [class *= "pure-u"] {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .post-title {
+      font-family: 'EB Garamond', serif;
+    }
+  </style>
 </head>
 
     <body>
@@ -36,10 +47,10 @@
 
         <div>
             <div class="content">
-              <h1 class="post-title is-center">The fallacies and numbers developers should know</h1>
               <div class="pure-g">
                 <div class="pure-u-md-1-5"></div>
                 <div class="pure-u-1 pure-u-md-3-5">
+                  <h1 class="post-title is-center">The fallacies and numbers developers should know</h1>
                   <div class="slot-content">
                     <article>
                       <p>Oftentimes, you could tell a developer is good or not by talking with him if he/she is aware of the common fallacies appear in Unicode and Time, or distributed systems. After all, the growth of a developer is to understand the complexity of the world and the limitation of the abstraction, so the mental model fit better to how the real world is working over time. This blog post is try to curate a list where I find it is good, especially for junior developers. There is already <a href="https://github.com/kdeldycke/awesome-fAalsehood">awesome falsehood</a> on github, but I don’t like every link provided in the wiki. And it missed some parts where they are not fallacies, but the numbers you’d better to know.</p>

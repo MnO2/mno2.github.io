@@ -22,9 +22,20 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://blog.paulme.ng" />
 
+  <link href="https://fonts.googleapis.com/css?family=EB+Garamond|Roboto&display=swap" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
   <link rel="stylesheet" href="../stylesheets/customize.css">
+  <style>
+    html, button, input, select, textarea,
+    .pure-g [class *= "pure-u"] {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .post-title {
+      font-family: 'EB Garamond', serif;
+    }
+  </style>
 </head>
 
     <body>
@@ -36,10 +47,10 @@
 
         <div>
             <div class="content">
-              <h1 class="post-title is-center">My view toward Apache Kafka</h1>
               <div class="pure-g">
                 <div class="pure-u-md-1-5"></div>
                 <div class="pure-u-1 pure-u-md-3-5">
+                  <h1 class="post-title is-center">My view toward Apache Kafka</h1>
                   <div class="slot-content">
                     <article>
                       <p>Apache Kafka is a distributed, fault tolerent high throughput transaction log system. Most of the marketing materials coin it as a message broker or publish-subscribe system. I couldn’t say those claims are wrong because in most of the architectures it does serve as a centralized logging system, and pass the message between different parts of the architectural diagram. However, I like to say it as a transaction log system because its API is relatively low-level in semantic comparing to RabbitMQ and others systems that would first come up in your mind when mentioned for the (task) message queue. The offset of the consumers are managed by the consuemr themselves (though starting from 0.8, the offsets of simple consumers are stored in Zookeeper for simple use cases.) This distiction might be because just like any data store abstraction are leaky, the message queue system when put in different scenario, are also leaky. And Apache Kafka lies on the end of low-level API with high throuhput end of the spectrum.</p>

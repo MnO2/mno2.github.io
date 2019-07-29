@@ -22,9 +22,20 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://blog.paulme.ng" />
 
+  <link href="https://fonts.googleapis.com/css?family=EB+Garamond|Roboto&display=swap" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
   <link rel="stylesheet" href="../stylesheets/customize.css">
+  <style>
+    html, button, input, select, textarea,
+    .pure-g [class *= "pure-u"] {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .post-title {
+      font-family: 'EB Garamond', serif;
+    }
+  </style>
 </head>
 
     <body>
@@ -36,10 +47,10 @@
 
         <div>
             <div class="content">
-              <h1 class="post-title is-center">I used to be an Haskeller like you, then I took an Arrow in the knee</h1>
               <div class="pure-g">
                 <div class="pure-u-md-1-5"></div>
                 <div class="pure-u-1 pure-u-md-3-5">
+                  <h1 class="post-title is-center">I used to be an Haskeller like you, then I took an Arrow in the knee</h1>
                   <div class="slot-content">
                     <article>
                       <p>You hardly can miss Arrow on your path of learning Haskell. Just after struggling with Functor, Applicative and Monad, you convince yourself that you can finally take a look at those standard libraries requiring you the knowledge of Monad. A few Arrow interface libraries such as Hakyll, HXT, reactive-banana just punch you in the face. You just don’t understand what that is. Finishing tutorials on wikibook (link1, link2) do help, but you still can’t get the whole picture. What’s the relationship between Arrow and Monad? Is there non-trivial concrete example that can persuade me it is useful? Here I try to provide my answers.</p>

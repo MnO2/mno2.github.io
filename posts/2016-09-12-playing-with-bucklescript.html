@@ -22,9 +22,20 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://blog.paulme.ng" />
 
+  <link href="https://fonts.googleapis.com/css?family=EB+Garamond|Roboto&display=swap" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
   <link rel="stylesheet" href="../stylesheets/customize.css">
+  <style>
+    html, button, input, select, textarea,
+    .pure-g [class *= "pure-u"] {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .post-title {
+      font-family: 'EB Garamond', serif;
+    }
+  </style>
 </head>
 
     <body>
@@ -36,10 +47,10 @@
 
         <div>
             <div class="content">
-              <h1 class="post-title is-center">Playing with Bucklescript</h1>
               <div class="pure-g">
                 <div class="pure-u-md-1-5"></div>
                 <div class="pure-u-1 pure-u-md-3-5">
+                  <h1 class="post-title is-center">Playing with Bucklescript</h1>
                   <div class="slot-content">
                     <article>
                       <p>As of the time of 2016, most of the people agrees that Javascript is truly a language could be run anywhere. The pending problem to be solved is how to manage large Javascript projects. A few of industrial strength projects like Angularjs made the leap and turned to what Microsoft has proposed: Typescript. It’s quite obvious that it would be type-safe and easier to refactor by introducing a type system. Also, it is an optional typing system and therefore it works non-instrusively to your existing projects. You can gradually introduce Typescript’s type declaration file to get you the type-safe. Microsoft also has invested a lot on Typescript’s toolchain to make it work in Visual Studio Code and IDE. For the case that you need a production-ready and hiring-easy toolchain, Typescript is basically a no-brainer choice. Even so, I am still quite unsatisfied with all of the gotchas in Typescript inherited from Javascript in order to be 100% back-compatible. For the use cases that allows me to pick my language, I am still inclined to go for static-typed languages compiled to Javascript, with good Javascript interoperability.</p>

@@ -22,9 +22,20 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://blog.paulme.ng" />
 
+  <link href="https://fonts.googleapis.com/css?family=EB+Garamond|Roboto&display=swap" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
   <link rel="stylesheet" href="../stylesheets/customize.css">
+  <style>
+    html, button, input, select, textarea,
+    .pure-g [class *= "pure-u"] {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .post-title {
+      font-family: 'EB Garamond', serif;
+    }
+  </style>
 </head>
 
     <body>
@@ -36,10 +47,10 @@
 
         <div>
             <div class="content">
-              <h1 class="post-title is-center">Luajit is so damn fast</h1>
               <div class="pure-g">
                 <div class="pure-u-md-1-5"></div>
                 <div class="pure-u-1 pure-u-md-3-5">
+                  <h1 class="post-title is-center">Luajit is so damn fast</h1>
                   <div class="slot-content">
                     <article>
                       <p>Because of reading libdnn source code, I started to survey about the existing technologies around DNN. Aside from caffe and Theano, one emerging framework as a keyword keep showing up in my reading is Torch 7. Unusual part of Torch 7 is that it is implemented with luajit, which in the era of R and python is a quite noticeable difference. I have read from 云風’s blog where luajit is pretty good, just I don’t have time to get my feet wet. And now it’s time.</p>
