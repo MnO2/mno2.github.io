@@ -42,19 +42,22 @@
     <body>
         <div class="pure-menu pure-menu-horizontal">
             <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="../about" class="pure-menu-link">About</a></li>
                 <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+                <li class="pure-menu-item"><a href="../rss/feed.xml" class="pure-menu-link">Subscribe</a></li>
             </ul>
         </div>
-
-        <div>
-            <div class="content">
-              <div class="pure-g">
-                <div class="pure-u-md-1-5"></div>
-                <div class="pure-u-1 pure-u-md-3-5">
-                  <h1 class="post-title is-center">Some thoughts about Octopress</h1>
-                  <div class="slot-content">
-                    <article>
-                      <p>Octopress has become a popular blogging framework among programmers since its 2.0 release. We can observe this growing from the reading of google keyword tool. It did serve the needs of most programmers comparing to other existing blogging frameworks. To the author, I give my full compliement and respect.</p>
+        <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2011-11-04-octopress.html">Some thoughts about Octopress</a></h1>
+    <div class="post-meta"><time datetime="2011-11-04 17:30">2011-11-04 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>Octopress has become a popular blogging framework among programmers since its 2.0 release. We can observe this growing from the reading of google keyword tool. It did serve the needs of most programmers comparing to other existing blogging frameworks. To the author, I give my full compliement and respect.</p>
 <p>However, as what luikore said: &gt; Octopress uses Rdiscount instead of Maruku for Markdown engine. &gt; Maruku supports (LATEX) math but Rdiscount doesn’t. &gt; Octopress claims itself a blog for hackers, but what hacker doesn’t use (LATEX) math?</p>
 <p>Making Octopress to work with MathJax is a pain in the neck (though technically it is not Octopress, it is Jekyll). Even following the instructions provided by luikore cannot completely resolve the problem. I excerpted a few equations from the official site of MathJax to do a display test, and here it is.</p>
 <p>The Cauchy-Schwarz Inequality</p>
@@ -66,12 +69,42 @@
 <p>\[ \begin{aligned} \nabla \times \vec{\mathbf{B}} -\, \frac1c\, \frac{\partial\vec{\mathbf{E}}}{\partial t} &amp; = \frac{4\pi}{c}\vec{\mathbf{j}} \\ \nabla \cdot \vec{\mathbf{E}} &amp; = 4 \pi \rho \\ \nabla \times \vec{\mathbf{E}}\, +\, \frac1c\, \frac{\partial\vec{\mathbf{B}}}{\partial t} &amp; = \vec{\mathbf{0}} \\ \nabla \cdot \vec{\mathbf{B}} &amp; = 0 \end{aligned} \]</p>
 <p>Some of the equations are still broken after the hack. I guess it is because \ symbols are escaped. Since I don’t have decent knowledge about ruby packages, it may take me some time to fix.</p>
 
-                    </article>
-                  </div>
-                </div>
-                <div class="pure-u-md-1-5"></div>
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+        </main>
+
+        <div class="pure-g">
+          <div class="pure-u-md-1-5"></div>
+          <div class="pure-u-md-3-5">
+          <nav class="main-nav">
+            
+            <span class="newer-posts">
+              <a href="../48/">&larr; Newer Posts</a>
+            </span>
+            
+            
+          </nav>
+          </div>
+          <div class="pure-u-md-1-5"></div>
+        </div>
+
+        <div class="pure-g">
+          <div class="pure-u-md-1-5"></div>
+          <div class="pure-u-1 pure-u-md-3-5">
+            <div class="page-number is-center">Page 49 of 49</div>
+            <footer class="site-footer">
+              <div class="inner is-center">
+                <section class="copyright">All content copyright <a href></a>© 2019 • All rights reserved.</section>
               </div>
-            </div>
+            </footer>
+          </div>
+          <div class="pure-u-md-1-5"></div>
         </div>
     </body>
 </html>

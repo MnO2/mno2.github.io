@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-004.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -42,12 +42,64 @@
     <body>
         <div class="pure-menu pure-menu-horizontal">
             <ul class="pure-menu-list">
-                <li class="pure-menu-item"><a href="./about" class="pure-menu-link">About</a></li>
+                <li class="pure-menu-item"><a href="../about" class="pure-menu-link">About</a></li>
                 <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
                 <li class="pure-menu-item"><a href="../rss/feed.xml" class="pure-menu-link">Subscribe</a></li>
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2019-07-01-%E4%BC%98%E5%8C%96-jieba-rs-%E4%B8%AD%E6%96%87%E5%88%86%E8%AF%8D-%E6%80%A7%E8%83%BD%E8%AF%84%E6%B5%8B%EF%BC%88%E5%BF%AB%E4%BA%8E-cppjieba-33percent%29.html">优化 jieba-rs 中文分词性能评测 (快于 cppjieba 33%)</a></h1>
+    <div class="post-meta"><time datetime="2019-07-01 14:10">2019-07-01 14:10</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>昨晚写了一篇关于优化 <a href="https://github.com/messense/jieba-rs">jieba-rs</a> 英文的<a href="https://blog.paulme.ng/posts/2019-06-30-optimizing-jieba-rs-to-be-33percents-faster-than-cppjieba.html">介绍</a>，但想说 jieba 的使用者多半还是在中文圈，对于宣传来讲 hacker news 跟 reddit 可能无法触及到真正会使用的用户群，于是为了宣传，也是为了让 search engine 可以搜索到，就来把性能的部分另外写成中文的一篇。关于过程我就不再重新用中文再写一次了，实在太累人。有兴趣的人可以阅读<a href="https://blog.paulme.ng/posts/2019-06-30-optimizing-jieba-rs-to-be-33percents-faster-than-cppjieba.html">英文版</a></p>
+<p>测试机器的机器规格如下</p>
+<pre><code>MacBook Pro (13-inch, 2017, Two Thunderbolt 3 ports)
+2.5 GHz Intel Core i7
+16 GB 2133 MHz LPDDR3</code></pre>
+<p>测试过程仿照<a href="http://yanyiwu.com/work/2015/06/14/jieba-series-performance-test.html">结巴(Jieba)中文分词系列性能评测</a>所描述，先按行读取文本围城到一个数组里，然后循环 50 次对围城每行文字作为一个句子进行分词。 分词算法都是采用精确模式，也就是包含了 HMM 的部分。</p>
+<p>耗时数据如下，从高到低排序</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">实作</th>
+<th style="text-align: left;">耗时</th>
+<th style="text-align: left;">版本 .</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">cppjieba</td>
+<td style="text-align: left;">6.219s</td>
+<td style="text-align: left;">866d0e8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">jieba-rs (master)</td>
+<td style="text-align: left;">4.330s</td>
+<td style="text-align: left;">a198e44</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">jieba-rs (darts)</td>
+<td style="text-align: left;">4.138s</td>
+<td style="text-align: left;">ab2fbfe</td>
+</tr>
+</tbody>
+</table>
+<p>以上耗时都是计算分词过程的耗时，不包括词典载入的耗时。</p>
+<p>这篇会着重于评测只是为了宣传，并不想陷入语言之争，这也是我英文版有写主要是分享关于用 Rust 优化的经验，也是为了我自己衡量可以在工作中多认真使用 Rust 为目的。</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -115,47 +167,6 @@ Extract: [0.679 seconds]time consumed.</code></pre>
 
                 </article>
             
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2019-06-16-cjk-unified-ideograph-developers-should-know.html">CJK Unified Ideograph developers should know</a></h1>
-    <div class="post-meta"><time datetime="2019-06-16 21:51">2019-06-16 21:51</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>I have been working on <a href="https://github.com/messense/jieba-rs">jieba-rs</a> these few weeks and traced the code from the original python <a href="https://github.com/fxsjy/jieba">implementation</a>. I found a wrong assumption in the code that is by assuming the unicode scalar only ranges from U+4E00 to U+9FD5</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb1-1" title="1">re_han_default <span class="op">=</span> re.<span class="bu">compile</span>(<span class="st">&quot;([</span><span class="ch">\u4E00</span><span class="st">-</span><span class="ch">\u9FD5</span><span class="st">a-zA-Z0-9+#&amp;\._%\-]+)&quot;</span>, re.U)</a></code></pre></div>
-<p>The same kind of mistakes have been made on Chinese websites, where developers don’t even bother to put minimum effort to understand what the unicode standard is, and therefore only assumes that the unicode range only from the BMP. They don’t know as of Unicode 12.0, it has defined a total of 87887 CJK Unifided Ideograph. And there are charaters defined in Extension A to Extension F, and the upcoming planned Extension G. What falls in the BMP was mainly the result of <a href="https://en.wikipedia.org/wiki/Han_unification">Han Unification</a></p>
-<p>To correctly defined the range of the unicode for CJK as the time of Unicode 12, you have to define at least the following ranges.</p>
-<ul>
-<li>U+3400…U+4DBF (Extesnion A)</li>
-<li>U+4E00…U+9FFF (BMP)</li>
-<li>U+F900…U+FAFF (Compatibilty Ideograph)</li>
-<li>U+20000…U+2A6DF (Extension B)</li>
-<li>U+2A700…U+2B73F (Extension C)</li>
-<li>U+2B740…U+2B81F (Extension D)</li>
-<li>U+2B820…U+2CEAF (Extension E)</li>
-<li>U+2CEB0…U+2EBEF (Extension F)</li>
-<li>U+2F800…U+2FA1F (Compatibility Supplement)</li>
-</ul>
-<p>It would cover the test cases like so that you would have your logic built on the correct foundation.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb2-1" title="1">   <span class="kw">let</span> <span class="kw">mut</span> jieba = <span class="pp">Jieba::</span>new();</a>
-<a class="sourceLine" id="cb2-2" title="2"></a>
-<a class="sourceLine" id="cb2-3" title="3">    <span class="co">//add fake word into dictionary</span></a>
-<a class="sourceLine" id="cb2-4" title="4">    jieba.add_word(<span class="st">&quot;䶴䶵𦡦&quot;</span>, <span class="cn">Some</span>(<span class="dv">1000</span>), <span class="cn">None</span>);</a>
-<a class="sourceLine" id="cb2-5" title="5">    jieba.add_word(<span class="st">&quot;讥䶯䶰䶱䶲䶳&quot;</span>, <span class="cn">Some</span>(<span class="dv">1000</span>), <span class="cn">None</span>);</a>
-<a class="sourceLine" id="cb2-6" title="6"></a>
-<a class="sourceLine" id="cb2-7" title="7">    <span class="kw">let</span> words = jieba.cut(<span class="st">&quot;讥䶯䶰䶱䶲䶳䶴䶵𦡦&quot;</span>, <span class="cn">false</span>);</a>
-<a class="sourceLine" id="cb2-8" title="8">    <span class="pp">assert_eq!</span>(words, <span class="pp">vec!</span><span class="op">[</span><span class="st">&quot;讥䶯䶰䶱䶲䶳&quot;</span>, <span class="st">&quot;䶴䶵𦡦&quot;</span><span class="op">]</span>);</a></code></pre></div>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
         </main>
 
         <div class="pure-g">
@@ -180,7 +191,7 @@ Extract: [0.679 seconds]time consumed.</code></pre>
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 3 of 48</div>
+            <div class="page-number is-center">Page 3 of 49</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All content copyright <a href></a>© 2019 • All rights reserved.</section>

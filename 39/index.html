@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-004.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -42,7 +42,7 @@
     <body>
         <div class="pure-menu pure-menu-horizontal">
             <ul class="pure-menu-list">
-                <li class="pure-menu-item"><a href="./about" class="pure-menu-link">About</a></li>
+                <li class="pure-menu-item"><a href="../about" class="pure-menu-link">About</a></li>
                 <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
                 <li class="pure-menu-item"><a href="../rss/feed.xml" class="pure-menu-link">Subscribe</a></li>
             </ul>
@@ -53,12 +53,16 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2014-07-28-moving-from-octopress-to-hakyll.html">Moving from Octopress to Hakyll</a></h1>
-    <div class="post-meta"><time datetime="2014-07-28 17:30">2014-07-28 17:30</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2015-01-04-mathematics-and-pl-theory.html">History of Mathematics and Programming Language Theory</a></h1>
+    <div class="post-meta"><time datetime="2015-01-04 17:30">2015-01-04 17:30</time> </span>
     <div class="slot-content">
       <article>
-        <p>Octopress had served my need of statically generating my blog very well for a while. As a pioneer in static website (especially blog) generator, it did pretty well. Only two things that I don’t really like, where they are Jekyll’s lack of support in MathJax and slowness of Matz ruby. It usually takes me tens of seconds to build the whole site with the article number between ten to twenty. Therefore I am looking for alternatives that could cover the same feature set and with better build speed. I considered DocPad and Hakyll as two alternative candidates. DocPad has rich features and sizable community and definitely a good option. But just as I grow more sophiscated in Haskell, using a good software based on Haskell is temptative. I could learn more and hack around it.</p>
-<p>With hakyll as the generator, I chose Casper as my blog theme. It is the default theme for Ghost, and licensed under MIT. Spending some time to read the existing sharing about using Hakyll, I managed to piece different components together. As I get more proficiency in Hakyll, it could be possibly released as a boilerplate template, or could be considered as a Hakyll-version of Octopress. I really love this combination of toolchains, hope I could blog more with them.</p>
+        <p><a href="https://cdn-images-1.medium.com/max/2400/0*0Qm8Sd_QQLodInAN.jpg"></a></p>
+<p>透過 lcamel 的介紹得知了「數學：確定性失落」(Mathematics: The loss of Certainty) 這本書。 作者 Morris Kline 有感於現今數學學院越來越走向純數研究，漸漸地遺忘數學乃科學之母，而寫的一本回顧數學歷史的書。 歷史上數學在許多關鍵時刻扮演了提供科學前進方向的指引。從科學研究提供出來的數據，發明新的數學工具，整理出一套觀點。 我們所熟知的大數學家在那個年代也往往是物理學家，天文學家。並且從不以數學家自稱。 他希望藉由歷史上眾多的經驗，來論述自己認為應該回到以往科學與數學間角色的立場。 而非讓純數派的數學家輕視被歸類為應用數學派的數學家。 至於本文為什麼要將數學史與程式語言理論放在一起呢？ 因為程式語言理論恰恰是近代數學危機之後，從理論發展的工具所衍生出來的。 而這本書對於數學近代史有著非常完整的介紹， 陳述了「邏輯主義」、「直覺主義」、「形式主義」與「集合論派」等等的觀點。 並說明了哥爾德不完備定理與之後的洛溫罕斯寇楞理論而導致數學基礎上的分歧（或是悲觀一點也可以看作毀滅）。 現代大學數學系所教的數學主流，多半還是集合論 ZF 公設出發來推導的一整個架構，但那也僅僅只是一種觀點而已。 這些歷史沒有跟程式語言理論的數學直接相關， 但就跟去思考為什麼有人發明微積分，整個歷史演進、整個大環境與他的思路究竟是怎麼導致這項發明的一樣。 天才雖是天才，但受限於時代，畢竟還是要有所本才能得出這些發現或發明。 由於程式語言理論奠基於數理邏輯與形式系統的發展上， 恰恰好就是這個時代試圖為數學奠定基礎的發明。 熟悉這些歷史能夠讓我們稍微窺探到這些天才們的狐狸尾巴。</p>
+<p>在這段歷史中，對於計算科學界最重要的就是為了解決 Hilbert 所謂的 Entscheidungsproblem (Decision Problem) 而獨立分別發明的 Turing Machine 與 Lambda Calculus。 雖然 Hilbert 的原意並不是為了計算理論，而是為了數學的基礎打底。 他在 1928 年的 conference 提出他的問題 “First, was mathematics complete… Second, was mathematics consistent… And thirdly, was mathematics decidable?” 所謂的 decidable 就是說，給任何一個清楚描述的數學陳述，由於在古典邏輯裡面，我們承認了排中律。 也就是一個陳述要碼為真，否則就是否。 既然我們這樣先驗了排中律，那剩下的問題就是我們是否能夠從既有承認的陳述，經過有限次的推導，來決定給定的數學陳述究竟是真還是假。 是否有這樣一個一般性適用的 algorithm 存在。 而 Alan Turing 與 Alonzo Church 都給出了否定的答案。 Turing Machine 與 Lambda Calculus 就是他們為了證明而構造的形式系統（要定義何謂 algorithm，就必須先給出形式系統）。 當初並非想拿來套用成計算理論，而是邏輯方面的應用。 後來 Church 也有意識到 Lambda Calculus 可以作為運算模型的潛力，並證明了他跟 Turing Machine 等價。 並為了在邏輯上避開羅素悖論，又多改進了第一版的 Lambda Calculus，加上型態變成 Simply Typed Lambda Calculus。 同樣地 Church 的這一項創作，又被應用至非他本意的領域，也就是後來的程式語言理論的型別研究部分。</p>
+<p>退一萬步來看，所謂的 Programming 就是在給定好的形式系統上，構造出你所想要的陳述。 這陳述可能比較簡單如 x + y 的結果，複雜可能是一個 web server。 這時候很自然的一個問題就是：「你怎麼保證你的構造是對的？」，也就是你宣稱的跟你構造的結果必須是一樣。 如今在我們剛學習程式的時候，這種保證多半是經由我們的直覺推理與測試。 但由於受到 Simply Typed Lambda Calculus 的啟發，理論學家們發現到這種保證是可以藉由型別來自動化做到的。 Simply Typed Lambda Calculus 給我們的啟示就是 Lambda Calculus 用代換形式當作一步演算跟型別的推導是有對應的。 當我們在進行每一步的時候，型別上的推導簡直就跟根琴所提出的 Natural Deduction 的步驟一樣。 而後來根據進一步正式證明而成為 Curry-Howard Correspondence。 這樣我們就知道，型別如 a -&gt; b，其實就是邏輯上的宣稱，你用邏輯的方式陳述你的規格。或是數學的術語就是「定理」 而對應的 Lambda Calculus 的演算，就是我們在對定理的證明。 證明的每一步驟剛好都是針對 Lambda Calculus 這個形式系統，用代換的方式來進行。 因此，Compiler 可以從你的演算來檢查跟你的宣稱是否有不一致的地方。 你是否宣稱一個函數應該輸入整數並輸出整數，最後卻輸出了字串。 這時候機器就能提醒你，你的構造跟你的宣稱不一致，非常有可能是你哪裡搞錯了。</p>
+<p>由於 Lambda Calculus 剛好是以 mathematical function 來當作操作單位的形式系統， 所以認知上，好像型別嚴格檢查的語言就是 functional programming 的形式。 但實際上 functional programming 並不一定要伴隨著嚴格的型別。 只是當你哲學上追求「可證明正確」的程式時，我們數學提供的工具，就是從 Church 的 Lambda Calculus 演進而來。 未來也不知道是否會有其他種理論。但現況是如此。 這也是程式語言理論界的主流。</p>
+<p>個人覺得程式語言研究好玩的地方在於，充分體現了形式系統多元化的需求，甚至加進實作的考量還會有社會學的因素進來。 學界主流語言追求正確與結構的表達力提供非常好的指引。 但對於現今主流程式語言從草根發展的背景卻不太相搭， 因此儘管許多理論在 1980 年代學界就已經達成共識，在實務上經過了三十年還是無法融入主流。 這當中有許多有趣的因素值得探討。 多少也造就了專家用的形式系統與草根用的形式系統有十分大的差距的現況。 針對任務的出錯成本與轉換成本、資源成本等，也形成了越來越分歧的情形。 資訊科學的蓬勃發展算一算還沒一百年。一百年後的系統，不知道會是什麼樣子。光發想這件事就有讓人細細琢磨的樂趣。</p>
 
       </article>
     </div>
@@ -72,16 +76,12 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2013-03-14-mediterranean-sea.html">地中海的春天讀後雜感</a></h1>
-    <div class="post-meta"><time datetime="2013-03-14 17:30">2013-03-14 17:30</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2014-07-28-moving-from-octopress-to-hakyll.html">Moving from Octopress to Hakyll</a></h1>
+    <div class="post-meta"><time datetime="2014-07-28 17:30">2014-07-28 17:30</time> </span>
     <div class="slot-content">
       <article>
-        <p><a href="https://cdn-images-1.medium.com/max/2400/0*RBEAA7_yV3Er7IVA.jpg"></a></p>
-<p>這是第三本看過張翠容寫的書了。一如閱讀前兩本的感想，非長久浸淫於政治哲學、經濟、人類學、社會學等有思考累積的前提下，要下筆總是猶豫不已。不過同手上仍在閱讀的「我的涼山兄弟」，也陸續讀了不少淺顯型的社會科學或報導型文學的書。雖仍未有政治經濟哲學正規的訓練，我想也算多少長了點眼界，能寫點消化的東西。</p>
-<p>地中海的春天主要是金融危機後，在緊接的歐債問題期間走訪地中海沿岸國家的記錄。與前兩本呈現差異的一個點是，此次走訪的是從東亞刻板印象中相對富裕與社會制度完善的南歐與北非中比較富裕的國家。與前兩本另一種既定印象定位成衝突或至少與西方主流媒體意見衝突的感覺有所差異。不過走訪基層，走訪現場凸顯的共通點就是，在現有遊戲規則中屬於弱勢的人民在想辦法為自己找尋出路。雖然艱困，但也是為未來開啓另一道曙光的機會。文中如拉丁美洲之路一再提及全球化與新自由主義的遊戲規則下，造成現在許多結構上的大問題。貧富差距拉大，金融資本不受限制地流動。也許理論的初衷只是要解決當時既定時空下的某些問題，但被打著不同算盤的人借來達成自己的目的，也造就了現今新自由主義是成為一個負面想象的詞彙。</p>
-<p>想一想也挺弔詭的，政治詞彙本身，或許不精確才是王道。每個人都能對但一詞彙有不同的解讀，才能團結起各方人馬，暫時為共通的目標奮鬥。等到了目標達成的時候再各憑本事爭權奪利。今日人人能朗朗上口的「資本主義」「社會主義」「左派」「右派」，在言及時每個人心中的定義真的都一樣嗎？高談闊論時真的有把事情想得夠清楚嗎？或許這也是詞彙氾濫的原因。Neo Liberalism, Libertarianism，用臭了就再立一個以示與別人區別。語言學上一些不同時代政治正確的詞語就是這麼來的吧。</p>
-<p>光「民主」這個詞就有許多許多種定義了。畢竟實踐方式就有許多種，但安逸的人們可能僅會看到最淺顯的一種，我有票投就說我有民主。跟佛教有許多種一般，非追求內心的佛而是燒香拜拜的佛。我想現在也算是當權者的成功洗腦，只要不吵，維持現狀就好。甚至好像有自然規律在後面一樣，經濟一差，社會就分裂對立。對立嚴重點就引來仇恨，仇恨就帶來新納粹主義。接著就是殺戮的漩渦，比誰的拳頭大。直到拳頭大的一方消滅另一方，或是消耗至另一方耗盡氣力，才有回歸於某種平衡。</p>
-<p>近幾年科技的進步，雖然就絕對的指標最差的人類生活水準都有顯著的進步，不過似乎也加深了世界的分配不均。資訊的不平等不自由我想會是這個世代的主軸，這也是為什麼應該要為開放的平台盡一份心力吧。只是儘管在主題是資訊而非傳統物質上，考量社會規則的邊緣者與自由競爭之間，都還是不斷在拉鋸戰。</p>
+        <p>Octopress had served my need of statically generating my blog very well for a while. As a pioneer in static website (especially blog) generator, it did pretty well. Only two things that I don’t really like, where they are Jekyll’s lack of support in MathJax and slowness of Matz ruby. It usually takes me tens of seconds to build the whole site with the article number between ten to twenty. Therefore I am looking for alternatives that could cover the same feature set and with better build speed. I considered DocPad and Hakyll as two alternative candidates. DocPad has rich features and sizable community and definitely a good option. But just as I grow more sophiscated in Haskell, using a good software based on Haskell is temptative. I could learn more and hack around it.</p>
+<p>With hakyll as the generator, I chose Casper as my blog theme. It is the default theme for Ghost, and licensed under MIT. Spending some time to read the existing sharing about using Hakyll, I managed to piece different components together. As I get more proficiency in Hakyll, it could be possibly released as a boilerplate template, or could be considered as a Hakyll-version of Octopress. I really love this combination of toolchains, hope I could blog more with them.</p>
 
       </article>
     </div>
@@ -115,7 +115,7 @@
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 39 of 48</div>
+            <div class="page-number is-center">Page 39 of 49</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All content copyright <a href></a>© 2019 • All rights reserved.</section>
