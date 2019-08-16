@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="./stylesheets/customize.css">
+  <link rel="stylesheet" href="../stylesheets/customize.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -42,22 +42,19 @@
     <body>
         <div class="pure-menu pure-menu-horizontal">
             <ul class="pure-menu-list">
-                <li class="pure-menu-item"><a href="./about" class="pure-menu-link">About</a></li>
-                <li class="pure-menu-item"><a href="./archive.html" class="pure-menu-link">Archive</a></li>
-                <li class="pure-menu-item"><a href="./rss/feed.xml" class="pure-menu-link">Subscribe</a></li>
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
             </ul>
         </div>
-        <main class="content" role="main">
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="./posts/2019-08-16-logq---analyzing-log-files-in-sql-with-command-line-toolkit%2C-implemented-in-rust.html">logq - Analyzing log files in SQL with command-line toolkit, implemented in Rust</a></h1>
-    <div class="post-meta"><time datetime="2019-08-16 23:35">2019-08-16 23:35</time> </span>
-    <div class="slot-content">
-      <article>
-        <p><a href="https://github.com/MnO2/logq">logq</a> is my latest project and it has reached to a reasonably qualitative milestone for me to be comfortable enough to introduce it and share about its technical detail.</p>
+
+        <div>
+            <div class="content">
+              <div class="pure-g">
+                <div class="pure-u-md-1-5"></div>
+                <div class="pure-u-1 pure-u-md-3-5">
+                  <h1 class="post-title is-center">logq - Analyzing log files in SQL with command-line toolkit, implemented in Rust</h1>
+                  <div class="slot-content">
+                    <article>
+                      <p><a href="https://github.com/MnO2/logq">logq</a> is my latest project and it has reached to a reasonably qualitative milestone for me to be comfortable enough to introduce it and share about its technical detail.</p>
 <p>Let’s start by an example. Imagine that you are in the middle of troubleshooting a production incident and you are suspecting a certain endpoint from the web-server is having problem and result into high latency. Since it is application level and it is not provided by the AWS CloudWatch. It is also the first time that it happened so there isn’t any in-house datadog or application level instarumentation setup. And it occurs to you that the access log contains the relevant information and it would be possible for you to calculate the metrics from the log. You download the log from the archive storage and piece together an ad-hoc script in 30 minutes and run the metrics against the log, and the script is implemented in python it gets to pretty slow if the log size is large. Wouldn’t it be great if there were command line where you could handle these kind of ad-hoc analysis situation easily? Where no extra dependency setup like ELK or library is needed. That is the motivation to drive to the development of <a href="https://github.com/MnO2/logq">logq</a>, where you could answer the question of “What are the 95th latencies with 5 seconds time frame against application handlers by ignoring the second path segments” easily.</p>
 <pre><code>&gt; logq query 'select time_bucket(&quot;5 seconds&quot;, timestamp) as t, url_path_bucket(request, 1, &quot;_&quot;) as r, percentile_disc(0.95) within group (order by sent_bytes asc) as bps from elb group by t, r' data/AWSLogs.log
 +----------------------------+----------------------------------------------------------------------+----------+
@@ -202,69 +199,12 @@ SUM:                            14            651             17           4867
 </ul>
 <p>Hope I can constantly have spare time to work on this many things on the roadmap.</p>
 
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="./posts/2019-07-30-%E3%80%8Cprotonmail%E3%80%8D%E3%81%AB%E7%A7%BB%E8%A1%8C%E3%81%97%E3%81%A6%E3%80%81%E3%80%8Cgmail%E3%80%8D%E3%82%92%E8%BE%9E%E3%82%81%E3%81%BE%E3%81%99.html">「ProtonMail」に移行して、「Gmail」を辞めます</a></h1>
-    <div class="post-meta"><time datetime="2019-07-30 10:53">2019-07-30 10:53</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>Googleが想像以上にいろんな情報を取得した。何か調べ物がある時はGoogleで検索し、ブラウザはChromeを使って、メールはGmailで送信し、どこかに行く時Googleマープで所在地を確認し、YouTubeの動画を見て、Googleドライブに入れて、仕事はGoogle Docsを使いて。すべての閲覧履歴をGoogleが保存します。インターネット生活のほぼ全てをGoogleに絡め取られているの事は、良いことではない。そのため、Googleの依存度を減らしたい。</p>
-<p>最初の辞めるのサービスは Gmail。メールは全ての情報は含まれている、クレジットカードでも、応募の情報でも、旅行情報でも、メールサービスは自分の情報を取得している、それが飛行機のチケット予約すると、Googleがカレンダーに予約を作成できるの理由。</p>
-<h2 id="protonmail-の特徴">ProtonMail の特徴</h2>
-<p>ProtonMailのメールデータは全て暗号化された状態でサーバー上に保存されています。データはすべてのステップで暗号化されていることから傍受のリスクはないとのこと。もっと知りたいたら、<a href="https://www.ted.com/talks/andy_yen_think_your_email_s_private_think_again?language=en">Andy Yen: Think your email’s private? Think again</a>の TED トークの動画を見てください。</p>
-<h2 id="購入後1ヶ月間使用した感想">購入後1ヶ月間、使用した感想</h2>
-<p>移入が大体上手くいく、ProtonMail はカスタムドメインをセットアップすることがあります。paulme.ng のドメインをProtonMailに移行しました。スパムフィルタが ProtonMail より Gmail の方がうまい。ProtonMailのフィルタはが手動セットアップあとで、メールの分類正しいになりました。暗号化と便利のトレード・オフがと思います。暗号化したら、情報を取得できないだから、訓練データになし、機械学習的手法を使っていない、スパムメッセージの分類器を作っていこどができません。それ以外は、満足しています。</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-        </main>
-
-        <div class="pure-g">
-          <div class="pure-u-md-1-5"></div>
-          <div class="pure-u-md-3-5">
-          <nav class="main-nav">
-            
-            <span class="newer-posts">
-              
-            </span>
-            
-            
-            <span class="older-posts" style="float:right">
-              <a href="./2/">Older Posts &rarr;</a>
-            </span>
-            
-          </nav>
-          </div>
-          <div class="pure-u-md-1-5"></div>
-        </div>
-
-        <div class="pure-g">
-          <div class="pure-u-md-1-5"></div>
-          <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 1 of 49</div>
-            <footer class="site-footer">
-              <div class="inner is-center">
-                <section class="copyright">All content copyright <a href></a>© 2019 • All rights reserved.</section>
+                    </article>
+                  </div>
+                </div>
+                <div class="pure-u-md-1-5"></div>
               </div>
-            </footer>
-          </div>
-          <div class="pure-u-md-1-5"></div>
+            </div>
         </div>
     </body>
 </html>

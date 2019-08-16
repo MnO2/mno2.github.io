@@ -53,6 +53,103 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2012-04-06-rank-n-type.html">What is Rank-N Types in Haskell</a></h1>
+    <div class="post-meta"><time datetime="2012-04-06 17:30">2012-04-06 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>For a beginner of haskell coming from popular imperative languages with “Generic” or “Template” construct in them, like C++, Java, it is not too hard to accept the parametric polymorphism at first glance. The type signature of id :: a -&gt; a can quickly remind him of C++ template.</p>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+using namespace std;
+
+template &lt;typename T&gt;
+T id(const T &amp;x)
+{
+        return x; 
+}
+
+int main()
+{
+        cout &lt;&lt; id(1) &lt;&lt; endl;
+        cout &lt;&lt; id(string(&quot;foo&quot;)) &lt;&lt; endl;
+        return 0;
+}</code></pre>
+<p>However, the thing would become complicated when he bumped to the type signature of runST</p>
+<pre><code>runST :: (forall s. ST s a) -&gt; a</code></pre>
+<p>A few questions pop out. What the hell is that forall, and what are Rank2Types and RankNTypes documented in the GHC manual?</p>
+<h3 id="higher-rank-polymorphism">Higher Rank Polymorphism</h3>
+<p>The parametric polymorphism you usually see is actually Rank-1 Polymorphism. There is actually Rank-2 polymorphism … to Rank-N polymorphism. In not quite exact language, a Rank-1 polymorphic function is that it doesn’t depend on its input/output types. The type become parameters, and when you call the function, the types are “instantiated.” And Rank-2 polymorphic function is a function gets called with its parameters parameterized, or to be Rank-1 polymorphic. So on, Rank-N polymorphic function is a function gets called with its parameters to be Rank-(N-1) polymorphic.</p>
+<p>Let’s look at a Rank-2 example. Suppose we have a list of Int and a list of Char, we want to write a function to check if the results of applying a function to both lists are equal. Use case would look like this.</p>
+<pre><code>check f l1 l2 = (f l1) == (f l2)
+
+main = do
+    print $ check length [1,2,3,4] ['a','b','c','d']
+    print $ check ((+2) . length) [1,2] ['a']</code></pre>
+<p>We can see that we want parameter f of check to be a Rank-1 polymorphic function, so that we can apply it to both [Int] and [Char]. In such case, what would be the type signature of check? Let’s look at how we can declare it in haskell.</p>
+<h3 id="forall">forall</h3>
+<p>Parametric polymorphism is implicit in haskell. When you write a -&gt; a, actually it is forall a. a -&gt; a. forall is the keyword to explicitly declare what is your type parameter, or type variable. A few examples from standard lib can be explicitly written like this.</p>
+<pre><code>length :: forall a. [a] -&gt; Int
+fst :: forall a b. (a,b) -&gt; a
+map :: forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]</code></pre>
+<p>Writing out explicitly, we declare the type signature of check as check :: (forall a. [a] -&gt; Int) -&gt; forall b. [b] -&gt; forall c. [c] -&gt; Bool. Notice that the effective range of forall greedily extends to the most right end, so the type signature above is equivalent to check :: (forall a. a -&gt; [Int]) -&gt; (forall b. [b] -&gt; (forall c. [c] -&gt; Bool)). But so many forall in the type signature, you would ask where should I put the forall to express a Rank-2 polymorphic function. Just as this link said, you can consider forall as a type level lambda /. This lambda / has some operational similarity with , instead of declare a variable binding, it binds type variables. A parallel in C++ would be binding T of template <typename T> to the corresponding template.</p>
+<p>With this in mind, basically we can write out the type variables and normal variables at the same time in / and . It would look like check = &gt; /&gt; 1 -&gt; /&gt; 2 -&gt; Bool, where f is a function which is /-&gt; -&gt; Int.</p>
+<p>Here is a working example:</p>
+<pre><code>{-# LANGUAGE RankNTypes #-}
+module Main(main) where
+
+import Prelude hiding (length)
+
+length :: forall a. [a] -&gt; Int 
+length (x:xs) = 1 + (length xs)
+length [] = 0
+
+check :: (forall a. [a] -&gt; Int) -&gt; forall b. [b] -&gt; forall c. [c] -&gt; Bool
+check f l1 l2 = (f l1) == (f l2)
+
+main = do
+    print $ check length [1] ['a','b']</code></pre>
+<p>You can play with Rank-N Type with N greater than 2. The spirit is the same. This is an example from here.</p>
+<pre><code>{-# LANGUAGE RankNTypes #-}
+module Main (main) where
+
+g1 :: a -&gt; a 
+g1 x = x
+
+g2 :: (forall a. a -&gt; a) -&gt; (Bool, Char)
+g2 f = (f True, f 'a')
+
+g3 :: ((forall a. a -&gt; a) -&gt; (Bool, Char)) -&gt; (Char, Bool)
+g3 f = (\x -&gt; (snd x, fst x)) (f g1)
+
+g4 :: (((forall a. a-&gt; a) -&gt; (Bool, Char)) -&gt; (Char, Bool)) -&gt; (Bool, Char)
+g4 f = (\x -&gt; (snd x, fst x)) (f g2)
+
+main = do
+    putStrLn &quot;Rank-2:&quot;
+    putStrLn . show . fst $ (g2 g1)
+    putStrLn . show . snd $ (g2 g1)
+    putStrLn &quot;Rank-3:&quot;
+    putStrLn . show . fst . g3 $ g2
+    putStrLn . show . snd . g3 $ g2
+    putStrLn &quot;Rank-4:&quot;
+    putStrLn . show . fst . g4 $ g3
+    putStrLn . show . snd . g4 $ g3Possible Confusion</code></pre>
+<h3 id="possible-confusion">Possible Confusion</h3>
+<p>Due to the usage of forall keyword, it is very easy to confuse RankNTypes, Existential Types and Scoped Type Variables. You can go to check out an excellent discussion on stackoverflow. Also don’t miss out John Lato’s and ezyang’s explanations on Existenatial Types.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
     <h1 class="post-title is-center"><a href="../posts/2012-04-04-%E4%B8%AD%E6%9D%B1%E7%8F%BE%E5%A0%B4%E8%88%87%E6%8B%89%E4%B8%81%E7%BE%8E%E6%B4%B2%E7%9C%9F%E7%9B%B8%E4%B9%8B%E8%B7%AF.html">中東現場與拉丁美洲真相之路</a></h1>
     <div class="post-meta"><time datetime="2012-04-04 17:30">2012-04-04 17:30</time> </span>
     <div class="slot-content">
@@ -72,107 +169,6 @@
 <li>香港的獨立媒體</li>
 <li>台灣的苦勞網以及Peopo</li>
 </ul>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2012-03-17-haskell-blaze-builder.html">Haskell Library Survey: Blaze-Builder</a></h1>
-    <div class="post-meta"><time datetime="2012-03-17 17:30">2012-03-17 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>Haskell is notorious for plethoric libraries on Hackage. For a beginner, it’s easy to lose in the forest of Hackage. With the establishment of Haskell Platform and the advice from experts ( link1, link2 ). the situation is getting better. But for a community, more tutorials would be more plausible. Therefore I decide to write down my library survey.</p>
-<h3 id="what-is-this-library-for">What is this library for?</h3>
-<p>If you remembered it well in Learn you a Haskell for Great Good, it mentions that the List append operation (++) takes linear time. It’s implementation in Haskell 98 Report looks like this:</p>
-<pre><code>infixr 5  ++
-(++) :: [a] -&gt; [a] -&gt; [a]
-[]     ++ ys = ys
-(x:xs) ++ ys = x : (xs ++ ys)</code></pre>
-<p>It’s obvious you have to traverse through all of the elements in the first list to get the operation done, hence linear time. And fortunately, ++ is right associative, which means when you are writing snippets like this, assuming as, bs, cs are all lists.</p>
-<p>It essentially means</p>
-<pre><code>(as ++ (bs ++ cs))</code></pre>
-<p>Based on the previous reasoning, it won’t cost us too much, merely the length of as plus the length of bs.</p>
-<p>But there IS some common cases that gets us in trouble. Let’s take a look at this example from here:</p>
-<p>appendToContent str page = page {pageContent = newContent} where newContent = (pageContent page) ++ str It is a naiive implementation usually occurs in Logger or the streaming output of a HTTP server. The problem of this pattern is it forces the concatenation to be left associative. Using the previous as ++ bs ++ cs as our example, it will become:</p>
-<pre><code>((as ++ bs) ++ cs)</code></pre>
-<p>It is unacceptable because the left associative ++ costs us quadratic time in the size of resulting list. To see that, here is an excerpt from ezyang’s post</p>
-<p>For clarity, we rewrite the definition from Haskell 98 to a ++ b = foldr (:) b a, the time complexity is the same.</p>
-<pre><code>(as ++ bs) ++ cs
-= foldr (:) cs (as ++ bs)
-= foldr (:) cs (foldr (:) bs as)
-= foldr (:) cs (foldr (:) bs (a:as'))
-= foldr (:) cs (a : foldr (:) b as')
-= a : foldr (:) cs (foldr (:) bs as')</code></pre>
-<p>“This is normal, each string append operation costs you linear time in most programming languages after all.” you said. “Joel Spolsky even make this problem famously known as Schlemiel the Painter’s algorithm.”</p>
-<p>But sometimes we DO care about performance. Logger and streaming output of a HTTP server previously mentioned are two of them. We really need efficient list append operation</p>
-<p>There are a few reasonable tactics according to Norman Ramsey</p>
-<p>Standard list with cons. Difference list (John Hughes list) with constant-time append. Algebraic data type supporting constant-time append: data Alist a = ANil | ASingle a | AAppend (Alist a) (Alist a). List of lists with final concat. It depends on the problem you are working to choose the most appropriate one. Here we focus on the second one, Difference List, because it is the one used in the blaze-builder. It’s originally designed for the streaming output of html. Therefore the append is truly the issue we care about.</p>
-<h3 id="difference-list">Difference List</h3>
-<p>The difference list is a data strucutre empowers us constant-time append. As the definition given by Haskell Wiki:</p>
-<p>It is a function f, which when given a list x, returns the list that f represents, prepended to x. Hard to imagine? Let’s take a look at a concrete example defined in Haskell: the ShowS type: The difference list specifically for List of Char.</p>
-<p>Its type in Haskell 98 Report is:</p>
-<pre><code>type ShowS = String -&gt; String</code></pre>
-<p>Judging from its type, it basically matches the description of a difference list. It is a function accepting a String, and supposedly output a String prepending something to x.</p>
-<p>Here is a toy example, using snoc (the inverse of cons) to append Char one by one to the end of difference list.</p>
-<pre><code>toString :: ShowS -&gt; String
-toString = ($ [])
-snoc ∷ ShowS → Char → ShowS
-snoc f a = f ∘ (a:)
-emptyH ∷ ShowS
-emptyH = id
-body ∷ String → ShowS → ShowS
-body (x:xs) acc = body xs (acc `snoc` x)
-body _ acc = acc
-run ∷ String → String
-run xs = toString (body xs emptyH)
-main = putStrLn $ run &quot;1234&quot;</code></pre>
-<p>We heavily rely on the function composition of (a:). With composition we can achieve the constant-time append, and stil preserve some properties of a list. To convert a difference list to a normal list of Char, apply the function to an empty list []. It is what toString is doing.</p>
-<p>The introduction of a function enables us to evaluate left-associated construction in right-associated fashion.</p>
-<pre><code>(as . (bs . cs)) 
-= as . bs .cs
-= (as . (bs . cs))</code></pre>
-<p>With ShowS, we can rewrite the previous example with showString, which is defined as showString s = (s++)`` haskell appendToContent str page = page {pageContent = newContent} where newContent = (pageContent page) . showString str ```</p>
-<p>Another excerpt from ezyang’s post proves the work of a difference list. (called Hughes List here)</p>
-<pre><code>type Hughes a = [a] -&gt; [a]
-listrep :: Hughes a -&gt; [a]
-listrep = (\l -&gt; l [])
-append :: Hughes a -&gt; Hughes a -&gt; Hughes a
-append a b = (\z -&gt; a (b z))
-listrep (append (append a b) c)
-= (\l -&gt; l []) (append (append a b) c)
-= (append (append a b) c) []
-= (\z -&gt; (append a b) (c z)) []
-= (append a b) (c [])
-= (\z -&gt; a (b z)) (c [])
-= a (b (c []))</code></pre>
-<h3 id="blaze-builder">Blaze-Builder</h3>
-<p>Difference list is not limited to list of Char. Elaborating on ShowS is merely for explanation. It can be generalized to list of Chunks, or ByteString for performant output.</p>
-<p>Data.Binary.Builder was frontier to use this pattern. The internal working of provided Builder type is essentially a difference list. The purpose of binary package is to encode the Haskell value into binary format and serialize them to external devices, network devices. And blaze-builder, as in Simon’s and Jaspervdj’s introduction (The latter one is a little bit outdated), it is a drop-in replacement for Data.Binary.Builder, with speed and expressiveness enhancement.</p>
-<p>A toy example from the documentation:</p>
-<pre><code>import Data.Monoid
-import qualified Data.ByteString.Lazy as L
-import Blaze.ByteString.Builder
-import Blaze.ByteString.Builder.Char.Utf8
-strings :: [String]
-strings = replicate 10000 &quot;Hello World!&quot;
-concatenation :: Builder
-concatenation = mconcat $ map fromString strings
-result :: L.ByteString
-result = toLazyByteString concatenation
-main = L.putStrLn result</code></pre>
-<p>This example serializes 10000 instances of “Hello World” to binary representation, which coincidently to be ASCII encoding of bytes. We use provided fromString to serialize a single String to Builder. And the Builder provides a Monoid interface, which means we have mconcat to efficiently concat them, as we do for the difference list.</p>
-<p>After that, we use toLazyByteString to transform it from Builder to ByteString, just like we call toString in the ShowS example.</p>
-<p>With ByteString we have putStrLn function to output the binary representation to external devices.</p>
-<h3 id="postscript">Postscript</h3>
-<p>According to this slide by Simon Meiser. It seems that he is working on bytestring package to incorporate similiar techniques used on blaze-builder. Perhaps after a while the blaze-builder could be replaced by binary. But at this time, a lot of packages are still using blaze-builder. It is still worth it to have a basic understanding of what this library is doing.</p>
 
       </article>
     </div>
