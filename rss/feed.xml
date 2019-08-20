@@ -8,8 +8,100 @@
         <name>Paul Meng</name>
         <email>me@paulme.ng</email>
     </author>
-    <updated>2019-08-16T00:00:00Z</updated>
+    <updated>2019-08-20T00:00:00Z</updated>
     <entry>
+    <title>Travel Planning with Trello</title>
+    <link href="https://blog.paulme.ng/posts/2019-08-20-travel-planning-with-trello.html" />
+    <id>https://blog.paulme.ng/posts/2019-08-20-travel-planning-with-trello.html</id>
+    <published>2019-08-20T00:00:00Z</published>
+    <updated>2019-08-20T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>As a frequent traveller who has been to 55+ countries/regions, I know that travel planning is a time consuming process. I enjoyed the process pretty much as it would get me to know the destination and the culture more. Being to the destination is only small part of it. However, planning it with the right tool definitely would make your life much easier.</p>
+<p>I was quite used to put everything into one Google Doc. I have been using the template I created for myself all over these years. I would revise the template from the experience from the journey to make sure the template is thorough and it could handle 90% of the scenario. Whenever I am about to plan my next trip, I’ll just copy from my template and dump the materials and the links to the wikitravel and blog posts into the Google Doc and use it as a draft to plan my trip.</p>
+<p>Until I find a significant better way to do it. It’s part of the movement I set for myself to make most of the things in my life to be managed by Trello. I would centralize the notification/update by integrating the crawler and Trello API. But soon I found that Trello is especially suitable for travel planning. This blog post is not sponsored by Trello but I whole-heartedly think so.</p>
+<p>Travel planning is a classic type of tasks that has the following properties:</p>
+<ol type="1">
+<li>Start from a simple idea and expanded into details and converge to a final plan</li>
+<li>The final outcome is a detailed itinerary with contingency plan.</li>
+<li>Itinerary alone is not enough. Analytical reporting is required since you need budgeting.</li>
+</ol>
+<p>Therefore at least to me, a good software for travel planning need to have the following features:</p>
+<ol type="1">
+<li>A pin board to collect the materials you are gonna to read.</li>
+<li>Easy to re-organize and label items to suit your need or your mind map looks like.</li>
+<li>Rich media supports</li>
+<li>It provides APIs so that you could export and analyze it with a proper tooling.</li>
+<li>Synchronization and Offline access.</li>
+</ol>
+<p>And Trello just matches all of them to me as the time of Aug 2019, and this is how I use it.</p>
+<p>At the brainstorming phase, I would install the Send-to-Trello button to my Firefox. Whenever I looked up a relevant blog post and I don’t have time to read it full, I would use Send-to-Trello button to save it later. Usually I would create a List in Trello and name it as <code>Lead</code>.</p>
+<p><img src="/images/2019-08-20/send_to_trello.png" /></p>
+<p>And I would read them and create the digested steps into Cards and organize them into days. This is an iterative process, I would first focus on the ballpark schedule so that I could put everything into the my scheduled numbers of days, and make sure the big transporation items are possible to tickets in the budget. In the later iterations, I would add more detailed steps including the ticket and transfer information etc, so that I could just follow the instructions when I am on the road. The Card design just makes this iterative process easy and intuitive.</p>
+<p><img src="/images/2019-08-20/trello_cards.png" /></p>
+<p>With the Adds-on, Trello could even show you the Map View of your cards, it’s especially useful when you are planning the places you would like to visit in the city. You could see the obvious clusters for the markers on the map, and put them in the same day.</p>
+<p><img src="/images/2019-08-20/trello_map_view.png" /></p>
+<p>Also I would leverage on the Custom Fields adds-on to create extra field to document the cost and duration of the transportation. These are for further analysis at the later phase.</p>
+<p>After finishing the planning and make sure I was correctly labeling the cards. I would run a script against Trello API to generate the Google Sheets budget spreadsheet.</p>
+<pre><code>#!/usr/bin/env ruby
+
+require &quot;google_drive&quot;
+require &#39;trello&#39;
+require &#39;time&#39;
+require &#39;json&#39;
+
+spreadsheet_id = &#39;&lt;Your Spread Sheet ID&gt;&#39;
+target_currency = &#39;TWD&#39;
+
+config_file = File.read(&quot;config/trello.json&quot;)
+config_for_trello = JSON.parse(config_file)
+
+Trello.configure do |config|
+  config.developer_public_key = config_for_trello[&#39;developer_public_key&#39;] 
+  config.member_token = config_for_trello[&#39;member_token&#39;] 
+end
+
+cards = {}
+
+Trello::Board.find(&#39;&lt;Your Board ID&gt;&#39;).lists.each do |list|
+  Trello::List.find(list.id).cards.each do |card|
+    cards[card.id] = { :name =&gt; card.name }
+    card.custom_field_items.each do |item|
+      pp item.custom_field_id
+      if item.custom_field_id == &#39;5d5978f014ab2f17fcb6a2cd&#39;
+        if not item.value[&#39;number&#39;].nil?
+          cards[item.model_id][:cost] = item.value[&#39;number&#39;]
+        end
+      elsif item.custom_field_id == &#39;5d59795638dd318d1a53471a&#39;
+        if not item.option_value().nil?
+          cards[item.model_id][:currency] = item.option_value()[&#39;text&#39;]
+        end
+      end
+    end
+  end
+end
+
+pp cards
+
+row = 1
+session = GoogleDrive::Session.from_config(&quot;config/google.json&quot;)
+ws = session.spreadsheet_by_key(spreadsheet_id).worksheets[0]
+
+cards.each do |card_id, card|
+  if not card[:cost].nil? and not card[:currency].nil?
+    ws[row, 1] = card[:name]
+    ws[row, 2] = card[:cost]
+    ws[row, 3] = card[:currency]
+    ws[row, 4] = target_currency
+
+    row += 1
+  end
+end
+ws.save</code></pre>
+<p>And here is what it looks like in Google Sheets.</p>
+<p><img src="/images/2019-08-20/budget_table.png" /></p>
+<p>I used it to plan my trip to Kyoto in the upcoming month, and it is so much better than what I was doing by Google Doc, reducing the big share of time to do copy pasting and adjusting the format. I would use this method to plan my trip in the future.</p>
+]]></summary>
+</entry>
+<entry>
     <title>logq - Analyzing log files in SQL with command-line toolkit, implemented in Rust</title>
     <link href="https://blog.paulme.ng/posts/2019-08-16-logq---analyzing-log-files-in-sql-with-command-line-toolkit%2C-implemented-in-rust.html" />
     <id>https://blog.paulme.ng/posts/2019-08-16-logq---analyzing-log-files-in-sql-with-command-line-toolkit%2C-implemented-in-rust.html</id>
@@ -508,19 +600,6 @@ Extract: [0.679 seconds]time consumed.</code></pre>
 <p>It seems that when I open web pages that heavily use javascript or css, my laptop’s fan would inevitably start to work. Unlike Chrome it would also eat up battery but not to the extent of triggering the cpu’s fan running. Not sure it is due to both of browsers’ javascript engines difference.</p>
 <h2 id="summary">Summary</h2>
 <p>It is not without issue but it is good enough that I am happy to set it as my main browser, and get rid of the sneaky Google.</p>
-]]></summary>
-</entry>
-<entry>
-    <title>Moving away from Medium</title>
-    <link href="https://blog.paulme.ng/posts/2019-05-26-moving-away-from-medium.html" />
-    <id>https://blog.paulme.ng/posts/2019-05-26-moving-away-from-medium.html</id>
-    <published>2019-05-26T00:00:00Z</published>
-    <updated>2019-05-26T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<p>I was a happy user of medium until they started to raise the paywall due to they need to manage to turn it into a business not losing a lot of money. I am quite OK with paying or accept that the website needs to inject ads or something else to generate revenue. However, the way the medium has been doing is annoying. They put up the warning on the top of your write-ups saying that it is not behind the paywall, and you could not hide it by clicking it away, every time you visit the page it would show, and only the author would see it.</p>
-<p><img src="/images/paywall.png" /></p>
-<p>One of the benefit of Medium is that it comes with an app that I could simply just edit a write-up while I am traveling (though it could not be used without internet). I also found the replacement which is <a href="https://www.mweb.im/">MWeb</a> markdown editor. I could edit the writeup offline and easily publish it to the platforms supported. The Medium’s app is no longer exclusive benefit to me.</p>
-<p>I decided to move back to the static site generator. I updated the Hakyll’s theme and make it as clean as possible. I was using the old Caspor theme but this time I used purecss to make one by myself. It is responsive and look very clean with all the white color around it. Without those large size javascript and css files need to be loaded, my static website loaded much faster as well, and I have full access to edit it as much as I like. This static website is also run on the digitalocean’s managerd kubernetes.</p>
-<p>My journey so far has been Octopress, Hakyll, Medium, and then move back to Hakyll.</p>
 ]]></summary>
 </entry>
 

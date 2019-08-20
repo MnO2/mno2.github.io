@@ -53,6 +53,187 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2012-03-05-template-haskell.html">Introduction to Template Haskell</a></h1>
+    <div class="post-meta"><time datetime="2012-03-05 17:30">2012-03-05 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>This article serves as my digestion of Template Haskell, an GHC extension enables us to use Haskell Language itself to metaprogram. It is extensively used in Yesod Web Framework, so understanding it thoroughly undoubtedly facilitate us run Yesod in its full power. Before we do that, let’s go through common approaches used to metaprogram.</p>
+<p>As most of terminology used in the community of programming language, metaprogramming is vaguely defined in my opinion. From the third sence of etymology dictionary, an literal interpretation would be “program of that which trancends the program.” That brings us to the definition from wikipedia:</p>
+<p>Metaprogramming is the writing of computer programs that write or manipulate other programs (or themselves) as their data, or that do part of the work at compile time that would otherwise be done at runtime. For me the important part is to be able to manipulate programs, or code as data. You either do it at runtime, which is usually what most dynamic typing programming language would do, or rely on compilers help you to do so (at compile time).</p>
+<p>One of common approaches toward the former one is sacrificing encapsulation to leak the internal of the runtime engine. Popular dynamic typing programming languages like Ruby, Python, PHP, Javascript all choose to do so, but this feature not just involves these languages. Java, instead of stressing on encapsulation, chooses to leak the class information of JVM and achieve the same effect. But this trade-off is benefitial considered that it makes the languages can metaprogram in their own languages, without any extra extension.</p>
+<p>Speaking of the latter, we would mention probably the first language what most programmers know, C++ template. Programmers describe a template and instantiate a set of them, then compiler will generate the source code corresponding to the instantiation. C++ template is an outcome of accident. It is discovered to be Turing-complete during the process of standardization, which means you can crash the compiler by writing code never stop. Here is a C++ template metaprogram to generate Fibonacci sequence at compile time.</p>
+<pre><code>#include &lt;iostream&gt;
+
+template &lt;int N&gt;
+struct Fibonacci
+{
+    enum { value = Fibonacci&lt;N-2&gt;::value + Fibonacci&lt;N-1&gt;::value };
+};
+
+template &lt;&gt;
+struct Fibonacci&lt;2&gt;
+{
+    enum { value = 1 };
+};
+
+template &lt;&gt;
+struct Fibonacci&lt;1&gt;
+{
+    enum { value = 1 };
+};
+
+int main()
+{
+    int x = Fibonacci&lt;4&gt;::value;
+    int y = Fibonacci&lt;20&gt;::value;
+
+    std::cout &lt;&lt; x &lt;&lt; &quot; &quot; &lt;&lt; y &lt;&lt; std::endl;
+    return 0;
+}</code></pre>
+<p>Lisp family worths another paragraph apart from the previous approaches. They are so special because of homoiconicity: a programming language where the primary representation of programs is also a data-structure in a primitive type of the language itself. In Lisp family, the code itself can be seen as a representation of its abstract syntax tree, with parenthesis as the subtree boundaries. Hence we have such a powerful Macro system in lisp, which directly operates on the abstract syntax tree. Or it can be seen as functions transforming from one syntax tree to another. In clojure, a dialect of lisp run on JVM, we can observe the behavior of macro like this.</p>
+<p>First bring up the REPL</p>
+<pre><code>$ clojure-repl
+WARNING: clojure.lang.Repl is deprecated.
+Instead, use clojure.main like this:
+java -cp clojure.jar clojure.main -i init.clj -r args...
+Clojure 1.1.0
+user=&gt;
+then type
+
+ser=&gt; (defmacro Square [X] `(* ~X ~X))
+#'user/Square
+user=&gt; (macroexpand-1 '(Square 9))
+(clojure.core/* 9 9)</code></pre>
+<p>Template Haskell, though not homoiconic, imitates Lispy macro behavior. If you are familiar with Common Lisp, Scheme or Clojure, understanding Template Haskell should be fairly easy. It could be vaguely thought as a type-safe, compile time version of lispy macro system.</p>
+<h3 id="template-haskell">Template Haskell</h3>
+<p>Template Haskell currently is not a part of standard, neither Haskell 98 nor Haskell 2010. It is just an experimental extension of GHC. In order to use it, you have to add a few lines at the head of file. (The environment here is GHC 7.0.4)</p>
+<pre><code>{-# LANGUAGE TemplateHaskell #-} import Language.Haskell.TH</code></pre>
+<p>Otherwise in ghci, you have to use operator :set and :module.</p>
+<pre><code>ghci&gt; :set -XTemplateHaskell 
+ghci&gt; :module + Language.Haskell.TH</code></pre>
+<p>In parallel to Lispy quote, Haskell provides what is called “Quote Monad” type or just “Q Monad”. They works just like Lispy “quote” with four different types for different syntax program structures: expression, declaration, type and pattern To use them, enclose a piece of code in Oxford Brackets [| … |], instead of lispy `(+ ~X ~X).</p>
+<pre><code>[e| ...(some Haskell code)... |] :: Q Exp   -- Expression 
+[d| ...(some Haskell code)... |] :: Q [Dec] -- Declaration
+[t| ...(some Haskell code)... |] :: Q Type  -- Type
+[p| ...(some Haskell code)... |] :: Q Pat   -- Pattern</code></pre>
+<p>For those don’t understand Lisp, just think of them as functions mapping a string containing haskell code to its corresponding abstract syntax tree.</p>
+<p>In Lisp, to evaluate a macro, just surround it with parenthesis and feed it with correct arguments: (Square 9) In Template Haskell, we use $() to achieve the same effect, and the terminology used is “Splices”.</p>
+<pre><code>$([d| ... (some haskell code) ... |])</code></pre>
+<p>And again, you can simply think of it as a function mapping an abstract syntax tree to the corresponding haskell code string.</p>
+<p>Let’s start with a very simple example, not hello world, but one plus one. In haskell, it would like this:</p>
+<p>With Tempalte Haskell, we can rewrite it like this:</p>
+<pre><code>{-# LANGUAGE TemplateHaskell #-} 
+import Language.Haskell.TH 
+f = $([e| 1+1 |]) 
+main = print f</code></pre>
+<p>We replace the 1+1 expression with corresponding Oxford Brackets for expression [e| … |], and generate code (or evalute it) with $(…).</p>
+<p>You may also try to include f to our expression.</p>
+<pre><code>{-# LANGUAGE TemplateHaskell #-} 
+import Language.Haskell.TH 
+-- error 
+$([e| f = 1+1 |]) 
+main = print f</code></pre>
+<p>Sadly it is illegal, because it is a declaration but not an expression. We have to use Oxford Brackets for declaration [d| … |].</p>
+<pre><code>{-# LANGUAGE TemplateHaskell #-} 
+import Language.Haskell.TH 
+$([d| f = 1+1 |]) 
+main = print f</code></pre>
+<p>Now you get a little hang of it, we can even include the main declaration.</p>
+<pre><code>{-# LANGUAGE TemplateHaskell #-} 
+import Language.Haskell.TH 
+$([d| f = 1+1 |]) 
+$([d| main = print f |])</code></pre>
+<p>Actually, we don’t see a lot of work under water behind this cover of ease of usage. We are in a static typing functional language, so there must be some magical types easy to compose behind the scene. And here we are, let’s type a few characters in ghci.</p>
+<pre><code>ghci&gt; runQ [e| 1+1 |] InfixE (Just (LitE (IntegerL 1))) (VarE GHC.Num.+) (Just (LitE (IntegerL 1)))
+</code></pre>
+<p>With runQ, we can acquire the type info behind the scene, they are Q Monads. Watching it closely and you will notice that they corresponds the strcture of abstract syntax tree. (LitE (IntegerL 1)) gives us literal value 1. and InfixE … (VarE GHC.Num.+) … gives us plus operator.</p>
+<p>Let’s put it in declaration.</p>
+<pre><code>ghci&gt; runQ [d| f=1+1 |] 
+[ValD (VarP f) (NormalB (InfixE (Just (LitE (IntegerL 1))) (VarE GHC.Num.+) (Just (LitE (IntegerL 1))))) []]</code></pre>
+<p>Now the extra elements are ValD (VarP f) (NormalB …). It is obvious that it is a top-level binding.</p>
+<p>You can try it with your own example like hello world:</p>
+<pre><code>ghci&gt; runQ [d| main=putStrLn &quot;Hello World!&quot; |] 
+[ValD (VarP main) (NormalB (AppE (VarE System.IO.putStrLn) (LitE (StringL &quot;Hello World!&quot;)))) []]</code></pre>
+<p>Not every expression or declaration can be such simple, put them in brackets and voila. Sometimes you have to compose them by yourselves, or compiler would complain. Continuing with out hello world example, we can write it like this.</p>
+<pre><code>main = $(appE (varE $ mkName &quot;putStrLn&quot;) (litE (stringL &quot;Hello World!&quot;)))</code></pre>
+<p>Here we compose abstract syntax tree with Q monad, then splice it with $( … ) operator. Or you can use do to glue Q Monad together.</p>
+<pre><code>{-# LANGUAGE TemplateHaskell, QuasiQuotes #-} 
+import Language.Haskell.TH 
+do 
+  mainQ &lt;- valD (varP $ mkName &quot;main&quot;) (normalB (appE (varE 'putStrLn) (litE (stringL &quot;Hello World!&quot;)))) [] return [mainQ]</code></pre>
+<h3 id="quasi-quote">Quasi Quote</h3>
+<p>Another extension commonly used with Template Haskell is Quasi Quote. It extends the Oxford Brackets beyond the basic four to your likeness, like [foo| … |]</p>
+<p>To use that you not only have to switch on the flags,</p>
+<pre><code>{-# LANGUAGE TemplateHaskell, QuasiQuotes #-}
+ghci&gt; :set -XQuasiQuotes
+but also define QuasiQuoter
+
+foo = QuasiQuoter { quoteExp = parseExp :: String -&gt; Q Exp , quotePat = undefined :: String -&gt; Q Pat , quoteType = undefined :: String -&gt; Q Type , quoteDec = undefined :: String -&gt; Q [Dec] }</code></pre>
+<p>You can see that the four fields correspond to the original four: expression, pattern, type and declaration. It tells quasiquoter to use quoteExp when located at expression context, quotePat when located at pattern context, and so on.</p>
+<p>Here is an example from the HaskellWiki. Due to the restriction of Template Haskell, the definition has to go to different source files.</p>
+<pre><code>Main.hs {-# LANGUAGE TemplateHaskell, QuasiQuotes #-} module Main where
+
+import Data.Generics import qualified Language.Haskell.TH as TH import Language.Haskell.TH.Quote import Expr
+
+main :: IO () main = do print $ eval [expr| 1 + 3 + 5 |] case IntExpr 1 of [expr|$int:n|] -&gt; print n _ -&gt; return () ```
+</code></pre>
+<pre><code>{-# LANGUAGE DeriveDataTypeable #-} module Expr (Expr(..), BinOp(..), eval, expr, parseExpr) where
+
+import Data.Generics import Text.ParserCombinators.Parsec import qualified Language.Haskell.TH as TH import Language.Haskell.TH.Quote
+
+data Expr = IntExpr Integer | AntiIntExpr String | BinopExpr BinOp Expr Expr | AntiExpr String deriving(Show, Typeable, Data)
+
+data BinOp = AddOp | SubOp | MulOp | DivOp deriving(Show, Typeable, Data)
+
+eval :: Expr -&gt; Integer eval (IntExpr n) = n eval (BinopExpr op x y) = (opToFun op) (eval x) (eval y) where opToFun AddOp = (+) opToFun SubOp = (-) opToFun MulOp = (*) opToFun DivOp = div
+
+small = lower &lt;|&gt; char ’_‘large = upper idchar = small &lt;|&gt; large &lt;|&gt; digit &lt;|&gt; char’’’
+
+lexeme p = do{ x &lt;- p; spaces; return x } symbol name = lexeme (string name) parens p = between (symbol “(”) (symbol “)”) p
+
+expr’ :: CharParser st Expr expr’ = term chainl1 addop
+
+term :: CharParser st Expr term = factor chainl1 mulop
+
+factor :: CharParser st Expr factor = parens expr’ &lt;|&gt; integer &lt;|&gt; try antiIntExpr &lt;|&gt; antiExpr
+
+mulop = do{ symbol “*“; return $ BinopExpr MulOp } &lt;|&gt; do{ symbol”/“; return $ BinopExpr DivOp }
+
+addop = do{ symbol “+”; return $ BinopExpr AddOp } &lt;|&gt; do{ symbol “-”; return $ BinopExpr SubOp }
+
+integer :: CharParser st Expr integer = lexeme $ do{ ds &lt;- many1 digit ; return $ IntExpr (read ds) }
+
+ident :: CharParser s String ident = do{ c &lt;- small; cs &lt;- many idchar; return (c:cs) }
+
+antiIntExpr = lexeme $ do{ symbol “$int:”; id &lt;- ident; return $ AntiIntExpr id } antiExpr = lexeme $ do{ symbol “$”; id &lt;- ident; return $ AntiExpr id }
+
+parseExpr :: Monad m =&gt; (String, Int, Int) -&gt; String -&gt; m Expr parseExpr (file, line, col) s = case runParser p () “” s of Left err -&gt; fail $ show err Right e -&gt; return e where p = do pos &lt;- getPosition setPosition $ (flip setSourceName) file $ (flip setSourceLine) line $ (flip setSourceColumn) col $ pos spaces e &lt;- expr’ eof return e
+
+quoteExprExp :: String -&gt; TH.ExpQ quoteExprPat :: String -&gt; TH.PatQ
+
+expr :: QuasiQuoter expr = QuasiQuoter { quoteExp = quoteExprExp, quotePat = quoteExprPat, quoteType = undefined, quoteDec = undefined }
+
+quoteExprExp s = do loc &lt;- TH.location let pos = (TH.loc_filename loc, fst (TH.loc_start loc), snd (TH.loc_start loc)) expr &lt;- parseExpr pos s dataToExpQ (const Nothing extQ antiExprExp) expr
+
+antiExprExp :: Expr -&gt; Maybe (TH.Q TH.Exp) antiExprExp (AntiIntExpr v) = Just $ TH.appE (TH.conE (TH.mkName “IntExpr”)) (TH.varE (TH.mkName v)) antiExprExp (AntiExpr v) = Just $ TH.varE (TH.mkName v) antiExprExp _ = Nothing
+
+quoteExprPat s = do loc &lt;- TH.location let pos = (TH.loc_filename loc, fst (TH.loc_start loc), snd (TH.loc_start loc)) expr &lt;- parseExpr pos s dataToPatQ (const Nothing extQ antiExprPat) expr
+
+antiExprPat :: Expr -&gt; Maybe (TH.Q TH.Pat) antiExprPat (AntiIntExpr v) = Just $ TH.conP (TH.mkName “IntExpr”) [TH.varP (TH.mkName v)] antiExprPat (AntiExpr v) = Just $ TH.varP (TH.mkName v) antiExprPat _ = Nothing ```</code></pre>
+<p>Template Haskell can also arouse some problems when working with generic programming. So be careful about using it.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
     <h1 class="post-title is-center"><a href="../posts/2012-02-25-machine-word-haskell.html">Keeping An Eye Out for the Difference between Machine Word and Fixed Word in Haskell</a></h1>
     <div class="post-meta"><time datetime="2012-02-25 17:30">2012-02-25 17:30</time> </span>
     <div class="slot-content">
@@ -162,39 +343,6 @@ Main.main4 =
 
                 </article>
             
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2012-02-11-model-behaves-badly.html">Freely Choosed Models Behaving Badly</a></h1>
-    <div class="post-meta"><time datetime="2012-02-11 17:30">2012-02-11 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>這是兩本書的合併心得。 一本是經典作新自由主義(Neoliberalism)戰神Milton Friedman的Free to choose， 另一本則是計量金融大老Emanuel Derman的新書Models behaving badly。</p>
-<p><img src="https://cdn-images-1.medium.com/max/2400/0*fkCeTzbJtfD3CXpR.jpg" /></p>
-<p>雖身為一個諾貝爾獎得主，Milton Friedman一向擅長用清晰的邏輯跟迅速的反應跟大眾推銷他的信念， Free to choose這一本書源自於一系列的關於他的電視訪問， 他認為電視節目有製作長度的限制， 用一本書反而能更清楚地表達他的理念。 此書讀來並不艱澀， 除了一些現今常聽到的經濟概念(例如對外部性課稅)， 書中最強調的還是探討什麼是自由，什麼是平等，為什麼我們應該要求政府減少干預讓市場看不見的手自己運作。 整個立論的過程很難挑出瑕疵，至少在他那個年代如此。 於是他的學說開始風行， 政府開始移除自從小羅斯福新政之後的各種管制， 並踏上全球化自由貿易之路。 他自己也成為坐鎮芝加哥的芝加哥學派(貨幣學派)大老，教出無數徒子徒孫。 現今的葛林斯潘跟柏南克可以說都受貨幣學派影響很深。</p>
-<p>可是經過現實幾十年的驗證， 新自由主義在實證上可說是背上無數臭名。 不只是解除金融管制而促成新興計量金融的新興行業。 衍生性金融商品最後促成金融危機。 當初聽從新自由主義教條而實行自由貿易的中美洲到南美洲國家， 無數不成為美國的後花園。 經濟也淪為附庸而無法自立自強。 像墨西哥境內就設了中美洲加工區， 美國企業像是Nike就可以免關稅地把貨物運進去用便宜人力加工，再免關稅地運出。 外資企業霸占了各種民生行業，本地企業完全無法招架。 反倒是當初施行保護政策的東亞、東南亞等國家站了起來，像南韓、日本、台灣等等。 真是諷刺。</p>
-<p>全球化的不完全實施也造成了今天的局面，即金融、政治等不同層面的斷層。 跨國企業在不同地方運作、熱錢自由地進出國家。 但困在國界之中的人民們卻無法自由流動。 變成中國勞工搶美國勞工飯碗的情形也是不意外。 對台灣勞工而言，要素差異等價化就玩死你。</p>
-<p>這一切都反映社會科學上很難找出難以動搖的假設。 從某些假設出發用嚴謹的推論可以推論出一個很漂亮的邏輯架構， 但終究很難講他是一個理論(Theory)，反而應該稱做模型(Model)， 這就牽扯到我所說的第二本書Models behaving badly。</p>
-<p>Derman身為一個原物理學家， 對於Theory跟Model的差異有清晰的體悟， Theory代表理形的物體跟現實的物體是相等的， 但Model只是近似，差不多、好像這樣。 很遺憾現在的計量金融模型仔細去看數學式子真的昰沒什麼道理， 我自己看過造成金融海嘯的金融商品: Collateralized debt obligation (CDO)， 真的昰一個粗糙的模型， 簡單來講就是他把一堆債綁在一起，變成一池債(Pool)，這一池債中總有些會違約有些不會， 但只要這一池債中違約不要超過總金額的某個比例就好了， 那就可以把那個比例以下當作低風險的賣掉，其他的當作高風險賣掉。 但這必須要算違約率到底是多少，但他模型為了可以算也為了漂亮就直接假設你這池債大到一個程度的時候分佈就會是常態分佈。 卻沒有人問為什麼實際情形就是常態分佈。</p>
-<p>假設錯誤如果用在不會影響到人們生活的地方也就沒有關係。 但金融卻是跟全球人們息息相關。 於是Derman就提出了金融人的Hippocratic Oath (醫學院學生都要宣誓的): Financial modelers’ manifesto， 希望金融人要了解他們用的模型僅僅是模型，不是真理。</p>
-<p>最後，我也查了一下歐元當初用的模型， 號稱歐元之父Robert Mundell提出Optimum currency area， 光wikipedia上就有提到四個常被引用的前提:</p>
-<ol type="1">
-<li>勞工要能自由流動，不能有限制，也不能有文化障礙</li>
-<li>資本自由流動，價格在不同區域有彈性不能僵化。</li>
-<li>有共同的財政系統能夠重新分配錢到不同的區域</li>
-<li>參與國家要有相似的繁榮衰退周期。</li>
-</ol>
-<p>看起來蠻多項都不符合的，語言還是勞工移動最大的障礙， 現在雖然有ECB但並沒有像美國Federal System那樣可以強制重分配，導致弱國永遠是資本跟貨物的消耗者，有財政危機不意外。 歐盟的強國應該是有共同的經濟相似性，但南歐那些國家看起來一點都不相似，怎麼會可以加入呢? Mundell曾經罵毆元設計沒有問題，是執行上有問題。 在我看來都需要負點責任，執行上絕對是有問題，但強推有執行上顯著困難的一個學說，好像也應該宣誓一下Financial modelers’ manifesto。</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
         </main>
 
         <div class="pure-g">
@@ -219,7 +367,7 @@ Main.main4 =
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 45 of 49</div>
+            <div class="page-number is-center">Page 45 of 50</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>
