@@ -8,8 +8,37 @@
         <name>Paul Meng</name>
         <email>me@paulme.ng</email>
     </author>
-    <updated>2019-08-20T00:00:00Z</updated>
+    <updated>2019-08-21T00:00:00Z</updated>
     <entry>
+    <title>go-pdqsort - Pattern Defeating Quicksort in Go</title>
+    <link href="https://blog.paulme.ng/posts/2019-08-21-go-pdqsort---pattern-defeating-quicksort-in-go.html" />
+    <id>https://blog.paulme.ng/posts/2019-08-21-go-pdqsort---pattern-defeating-quicksort-in-go.html</id>
+    <published>2019-08-21T00:00:00Z</published>
+    <updated>2019-08-21T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p><a href="https://github.com/MnO2/go-pdqsort">go-pdqsort</a> is my implementation of pattern defeating sort in golang. I knew about pattern defeating sort from rust’s standard library documentation. I’ve never heard about this algorithm and it immediately intrigues my interest. I googled about it and found the original <a href="https://github.com/orlp/pdqsort">implementation</a> and their discussion threads on <a href="https://news.ycombinator.com/item?id=14661659">hacker news</a> and <a href="https://www.reddit.com/r/cpp/comments/2z6hgx/patterndefeating_quicksort/">reddit</a>. Then I read the <a href="https://paperpile.com/view/c3820723-6d9c-0a86-ab02-8e46dc22aec5">technical report</a> from Orson Peters. The key observation from the algorithm is that merely reducing the miss rate from CPU branch prediction, it would make the sorting speed greatly improved (no need to flush the cache line etc), so the technique adopted was to put the index of the array in the buckets and don’t swap them immediately, but put them in the right bin and swap them in one batch at the end of the loop. This works perfectly in the language with zero cost abstraction like C/C++ and Rust. I wasn’t sure about that would work in the heap-managed languages like golang, python and ruby etc, since most of the things are on the heap (with pointer indirection) and often results into cache misses, the impact of branch prediction miss rate might be neglectable. (For sure it would depend on the escape analysis in golang compiler, it would put the things on stack if it doesn’t escape in general). Though my hunch was that it would be slower, it still a good practice to implement the algorithm by myself so that I would get to know the details of the algorithm. And here are the results</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">implementation</th>
+<th style="text-align: center;">speed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">pdqsort</td>
+<td style="text-align: center;">80874 ns/op</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">std-lib sort</td>
+<td style="text-align: center;">69828 ns/op</td>
+</tr>
+</tbody>
+</table>
+<p>I am not sure about what std-lib’s sort is, but it looks like introsort since it switches to heapsort when the recursion is too deep, and it incorporates the techniques from shellsort as well, but the main part is still Bently’s quicksort technique. You can tell from the result that pdqsort is significantly slower than std-lib’s sort, probably due to the overhead of those memory batch swap, where it triggers extra allocation or cache eviction, pretty much as expected.</p>
+<p>If you are interested in the algorithm, you could check out the <a href="https://github.com/MnO2/go-pdqsort">code</a> by yourself.</p>
+]]></summary>
+</entry>
+<entry>
     <title>Travel Planning with Trello</title>
     <link href="https://blog.paulme.ng/posts/2019-08-20-travel-planning-with-trello.html" />
     <id>https://blog.paulme.ng/posts/2019-08-20-travel-planning-with-trello.html</id>
@@ -568,38 +597,6 @@ Extract: [0.679 seconds]time consumed.</code></pre>
 <a class="sourceLine" id="cb2-6" title="6"></a>
 <a class="sourceLine" id="cb2-7" title="7">    <span class="kw">let</span> words = jieba.cut(<span class="st">&quot;讥䶯䶰䶱䶲䶳䶴䶵𦡦&quot;</span>, <span class="cn">false</span>);</a>
 <a class="sourceLine" id="cb2-8" title="8">    <span class="pp">assert_eq!</span>(words, <span class="pp">vec!</span><span class="op">[</span><span class="st">&quot;讥䶯䶰䶱䶲䶳&quot;</span>, <span class="st">&quot;䶴䶵𦡦&quot;</span><span class="op">]</span>);</a></code></pre></div>
-]]></summary>
-</entry>
-<entry>
-    <title>Switch from Chrome to Mozilla Firefox</title>
-    <link href="https://blog.paulme.ng/posts/2019-06-05-switch-from-chrome-to-mozilla-firefox.html" />
-    <id>https://blog.paulme.ng/posts/2019-06-05-switch-from-chrome-to-mozilla-firefox.html</id>
-    <published>2019-06-05T00:00:00Z</published>
-    <updated>2019-06-05T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<p>Not only I am leaving Medium, I am also switching my default browser from Chrome to Firefox, due to the concerns that Google is creeping in and intrude the my privacy and trust after reading the news <a href="https://news.ycombinator.com/item?id=18052923">1</a> and <a href="https://news.ycombinator.com/item?id=20044430">2</a>.</p>
-<p>It’s not the first time I tried to switch my main browser to Firefox, the last time I tried was when the first version of <a href="https://wiki.mozilla.org/Quantum">Quantum</a>’s release. I heard it was shipped with its CSS engine from servo, I couldn’t help to download it and try it out. However, it wasn’t a successful attempt. There was bugs and issues I run into, apart from that, all of the extensions need to be migrated since the APIs and architectures are totally different. At the time when it was released, there wasn’t many good extensions migrated yet. But now most of my commonly used extensions are supported.</p>
-<h2 id="extensions">Extensions</h2>
-<p>Here are the list of the extensions I’ve installed so far.</p>
-<ul>
-<li>Facebook Containers</li>
-<li>Multi-Account Containers</li>
-<li>Firefox Lockwise</li>
-<li>OneTab</li>
-<li>Tampermonkey</li>
-<li>IG Helper</li>
-<li>Neat URL</li>
-</ul>
-<p>I found that Facebook Containers is extremely useful, it works pretty much like sandbox account in Android. Neat URL is also convenient in that I don’t have to manually remove those tracking parameters when I copy &amp; paste the url to others.</p>
-<h2 id="issues">Issues</h2>
-<p>It’s not working perfectly without any issue though. I’ve run into the following situations.</p>
-<ul>
-<li>FB Messenger not able to load, not sure it is because I set the content blocking rules too strict.</li>
-<li>Google Drive often hits to high cpu usage when the folders have many items.</li>
-<li>Random high cpu spike when open on certain web pages.</li>
-</ul>
-<p>It seems that when I open web pages that heavily use javascript or css, my laptop’s fan would inevitably start to work. Unlike Chrome it would also eat up battery but not to the extent of triggering the cpu’s fan running. Not sure it is due to both of browsers’ javascript engines difference.</p>
-<h2 id="summary">Summary</h2>
-<p>It is not without issue but it is good enough that I am happy to set it as my main browser, and get rid of the sneaky Google.</p>
 ]]></summary>
 </entry>
 

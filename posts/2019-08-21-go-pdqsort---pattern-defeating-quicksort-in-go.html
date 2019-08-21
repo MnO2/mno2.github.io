@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>go-pdqsort - Pattern Defeating Quicksort in Go</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="go-pdqsort - Pattern Defeating Quicksort in Go" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link href="https://fonts.googleapis.com/css?family=EB+Garamond|Roboto&display=swap" rel="stylesheet"> 
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1566397084.css">
+  <style>
+    html, button, input, select, textarea,
+    .pure-g [class *= "pure-u"] {
+      font-family: 'Roboto', 'Noto Sans TC', 'Noto Sans JP', sans-serif;
+    }
+
+    .post-title {
+      font-family: 'EB Garamond', 'Noto Sans TC', 'Noto Sans JP', serif;
+    }
+  </style>
+</head>
+
+    <body>
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <div class="content">
+              <div class="pure-g">
+                <div class="pure-u-md-1-5"></div>
+                <div class="pure-u-1 pure-u-md-3-5">
+                  <h1 class="post-title is-center">go-pdqsort - Pattern Defeating Quicksort in Go</h1>
+                  <div class="slot-content">
+                    <article>
+                      <p><a href="https://github.com/MnO2/go-pdqsort">go-pdqsort</a> is my implementation of pattern defeating sort in golang. I knew about pattern defeating sort from rust’s standard library documentation. I’ve never heard about this algorithm and it immediately intrigues my interest. I googled about it and found the original <a href="https://github.com/orlp/pdqsort">implementation</a> and their discussion threads on <a href="https://news.ycombinator.com/item?id=14661659">hacker news</a> and <a href="https://www.reddit.com/r/cpp/comments/2z6hgx/patterndefeating_quicksort/">reddit</a>. Then I read the <a href="https://paperpile.com/view/c3820723-6d9c-0a86-ab02-8e46dc22aec5">technical report</a> from Orson Peters. The key observation from the algorithm is that merely reducing the miss rate from CPU branch prediction, it would make the sorting speed greatly improved (no need to flush the cache line etc), so the technique adopted was to put the index of the array in the buckets and don’t swap them immediately, but put them in the right bin and swap them in one batch at the end of the loop. This works perfectly in the language with zero cost abstraction like C/C++ and Rust. I wasn’t sure about that would work in the heap-managed languages like golang, python and ruby etc, since most of the things are on the heap (with pointer indirection) and often results into cache misses, the impact of branch prediction miss rate might be neglectable. (For sure it would depend on the escape analysis in golang compiler, it would put the things on stack if it doesn’t escape in general). Though my hunch was that it would be slower, it still a good practice to implement the algorithm by myself so that I would get to know the details of the algorithm. And here are the results</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">implementation</th>
+<th style="text-align: center;">speed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">pdqsort</td>
+<td style="text-align: center;">80874 ns/op</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">std-lib sort</td>
+<td style="text-align: center;">69828 ns/op</td>
+</tr>
+</tbody>
+</table>
+<p>I am not sure about what std-lib’s sort is, but it looks like introsort since it switches to heapsort when the recursion is too deep, and it incorporates the techniques from shellsort as well, but the main part is still Bently’s quicksort technique. You can tell from the result that pdqsort is significantly slower than std-lib’s sort, probably due to the overhead of those memory batch swap, where it triggers extra allocation or cache eviction, pretty much as expected.</p>
+<p>If you are interested in the algorithm, you could check out the <a href="https://github.com/MnO2/go-pdqsort">code</a> by yourself.</p>
+
+                    </article>
+                  </div>
+                </div>
+                <div class="pure-u-md-1-5"></div>
+              </div>
+            </div>
+        </div>
+    </body>
+</html>
