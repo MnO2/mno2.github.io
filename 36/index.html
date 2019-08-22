@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1566397084.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1566492008.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -53,6 +53,162 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2015-02-28-effective-modern-cpp.html">Effective Modern C++</a></h1>
+    <div class="post-meta"><time datetime="2015-02-28 17:30">2015-02-28 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>This is a summary after reading Scott Meyer’s Effective Modern C++. As a programming language with 32 years of history, the new standard of C++11 and C++14 revitalize the whole language. As one of the mainstream PLs, numerous briliant people contribute to the renovation, including celebrity like Bartosz Milewski who set foot both in Haskell and C++. Lots of good design are added (though still with a truck of bad and legacy design tagging along). The new book discuss more practice you should adopt with new standard, and retire the old practices related to C++03. I am going to sum up a few practices and gotcha that I could still recall after finishing the whole book.</p>
+<h3 id="move">move</h3>
+<p>move is actually a misnomer. It is not moving anything. What it does is actually using a universal reference to capture the variable, and with the correctly deduced T, it using std::remove_reference_t to remove the statically cast the lvalue to rvalue. the naming of it doesn’t involve any movement. It is the rvalue gives compilers the hint about what could be optimized. And move doesn’t necessarily mean it is cheaper than copy. You still have to check out if the implemntation for rvalue operation to see how much does it cost.</p>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;type_traits&gt;
+#include &lt;string&gt;
+
+template&lt;typename T&gt;
+decltype(auto) my_move(T&amp;&amp; param)
+{
+    using ReturnType = std::remove_reference_t&lt;T&gt;&amp;&amp;;
+    return static_cast&lt;ReturnType&gt;(param);
+}
+
+void p(std::string s)
+{
+    std::cout &lt;&lt; s &lt;&lt; std::endl;
+}
+
+int main()
+{
+    std::string s(&quot;hello world&quot;);
+    p(my_move(s));
+    return 0;
+}</code></pre>
+<h3 id="noexcept">noexcept</h3>
+<p>The containers in the standard library doesn’t all adopt the move semantic of any user defined type automatically with you set the compiler flag. Most of them use a conditaionl move strategy to avoid the problem of exceeption. Therefore, in order to take the benefit from move semantic. You have to somehow indicate that your function would not throw any exception. Which is noexcept keyword. But this keyword could be used as the operator to tell if the function would throw exception or not. The following is a snippet that implement a swap only does its job when the individual elemental swap doesn’t throw any exception.</p>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;cstddef&gt;
+#include &lt;array&gt;
+#include &lt;algorithm&gt;
+
+template &lt;class T, std::size_t N&gt;
+void my_swap(std::array&lt;T, N&gt;(&amp;a), std::array&lt;T, N&gt;(&amp;b)) noexcept(noexcept(std::swap(a[N], b[N])))
+{
+    for (int i = 0; i &lt; N ; i++) {
+        std::swap(a[i], b[i]);
+    }
+}
+
+int main()
+{
+    std::array&lt;int, 3&gt; a = {1,2,3};
+    std::array&lt;int, 3&gt; b = {4,5,6};
+
+    my_swap(a, b);
+
+    for (auto&amp;&amp;i: a) {
+        std::cout &lt;&lt; i &lt;&lt; &quot; &quot;;
+    }
+
+    return 0;
+}</code></pre>
+<h3 id="lambda">lambda</h3>
+<p>The best practice about lambda is avoiding the default capture mode. With C++14 it comes with [a = b] init capture syntax. It eases the pain of unique_ptr moving and POT copy capture.</p>
+<pre><code>#include &lt;vector&gt;
+#include &lt;functional&gt;
+
+int main()
+{
+    using FilterContainer = std::vector&lt;std::function&lt;bool(int)&gt; &gt;;
+
+    FilterContainer filters;
+    int divisor = 2;
+    filters.emplace_back([divisor = divisor](int value) { return value % divisor == 0; });
+
+    return 0;
+}</code></pre>
+<h3 id="perfect-forwarding">perfect forwarding</h3>
+<p>Perfect forwarding in 99% of the scenarios would be perfectly functional. Some exceptions that it doesn’t work is that the constructor has different meaning with the argument list (a, b) and initializer list {a, b}. std::vector is one of them. std::vector a(2, 3) means create a vector with two 3. but not a vector with its content [2, 3]</p>
+<pre><code>#include &lt;vector&gt;
+#include &lt;iostream&gt;
+
+template&lt;typename... Ts&gt;
+std::vector&lt;int&gt; fwd(Ts&amp;&amp;... params)
+{
+    return std::vector&lt;int&gt;(std::forward&lt;Ts&gt;(params)...);
+}
+
+template&lt;typename... Ts&gt;
+std::vector&lt;int&gt; fwd2(Ts&amp;&amp;... params)
+{
+    return std::vector&lt;int&gt;{std::forward&lt;Ts&gt;(params)...};
+}
+
+int main()
+{
+    auto&amp;&amp; v = fwd(2, 3);
+    auto&amp;&amp; v2 = fwd2(2, 3);
+
+    for (auto&amp;&amp; i: v) {
+        std::cout &lt;&lt; i &lt;&lt; &quot; &quot;;
+    }
+    std::cout &lt;&lt; std::endl;
+
+    for (auto&amp;&amp; i: v2) {
+        std::cout &lt;&lt; i &lt;&lt; &quot; &quot;;
+    }
+    std::cout &lt;&lt; std::endl;
+
+    return 0;
+}</code></pre>
+<h3 id="universal-reference">universal reference</h3>
+<p>Sometimes universal referece would be too aggressive and hinder the function you would really like to match. The answer is to use enable_if to let it only match under certain constraints.</p>
+<pre><code>#include &lt;iostream&gt;
+
+class Foo {
+public:
+    template &lt;typename T&gt;
+    explicit Foo(T&amp;&amp; f) { std::cout &lt;&lt; &quot;universal ref&quot; &lt;&lt; std::endl; }
+
+    Foo(const Foo&amp; f) { std::cout &lt;&lt; &quot;copy constructor&quot; &lt;&lt; std::endl; }
+    Foo(Foo&amp;&amp; f) { std::cout &lt;&lt; &quot;move constructor&quot; &lt;&lt; std::endl; }
+};
+
+int main() {
+    Foo a(1);
+    const Foo ac(1);
+
+    auto b(a);
+    auto bc(ac);
+
+    return 0;
+}</code></pre>
+<h3 id="emplace_back">emplace_back</h3>
+<p>emplace_back is a good way to save the operation cost, but it is not a explixir and could results to different meaning. Like std::regex. push_back a null_ptr would make compiler whining, but compiler would happily accept null_ptr if you call emplace_back, and blows up at runtime.</p>
+<pre><code>#include &lt;vector&gt;
+#include &lt;regex&gt;
+
+int main()
+{
+    std::vector&lt;std::regex&gt; regexes;
+    regexes.emplace_back(nullptr);      //compile
+    regexes.push_back(nullptr);         //compile error
+
+    return 0;
+}</code></pre>
+<h3 id="epilogue">Epilogue</h3>
+<p>It’s amazing that C++ could still have great advancement in recent years, with all of its love and hate. The cost is that the language has been so complicated that few people could fully grasp. It’s also an interesting observation where that most of the interviews you met in an intervew who proclaim that they are well-versed C++ programmer are more than fifty percent likely that they are not. However, those who expresses their lack of confidence in knowing the language actually the group who are more competitive.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
     <h1 class="post-title is-center"><a href="../posts/2015-02-26-haskell-one-liner.html">Haskell One Liners</a></h1>
     <div class="post-meta"><time datetime="2015-02-26 17:30">2015-02-26 17:30</time> </span>
     <div class="slot-content">
@@ -70,180 +226,6 @@ ghc -e &quot;print . (filter (/= '\n'))  =&lt;&lt; getContents&quot;</code></pre
 <p>Then hit with POSIX regular expression syntax.</p>
 <pre><code>ghc -e 'print . (map (\s -&gt; subRegex (mkRegex &quot;^[[:space:]]+&quot;) s &quot;&quot;)) . lines =&lt;&lt; getContents'</code></pre>
 <p>I would add more if I can think of others.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-02-21-luajit.html">Luajit is so damn fast</a></h1>
-    <div class="post-meta"><time datetime="2015-02-21 17:30">2015-02-21 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>Because of reading libdnn source code, I started to survey about the existing technologies around DNN. Aside from caffe and Theano, one emerging framework as a keyword keep showing up in my reading is Torch 7. Unusual part of Torch 7 is that it is implemented with luajit, which in the era of R and python is a quite noticeable difference. I have read from 云風’s blog where luajit is pretty good, just I don’t have time to get my feet wet. And now it’s time.</p>
-<p>I use an arbitrary benchmark game to test its performance. It’s not based on a solid analysis nor scientific proof, but I think it’s enough to get some clues of how performant it is. The test is to generate 1G of random bytes with dd. The program should read these in 512-byte chunk as key, and trying to detect if there exists duplicate in this pool of byte stream.</p>
-<pre><code>#!/bin/bash dd if=/dev/urandom of=large_random.txt bs=1024 count=0 seek=$[1000*1000]</code></pre>
-<p>Let’s take a look of results. The same algorithm was implemented in lua, python, c++, haskell and coffee-script. luajit is lightning fast, at least in this case. It only took around one second on my Macbook Air 2013 model. What follows is haskell, where I am pretty impressed that haskell’s hash map could be fine tuned to so much fast, and the code is borrowed from some stack overflow thread long time ago. And then it is C++, it took around four seances. I think it is because I did extra work in copying buffer’s content to string, and that took extra amount of time. Or either it is the unordered_map is not that well optimised. The next is python, where most of the dictionary operations are implemented in C, so I wouldn’t be amazed by this speed.</p>
-<p>The nodejs’s speed is quite disappointing, I am not sure it is the third party library for streaming dragging it slow or it is nodejs’s inherent problem. It took around fifteen seconds to finish, and io.js runs a little bit faster than node. I probably did something wrong from this result, any correction are welcomed.</p>
-<pre><code>➜  uniq-blocks git:(master) ✗ time luajit lua/uniq-blocks.lua large_random.txt
-luajit lua/uniq-blocks.lua large_random.txt  0.87s user 0.30s system 98% cpu 1.183 total
-➜  uniq-blocks git:(master) ✗ time haskell/dist/build/uniq-blocks/uniq-blocks large_random.txt
-haskell/dist/build/uniq-blocks/uniq-blocks large_random.txt  1.99s user 0.24s system 98% cpu 2.263 total
-➜  uniq-blocks git:(master) ✗ time cpp/a.out large_random.txt
-cpp/a.out large_random.txt  3.75s user 0.33s system 99% cpu 4.098 total
-➜  uniq-blocks git:(master) ✗ time python python/uniq-blocks.py large_random.txt
-python python/uniq-blocks.py large_random.txt  4.54s user 1.41s system 99% cpu 5.974 total
-➜  uniq-blocks git:(master) ✗ time node js/uniq-blocks.js large_random.txt
-reading large_random.txt …
-node js/uniq-blocks.js large_random.txt  15.17s user 0.71s system 99% cpu 15.921 total
-➜  uniq-blocks git:(master) ✗ time /opt/boxen/homebrew/Cellar/iojs/1.2.0/bin/iojs js/uniq-blocks.js large_random.txt
-reading large_random.txt …
-/opt/boxen/homebrew/Cellar/iojs/1.2.0/bin/iojs js/uniq-blocks.js   13.24s user 0.62s system 99% cpu 13.931 total</code></pre>
-<p>With these figures, I am quite impressed by the luajit. I would definitely invest more of my time on it.</p>
-<p>The various codes are as follows:</p>
-<pre><code>import os
-import os.path
-import sys
-
-def dedupeFile(dd, fp):
-    fd = os.open(fp, os.O_RDONLY)
-    for block in iter(lambda : os.read(fd, 512), ‘’):
-        dd.setdefault(block, 0)
-        dd[block] = dd[block] + 1
-    os.close(fd)
-    return dd
-
-dd = {}
-dedupeFile(dd, sys.argv[1])
-function usage(program_name)
-    print(“Usage: “ .. program_name .. “ filename”)
-end
-
-function dedupeFile(file)
-    local f = io.open(file, “rb”)
-    local t = {}
-
-    while true do
-        local block = f:read(512)
-
-        if not block then break end
-
-        if t[block] == nil then
-            t[block] = 1
-        else
-            t[block] = t[block] + 1
-        end
-    end
-
-    f:close()
-end
-
-if arg[1] == nil then
-    usage(arg[0])
-    do return end
-else
-    filename = arg[1]
-    dedupeFile(filename)
-end
-fs = require ‘fs’
-path = require ‘path’
-lazy = require ‘lazy’
-BlockStream = require ‘block-stream’
-
-printLine = (line) -&gt; process.stdout.write line + ‘\n’
-
-usage = -&gt; printLine (“Usage: “ + process.argv[1] + “ &lt;filename&gt;”)
-
-if process.argv.length &lt; 3
-    usage()
-    process.exit(0)
-else
-    filename = process.argv[2]
-    printLine(“reading “ + filename + “ …”)
-
-    d = {}
-
-    dedupeFile = (chunk) -&gt;
-        if chunk of d
-            d[chunk] += 1
-        else
-            d[chunk] = 1
-
-    block = new BlockStream(512)
-    rstream = fs.createReadStream(filename).pipe(block)
-    block.on(‘data’, (chunk) -&gt; dedupeFile(chunk))
-    block.on(‘end’, -&gt; printLine(‘Done’))</code></pre>
-<pre><code>import           Control.Monad
-import qualified Data.ByteString.Lazy as LB
-import           Data.Foldable
-import           Data.HashMap.Strict hiding (foldl’)
-import           Data.Int
-import qualified Data.List            as DL
-import           System.Environment
-
-type DummyDedupe = HashMap LB.ByteString Int64
-
-toBlocks :: Int64 -&gt; LB.ByteString -&gt; [LB.ByteString]
-toBlocks n bs | LB.null bs = []
-              | otherwise = let (block, rest) = LB.splitAt n bs
-                            in block : toBlocks n rest
-
-dedupeBlocks :: [LB.ByteString] -&gt; DummyDedupe -&gt; DummyDedupe
-dedupeBlocks = flip $ DL.foldl’ (\acc block -&gt; insertWith (+) block 1 $! acc)
-
-dedupeFile :: FilePath -&gt; DummyDedupe -&gt; IO DummyDedupe
-dedupeFile fp dd = LB.readFile fp &gt;&gt;= return . (`dedupeBlocks` dd) . toBlocks 512
-
-main :: IO ()
-main = do
-  dd &lt;- getArgs &gt;&gt;= (`dedupeFile` empty) . head
-  putStrLn . show . (*512) . size $ dd
-  putStrLn . show . (*512) . foldl’ (+) 0 $ dd
-#include &lt;unordered_map&gt;
-#include &lt;string&gt;
-#include &lt;fstream&gt;
-#include &lt;iostream&gt;
-#include &lt;array&gt;
-
-void dedupleFile(std::ifstream &amp;f)
-{
-    std::unordered_map&lt;std::string, int&gt; M;
-    std::array&lt;char, 512&gt; buffer = { 0 };
-    char *ptr = &amp;buffer[0];
-
-    while (f.read(ptr, 512)) {
-        std::string key(ptr);
-        if (M.count(key) &gt; 0) {
-            M[key] += 1;
-        } else {
-            M[key] = 1;
-        }
-    }
-}
-
-int main(int argc, char *argv[])
-{
-    if (argc &lt; 2) {
-        std::cerr &lt;&lt; “Usage: “ &lt;&lt; argv[0] &lt;&lt; “ &lt;filename&gt;” &lt;&lt; std::endl;
-        return 1;
-    }
-
-    std::ifstream is(argv[1], std::ifstream::binary);
-    if (is) {
-        dedupleFile(is);
-    } else {
-        std::cerr &lt;&lt; “reading failed” &lt;&lt; std::endl;
-    }
-
-    return 0;
-}</code></pre>
 
       </article>
     </div>
@@ -277,7 +259,7 @@ int main(int argc, char *argv[])
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 36 of 50</div>
+            <div class="page-number is-center">Page 36 of 51</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>

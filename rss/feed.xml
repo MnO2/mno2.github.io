@@ -8,8 +8,17 @@
         <name>Paul Meng</name>
         <email>me@paulme.ng</email>
     </author>
-    <updated>2019-08-21T00:00:00Z</updated>
+    <updated>2019-08-23T00:00:00Z</updated>
     <entry>
+    <title>Changing the License of my open source projects</title>
+    <link href="https://blog.paulme.ng/posts/2019-08-23-changing-the-license-of-my-open-source-projects.html" />
+    <id>https://blog.paulme.ng/posts/2019-08-23-changing-the-license-of-my-open-source-projects.html</id>
+    <published>2019-08-23T00:00:00Z</published>
+    <updated>2019-08-23T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>After listening to the <a href="http://lucien.cc/about-2/">Lucien C.H. Lin</a>’s talk at <a href="https://coscup.org/2019/">Coscup 2019</a> about his experience on working with corporates dealing with FLOSS communities and licenses, I learn more about the practice in the industry. It also makes me to think about the license I would be using for my open source projects. <a href="http://neilmitchell.blogspot.com/2018/08/licensing-my-haskell-packages.html">This</a> article from Neil Mitchell in Haskell community explained his stance very well, and by carefully reading his article I would tend to agree with his intent. I would be inclined to change all of my projects to be Apache-2.0 and BSD-3 dual license so that it has patent grant protection and at the same time compatible with GPL. Rust is using Apache-2.0 and MIT dual license but to my personal I like the clause in BSD-3 where it requires you can’t use my name to endorse things you build, that makes sense to me. I would relicense my projects one by one from now on.</p>
+]]></summary>
+</entry>
+<entry>
     <title>go-pdqsort - Pattern Defeating Quicksort in Go</title>
     <link href="https://blog.paulme.ng/posts/2019-08-21-go-pdqsort---pattern-defeating-quicksort-in-go.html" />
     <id>https://blog.paulme.ng/posts/2019-08-21-go-pdqsort---pattern-defeating-quicksort-in-go.html</id>
@@ -565,38 +574,6 @@ Extract: [0.679 seconds]time consumed.</code></pre>
 <h2 id="lesson-learned-and-afterword">Lesson Learned and Afterword</h2>
 <p>Over the course of performance tuning and development I am convinced that Rust ecosystem has its potential and it seems to get a lot momentum in 2019, with so many Rustcons host around the world. Its spectrum of libraries is still far from the richness and matureness where you can find in C++ and Python world, but the standard library and a few core libraries contributed by star developers are very high quality and you could learn a lot by merely reading their code base. And its affine type system makes you feel safe to do a major refactoring for the performance tuning etc since you know compiler would call you dumb and catch those errors. If you are careless about a few of the details, you could still easily spit out poorly performing code. However, it’s also easy for you to improve it once you gain some experience on performance tuning and know where you should look at.</p>
 <p>Specially thanks again the <a href="https://github.com/messense/">messense</a> and <a href="https://github.com/andelf/">andelf</a> on the quick response to the pull requests and reviews. It’s a pleasant experience to work on these projects in Rust with good developers.</p>
-]]></summary>
-</entry>
-<entry>
-    <title>CJK Unified Ideograph developers should know</title>
-    <link href="https://blog.paulme.ng/posts/2019-06-16-cjk-unified-ideograph-developers-should-know.html" />
-    <id>https://blog.paulme.ng/posts/2019-06-16-cjk-unified-ideograph-developers-should-know.html</id>
-    <published>2019-06-16T00:00:00Z</published>
-    <updated>2019-06-16T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<p>I have been working on <a href="https://github.com/messense/jieba-rs">jieba-rs</a> these few weeks and traced the code from the original python <a href="https://github.com/fxsjy/jieba">implementation</a>. I found a wrong assumption in the code that is by assuming the unicode scalar only ranges from U+4E00 to U+9FD5</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb1-1" title="1">re_han_default <span class="op">=</span> re.<span class="bu">compile</span>(<span class="st">&quot;([</span><span class="ch">\u4E00</span><span class="st">-</span><span class="ch">\u9FD5</span><span class="st">a-zA-Z0-9+#&amp;\._%\-]+)&quot;</span>, re.U)</a></code></pre></div>
-<p>The same kind of mistakes have been made on Chinese websites, where developers don’t even bother to put minimum effort to understand what the unicode standard is, and therefore only assumes that the unicode range only from the BMP. They don’t know as of Unicode 12.0, it has defined a total of 87887 CJK Unifided Ideograph. And there are charaters defined in Extension A to Extension F, and the upcoming planned Extension G. What falls in the BMP was mainly the result of <a href="https://en.wikipedia.org/wiki/Han_unification">Han Unification</a></p>
-<p>To correctly defined the range of the unicode for CJK as the time of Unicode 12, you have to define at least the following ranges.</p>
-<ul>
-<li>U+3400…U+4DBF (Extesnion A)</li>
-<li>U+4E00…U+9FFF (BMP)</li>
-<li>U+F900…U+FAFF (Compatibilty Ideograph)</li>
-<li>U+20000…U+2A6DF (Extension B)</li>
-<li>U+2A700…U+2B73F (Extension C)</li>
-<li>U+2B740…U+2B81F (Extension D)</li>
-<li>U+2B820…U+2CEAF (Extension E)</li>
-<li>U+2CEB0…U+2EBEF (Extension F)</li>
-<li>U+2F800…U+2FA1F (Compatibility Supplement)</li>
-</ul>
-<p>It would cover the test cases like so that you would have your logic built on the correct foundation.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb2-1" title="1">   <span class="kw">let</span> <span class="kw">mut</span> jieba = <span class="pp">Jieba::</span>new();</a>
-<a class="sourceLine" id="cb2-2" title="2"></a>
-<a class="sourceLine" id="cb2-3" title="3">    <span class="co">//add fake word into dictionary</span></a>
-<a class="sourceLine" id="cb2-4" title="4">    jieba.add_word(<span class="st">&quot;䶴䶵𦡦&quot;</span>, <span class="cn">Some</span>(<span class="dv">1000</span>), <span class="cn">None</span>);</a>
-<a class="sourceLine" id="cb2-5" title="5">    jieba.add_word(<span class="st">&quot;讥䶯䶰䶱䶲䶳&quot;</span>, <span class="cn">Some</span>(<span class="dv">1000</span>), <span class="cn">None</span>);</a>
-<a class="sourceLine" id="cb2-6" title="6"></a>
-<a class="sourceLine" id="cb2-7" title="7">    <span class="kw">let</span> words = jieba.cut(<span class="st">&quot;讥䶯䶰䶱䶲䶳䶴䶵𦡦&quot;</span>, <span class="cn">false</span>);</a>
-<a class="sourceLine" id="cb2-8" title="8">    <span class="pp">assert_eq!</span>(words, <span class="pp">vec!</span><span class="op">[</span><span class="st">&quot;讥䶯䶰䶱䶲䶳&quot;</span>, <span class="st">&quot;䶴䶵𦡦&quot;</span><span class="op">]</span>);</a></code></pre></div>
 ]]></summary>
 </entry>
 
