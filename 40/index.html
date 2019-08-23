@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1566492008.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1566530914.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -53,6 +53,61 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2015-02-14-haskell-online-judge.html">Online Judge Systems accepting Haskell</a></h1>
+    <div class="post-meta"><time datetime="2015-02-14 17:30">2015-02-14 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>Online judge system is a good way to hone your problem solving skills and sharp your expressibility in specific languages. Back in school, I was always using C++98 as the main programming language for submission, but purely based on the reason that it is the main stream choice. Now, many years later, with the proliferation of online judge system, many niche or less popular languages are supported as well. And my favorite is Haskell. The problem is that most of the judge system does not keep up the speed of the growth of GHC, with their compilers used for judging not as the latest one. For example, Sphere Online Judge does support Haskell, but it only support ghc-7.6, and without haskell-platform installed.Codeforces has the similar issue since the last time I checked</p>
+<p>Good news is, rennovated TIOJ is now support ghc-7.8.3 + Haskell Platform. I picked a dynamic programming problem and was judged without issue. Just it might be because it was run on an older machine, it is bit of slow. Otherwise, it did go very well.</p>
+<p>My Program:</p>
+<pre><code>{-# LANGUAGE OverloadedStrings, MultiWayIf #-}
+import Control.Monad
+import Control.Monad.Trans
+import Control.Monad.Trans.Maybe
+import qualified Data.ByteString.Char8 as B
+import Data.Array.Unboxed
+import Data.Array.MArray as MArray
+import Data.Array.ST (runSTArray)
+import Data.Char (digitToInt)
+
+go :: ByteString -&gt; Int -&gt; Int -&gt; Int
+go s n =
+  let arr :: Array Int Int
+      arr = listArray (0, n) [f i | i &lt;- [0 .. n]]
+      f :: Int -&gt; Int
+      f i
+        | i &lt;= 1 = 1
+        | otherwise =
+            let c1 = digitToInt $ B.index s (i-2)
+                c2 = digitToInt $ B.index s (i-1)
+                in if | c2 == 0 -&gt; arr ! (i-2)
+                      | (c1 == 1) || (c1 == 2 &amp;&amp; c2 &gt;= 1 &amp;&amp; c2 &lt;= 6) -&gt; (arr ! (i-1)) + (arr ! (i-2))
+                      | otherwise -&gt; arr ! (i-1)
+  in \x -&gt; arr ! x
+
+solve :: ByteString -&gt; Int
+solve s =
+  let l = B.length s
+  in (go s l)  l
+
+main = runMaybeT $ forever $ do
+  s &lt;- lift B.getLine
+  when (s == “0”) $ mzero
+  let sol = solve s
+  lift $ print sol</code></pre>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
     <h1 class="post-title is-center"><a href="../posts/2015-02-08-lg-g-pad-83.html">LG G Pad 8.3 の オペレーティング·システムをCyanogenmod に作る</a></h1>
     <div class="post-meta"><time datetime="2015-02-08 17:30">2015-02-08 17:30</time> </span>
     <div class="slot-content">
@@ -67,76 +122,6 @@
 <p>2.6.3.0のTWRPをインストール成功したあと、もたCyanogenmodを搭載したできない。このバージョンのTWRPはawifiのデバイスIDを検査して、コミュニティ作るのROMをインストールできない。Googleでv500-TWRP_2.6.3.2-recovery.zip検索して、デバイスIDがv500を目標された作るのTWRPをダワンロードしてください。zipファイルはSDカードにロードして、TWRPリカバリー起動して、リカバリーにあのv500-TWRP_2.6.3.2-recovery.zipをインストールしてください。adb shellでインストールの方法がダメです。理由が不明。</p>
 <p>それでは、cm-12–20150128-NIGHTLY-v500.zipはCyanogenmodのウェブサイトからダワンロードしてください。同じのような、zipファイルはSDカードにロードして、TWRPリカバリーにzipファイルをインストールする。その後、Cyanogenmod 12を受け取るでした。</p>
 <p>Google Appが欲しいなら、pa_gapps-modular-micro-5.0.1-RC2–20150125a-signed.zipを検索して、5.0.1のmodularバージョンをインストール。大体は同じの手順でした。</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-02-07-perl6.html">Dabble in Perl 6</a></h1>
-    <div class="post-meta"><time datetime="2015-02-07 17:30">2015-02-07 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <h3 id="rakudo">Rakudo</h3>
-<p>I noticed the news where Larry Wall have a talk about Perl 6 speaking that it is going to be ready for production use before next Christmas. Well, maybe it’s time to have a dip of Perl 6, after such a long time of sixteen years development.</p>
-<h3 id="building-rakudo-on-mac-os-x">Building Rakudo on Mac OS X</h3>
-<p>There does exist Homebrew formula for Rakudo, however, it is bit of outdated as the time of writing. I decided to fetch the latest source from the official site. It turned out it is not hard to get ie built on OS X.</p>
-<pre><code>wget “http://rakudo.org/downloads/star/rakudo-star-2014.12.1.tar.gz”
-
-tar zxvf rakudo-star-2014.12.1.tar.gz
-cd rakudo-star-2014.12.1/
-perl Configure.pl --gen-parrot --gen-moar --gen-nqp --backends=parrot,jvm,moar
-make
-make install</code></pre>
-<h3 id="speed">Speed</h3>
-<p>I am aware that rakudo comes with different backends, but it is just MoarVM that is going to be marked with green light. To have an idea about its speed, I wrote memoize version of Fibonacci number in rakudo and ruby 2.1.2 respectively. The programs are as follows:</p>
-<pre><code>my @memoize;
-
-sub fib(Int $n) {
-    if $n == 0 || $n == 1 {
-        return 1;
-    } else {
-        if defined @memoize[$n] {
-            return @memoize[$n];
-        } else {
-            @memoize[$n] = fib($n - 1) + fib($n - 2);
-            return @memoize[$n];
-        }
-    }
-}
-
-say fib(1000);
-$memoize = Array.new(100002)
-
-def fib(n)
-  if n == 0 or n == 1
-    return 1
-  else
-    if $memoize[n] != nil
-      return $memoize[n]
-    else 
-      $memoize[n] = fib(n-1) + fib(n-2)
-      return $memoize[n]
-    end
-  end
-end
-
-
-puts fib(1000)</code></pre>
-<p>An simplest time command shows that rakudo is far more slower than ruby. In my opinion ruby implementation has been slow, but rakudo is even slower. For this level of speed I would keep it on my hobby language watching list for another while.</p>
-<pre><code>➜ rakudo-star-2014.12.1 time ruby fib.rb
-70330367711422815821835254877183549770181269836358732742604905087154537118196933579742249494562611733487750449241765991088186363265450223647106012053374121273867339111198139373125598767690091902245245323403501
-ruby fib.rb 0.04s user 0.01s system 92% cpu 0.056 total
-➜ rakudo-star-2014.12.1 time ./perl6 fib.pl
-70330367711422815821835254877183549770181269836358732742604905087154537118196933579742249494562611733487750449241765991088186363265450223647106012053374121273867339111198139373125598767690091902245245323403501
-./perl6 fib.pl 0.81s user 0.21s system 98% cpu 1.035 total</code></pre>
 
       </article>
     </div>
