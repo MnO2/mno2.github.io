@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1566530914.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1567900478.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -62,11 +62,11 @@
 <h3 id="haskellmode">Haskellmode</h3>
 <p>Without a doubt, Haskellmode is the most full-fledged vim plugin for haskell programmers. It features handy module importing, tags generation, haddock/hoogle look up, type info insertion. You can almost say it resolves the problem once and for all, other plugins became minor patch in the presence of it. The follows are two screenshots showing the features I love most.</p>
 <p>You can type _T in normal mode, vim will insert the inferred type for the function keyword under the cursor. Or just type _t instead, the info will be displayed in the status bar.</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*lnjSvHMgy4LolDNC.png" /></p>
+<p><img src="../images/legacy/0*lnjSvHMgy4LolDNC.png" /></p>
 <p>Tags generation is a very useful feature. Type _ct in normal mode, tag files will be generated. After that, you can hit Ctrl-] on a function keyword to jump directly to its definition, then jump back with Ctrl-t</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*fGbQBzO2mRs7D4vI.png" /></p>
+<p><img src="../images/legacy/0*fGbQBzO2mRs7D4vI.png" /></p>
 <p>Evaluate a function in the buffer with ghci</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*d_ZtxILwDVXCjgJP.png" /></p>
+<p><img src="../images/legacy/0*d_ZtxILwDVXCjgJP.png" /></p>
 <p>For further demo, check the screencast on the official website.</p>
 <h3 id="neco-ghc">neco-ghc</h3>
 <p>neco-ghc is a neocomplcache plugin for haskell, it grants you completion funtionality for average keyword. It depends on ghc-mod, so you need to install it. Do cabal install ghc-mod and a sudo ln -s ~/.cabal/ghc-mod /usr/loca/bin/ghc-mod in case it’s missing in the runtime path.</p>
@@ -77,25 +77,25 @@
 <li>use the commit eea8993c555 for vimproc (git checkout eea8993c555)</li>
 </ul>
 <p>Here is a few screenshots.</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*SLHNSHZBOgYk-sKw.png" /> <img src="https://cdn-images-1.medium.com/max/1600/0*1BnpTgXn8NpyWOgz.png" /></p>
+<p><img src="../images/legacy/0*SLHNSHZBOgYk-sKw.png" /> <img src="../images/legacy/0*1BnpTgXn8NpyWOgz.png" /></p>
 <p>The LANGUAGE flags and OPTION_GHC completion are missing, possibly because I use an older version.</p>
 <h3 id="vim-haskellfold">vim-haskellFold</h3>
 <p>vim-haskellFold improves upon the default fold provided by vim, and automatically folds functions when you open a haskell source code. It complements haskellmode, which lacks folding as far as I know.</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*1YlkVaclVyrFesAW.png" /></p>
+<p><img src="../images/legacy/0*1YlkVaclVyrFesAW.png" /></p>
 <h3 id="vim-haskellconceal">vim-haskellConceal</h3>
 <p>This plugin takes advantage of newly provided conceal feature in Vim 7.3. To use this feature, you must install version 7.3. Basiscally, this plugin defines the substituting characters for specific patterns used in haskell. For example, it replaces  to λ when the code displayed on the screen. It comes back to ascii when you edit and save it.</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*FtryRJqmTTHcT6pW.png" /></p>
+<p><img src="../images/legacy/0*FtryRJqmTTHcT6pW.png" /></p>
 <p>But still, I run into small issue. The trailing letters of a line just become hidden when I move the cursor off the line containing matching patterns. It seems that it is vim’s problem</p>
 <h3 id="vim-hoogle">vim-hoogle</h3>
 <p>Although haskellmode provide hoogle search, personally I don’t like to view it in a browser since I write code through remote terminal. w3m just mess the buffer for reasons I don’t know. vim-hoogle is a lite version, it opens a split window and show just the type info.</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*SbFx00mMChpW127X.png" /></p>
+<p><img src="../images/legacy/0*SbFx00mMChpW127X.png" /></p>
 <h3 id="haskell.vim-and-lhaskell.vim">haskell.vim and lhaskell.vim</h3>
 <p>They are just syntax files for .hs and .lhs respectively. Here is a screenshot for .lhs</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*cAYjp-_iSy4j-aXW.png" /></p>
+<p><img src="../images/legacy/0*cAYjp-_iSy4j-aXW.png" /></p>
 <h3 id="repl">repl</h3>
 <p>It is a successor of SHIM. It looks like it is just more than :GHCi of hakellmode. Sadly, I can’t get it installed correctly. It keeps tell me a pipe open error.`</p>
 <p>A power-up for the rapidly growing tagbar plugin for haskell. I didn’t try it, since it is pathogen incompatible. It does look good.</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*AcfGJrfoazNZSKbi.png" /></p>
+<p><img src="../images/legacy/0*AcfGJrfoazNZSKbi.png" /></p>
 <h3 id="uncode-haskell">uncode-haskell</h3>
 <p>Automatically translates the ascii combination to the corresponding unicode, like -&gt; to → Unlike haskellConceal, it replaces the ascii to unicode character when editing, and translates back to ascii when saving. an -&gt; becomes → right after you type it. In haskellConceal, the translation occurs after you move off the line, and translates it back when you move back to the line. unicode-haskell doesn’t do that. I prefer conceal feature personally although it is buggy.</p>
 <h2 id="not-pretty-useful">Not pretty useful</h2>

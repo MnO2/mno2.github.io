@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1566530914.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1567900478.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -60,11 +60,11 @@
 <p>Haskell has a powerful type system. In Haskell 98 it can already describe a lot of things other main stream programming languages can’t describe. With GHC’s extension much more can be done. However, snap framework’s goal is to strike a balance between type safety and easy adoption for a new comer. And I personally think snap did very well to achieve this goal. For snap and snap-core, it’s tailored only with Lens and Monad as of version 0.11. Only when you have to dive into the http server part, you have to deal with iteratee. But I believe with the release of io-streams, iteratee will be replaced for better handling with async exception etc. So let’s look at how snap framework model a web app with Monad and Lens.</p>
 <h3 id="how-to-model-a-web-app-with-monad-and-lens">How to Model a Web App with Monad and Lens</h3>
 <p>When writing in haskell, it is very important to think from the aspect of types, and the relationship between them. It’s like composing electronic circuits or playing with LEGO. To model an executing web app, you can squeeze your eyes a little bit, and you can see it look like this:</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*AEz8hJnHwaf0Hw6q.png" /></p>
+<p><img src="../images/legacy/0*AEz8hJnHwaf0Hw6q.png" /></p>
 <p>Here we call a web app as a service. To run it, usually it at least consists of Config and State. However, if we want to modify state in haskell, we need the help of setter and getter, which together means Lens.</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*RpZ2WT8GFJZkUDQW.png" /></p>
+<p><img src="../images/legacy/0*RpZ2WT8GFJZkUDQW.png" /></p>
 <p>For a real world web app, one service is far from enough. Also, categorizing the whole web app’s state into one service is not considered type safe. To accommodate this problem, snap framework consider a web app as a tree of services. For example, your web app may need to communicate with database service and OAuth service and template rendering service to serve a http request. And we also want to have some kind of permission control between the services. After all, you wouldn’t like your template rendering service mess up with the state of OAuth service. Hence, snap framework also take a chroot like permission control into account, and incorporate it into type system.</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*P0Yl9ztxv4Msrq5m.png" /></p>
+<p><img src="../images/legacy/0*P0Yl9ztxv4Msrq5m.png" /></p>
 <p>How the type is expressed in snap framework? Given a service with state v runs in a Reader plus State Monad Stack and outputs a value in the end, another b state is added to the type to denote the base state. It could be writing like m b v a. Base state is like global variable shared by several services. Or take file system as an analogy. Base state is any data on the path of current directory up to the root. Say we are in “/abc/def/ghi”, then this service can get and set any data in “/abc/“ and “/abc/def/“ and “/abc/def/ghi/…” . Setting base state is as to chroot to different directories. If we set base state to equal to v, then we are chrooting to “/ghi/”.</p>
 <p>Now let’s look at how they are really defined in code. An instance of MonadSnaplet corresponds to our “service” mentioned above. It’s type seems daunting, but with the explanation above, it would easier to understand.</p>
 <pre><code>class MonadSnaplet m where

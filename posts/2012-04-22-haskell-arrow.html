@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1566530914.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1567900478.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -66,7 +66,7 @@
 <p>In general, the structure that is not sequental, but is much like electronic circuits can be modeled by Arrows. Monads fails to model these structures. Its composability is not as flexible as Arrows.</p>
 <h3 id="typeclassopedia">Typeclassopedia</h3>
 <p>Let’s see a diagram from Typeclassopedia by Brent Yorgey.</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*EAp1EQzHN6cvH0px.png" /></p>
+<p><img src="../images/legacy/0*EAp1EQzHN6cvH0px.png" /></p>
 <p>This diagram tells us the relationship between Monads and Arrows. Unlike Functor and Applicative, they are basically different things and from different lineage.</p>
 <p>First of all, an Arrow has to be an Category. Category generalizes the notion of function composition to the morphisms in Category Theory. Its definition in base package is as follows:</p>
 <pre><code>class Category cat where
@@ -82,9 +82,9 @@
     (&amp;&amp;&amp;) :: a b c -&gt; a b c' -&gt; a b (c, c')</code></pre>
 <p>There are five methods here, but actually you only have to define arr and first. Rest of them can be automatically derived.</p>
 <p>To see how these five composing methods work, let’s try out an easy example. That is to model an OR gate with NAND gates.</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*6ek_K8IaTNu-E0J0.png" /></p>
+<p><img src="../images/legacy/0*6ek_K8IaTNu-E0J0.png" /></p>
 <p>We can duplicate the input to the first level NAND gates with id and &amp;&amp;&amp;, and to combine the results of first level NAND gates, we can use *** operator. In chart it looks like this.</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*1DCS_3OU5QVKmo-O.png" /></p>
+<p><img src="../images/legacy/0*1DCS_3OU5QVKmo-O.png" /></p>
 <p>To implements it in haskell we also need to define the circuit element as instances of Category and Arrow, we call it Auto.</p>
 <pre><code>{-# LANGUAGE Arrows #-}
 import Prelude hiding (id, (.))
@@ -150,7 +150,7 @@ main = do
 <p>The pattern is keyword proc followed with the input symbols, then -&gt; do. We describe each elemment in each line. m1 &lt;- nand2 -&lt; (i0,i0) means nand2 accept a tuple (i0, i0) and the its output is bound to the name m1. The last line must be an expression, just like Monad, its value denotes the value of the whole do block. In this case, its the output of nand2 -&lt; (m1,m2)</p>
 <h3 id="a-more-complicated-example">A More Complicated Example</h3>
 <p>Already know how to simulate OR with NAND, let’s implement a hald-adder.</p>
-<p><img src="https://cdn-images-1.medium.com/max/1600/0*MIcgossP8D0G67Vu.png" /></p>
+<p><img src="../images/legacy/0*MIcgossP8D0G67Vu.png" /></p>
 <p>With the help of Arrow Notation, all we need to do is to define the instances, and drawing circuits with &lt;- and -&lt; symbols in the program.</p>
 <pre><code>{-# LANGUAGE Arrows #-}
 import Prelude hiding (id, (.))
