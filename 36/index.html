@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1570091827.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1570185702.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,69 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2015-03-07-fibonacci-postgres.html">Fibonacci with Postgres</a></h1>
+    <div class="post-meta"><time datetime="2015-03-07 17:30">2015-03-07 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>Starting from 9.0, Postgres added Common Table Expression to help you refactor your query from nested query to chaining. It also added recursive keyword to enable a symbol referring to themselves. This creates a loopwhole and make the language Turing Complete. The whole expression makes no difference from a recursive let binding expression.</p>
+<p>For example, to recursively compute fibonacci numbers, you could write psql like this.</p>
+<pre><code>with recursive fib(a, b) as (
+        values (0, 1)
+    union all
+        select greatest(a, b), a+b as a from fib
+        where b &lt; 1024
+)
+select a from fib;</code></pre>
+<p>Excuting it would create a list of fibonacci numbers.</p>
+<pre><code>&gt; psql &lt; fib.sql
+  a
+-----
+   0
+   1
+   1
+   2
+   3
+   5
+   8
+  13
+  21
+  34
+  55
+  89
+ 144
+ 233
+ 377
+ 610
+ 987
+(17 rows)</code></pre>
+<p>This is no difference in the form of this recursively bound haskell expression.</p>
+<pre><code>ghci&gt; let fibs = 0:1:zipWith (+) fibs (tail fibs)
+ghci&gt; takeWhile (&lt; 1024) fibs
+[0,1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987]&gt;)</code></pre>
+<p>Explaining the statement and you could see the underlying step by step execution.</p>
+<pre><code>QUERY PLAN
+-----------------------------------------------------------------------------
+ CTE Scan on fib  (cost=2.96..3.58 rows=31 width=4)
+   CTE fib
+     -&gt;  Recursive Union  (cost=0.00..2.96 rows=31 width=8)
+           -&gt;  Values Scan on &quot;*VALUES*&quot;  (cost=0.00..0.01 rows=1 width=8)
+           -&gt;  WorkTable Scan on fib fib_1  (cost=0.00..0.23 rows=3 width=8)
+                 Filter: (b &lt; 1024)
+(6 rows)</code></pre>
+<p>With postgres being Turing complete, the language is basically equivalent to what Prolog does. Just one of the engine stressing more on data management, and the other more on problem solving. As Yin wang said, try challenging yourself by writing a Dijkstra shortest path finding algorithm in psql would be a good practice.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -110,162 +173,6 @@ fn main() {
 
                 </article>
             
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-02-28-effective-modern-cpp.html">Effective Modern C++</a></h1>
-    <div class="post-meta"><time datetime="2015-02-28 17:30">2015-02-28 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>This is a summary after reading Scott Meyer’s Effective Modern C++. As a programming language with 32 years of history, the new standard of C++11 and C++14 revitalize the whole language. As one of the mainstream PLs, numerous briliant people contribute to the renovation, including celebrity like Bartosz Milewski who set foot both in Haskell and C++. Lots of good design are added (though still with a truck of bad and legacy design tagging along). The new book discuss more practice you should adopt with new standard, and retire the old practices related to C++03. I am going to sum up a few practices and gotcha that I could still recall after finishing the whole book.</p>
-<h3 id="move">move</h3>
-<p>move is actually a misnomer. It is not moving anything. What it does is actually using a universal reference to capture the variable, and with the correctly deduced T, it using std::remove_reference_t to remove the statically cast the lvalue to rvalue. the naming of it doesn’t involve any movement. It is the rvalue gives compilers the hint about what could be optimized. And move doesn’t necessarily mean it is cheaper than copy. You still have to check out if the implemntation for rvalue operation to see how much does it cost.</p>
-<pre><code>#include &lt;iostream&gt;
-#include &lt;type_traits&gt;
-#include &lt;string&gt;
-
-template&lt;typename T&gt;
-decltype(auto) my_move(T&amp;&amp; param)
-{
-    using ReturnType = std::remove_reference_t&lt;T&gt;&amp;&amp;;
-    return static_cast&lt;ReturnType&gt;(param);
-}
-
-void p(std::string s)
-{
-    std::cout &lt;&lt; s &lt;&lt; std::endl;
-}
-
-int main()
-{
-    std::string s(&quot;hello world&quot;);
-    p(my_move(s));
-    return 0;
-}</code></pre>
-<h3 id="noexcept">noexcept</h3>
-<p>The containers in the standard library doesn’t all adopt the move semantic of any user defined type automatically with you set the compiler flag. Most of them use a conditaionl move strategy to avoid the problem of exceeption. Therefore, in order to take the benefit from move semantic. You have to somehow indicate that your function would not throw any exception. Which is noexcept keyword. But this keyword could be used as the operator to tell if the function would throw exception or not. The following is a snippet that implement a swap only does its job when the individual elemental swap doesn’t throw any exception.</p>
-<pre><code>#include &lt;iostream&gt;
-#include &lt;cstddef&gt;
-#include &lt;array&gt;
-#include &lt;algorithm&gt;
-
-template &lt;class T, std::size_t N&gt;
-void my_swap(std::array&lt;T, N&gt;(&amp;a), std::array&lt;T, N&gt;(&amp;b)) noexcept(noexcept(std::swap(a[N], b[N])))
-{
-    for (int i = 0; i &lt; N ; i++) {
-        std::swap(a[i], b[i]);
-    }
-}
-
-int main()
-{
-    std::array&lt;int, 3&gt; a = {1,2,3};
-    std::array&lt;int, 3&gt; b = {4,5,6};
-
-    my_swap(a, b);
-
-    for (auto&amp;&amp;i: a) {
-        std::cout &lt;&lt; i &lt;&lt; &quot; &quot;;
-    }
-
-    return 0;
-}</code></pre>
-<h3 id="lambda">lambda</h3>
-<p>The best practice about lambda is avoiding the default capture mode. With C++14 it comes with [a = b] init capture syntax. It eases the pain of unique_ptr moving and POT copy capture.</p>
-<pre><code>#include &lt;vector&gt;
-#include &lt;functional&gt;
-
-int main()
-{
-    using FilterContainer = std::vector&lt;std::function&lt;bool(int)&gt; &gt;;
-
-    FilterContainer filters;
-    int divisor = 2;
-    filters.emplace_back([divisor = divisor](int value) { return value % divisor == 0; });
-
-    return 0;
-}</code></pre>
-<h3 id="perfect-forwarding">perfect forwarding</h3>
-<p>Perfect forwarding in 99% of the scenarios would be perfectly functional. Some exceptions that it doesn’t work is that the constructor has different meaning with the argument list (a, b) and initializer list {a, b}. std::vector is one of them. std::vector a(2, 3) means create a vector with two 3. but not a vector with its content [2, 3]</p>
-<pre><code>#include &lt;vector&gt;
-#include &lt;iostream&gt;
-
-template&lt;typename... Ts&gt;
-std::vector&lt;int&gt; fwd(Ts&amp;&amp;... params)
-{
-    return std::vector&lt;int&gt;(std::forward&lt;Ts&gt;(params)...);
-}
-
-template&lt;typename... Ts&gt;
-std::vector&lt;int&gt; fwd2(Ts&amp;&amp;... params)
-{
-    return std::vector&lt;int&gt;{std::forward&lt;Ts&gt;(params)...};
-}
-
-int main()
-{
-    auto&amp;&amp; v = fwd(2, 3);
-    auto&amp;&amp; v2 = fwd2(2, 3);
-
-    for (auto&amp;&amp; i: v) {
-        std::cout &lt;&lt; i &lt;&lt; &quot; &quot;;
-    }
-    std::cout &lt;&lt; std::endl;
-
-    for (auto&amp;&amp; i: v2) {
-        std::cout &lt;&lt; i &lt;&lt; &quot; &quot;;
-    }
-    std::cout &lt;&lt; std::endl;
-
-    return 0;
-}</code></pre>
-<h3 id="universal-reference">universal reference</h3>
-<p>Sometimes universal referece would be too aggressive and hinder the function you would really like to match. The answer is to use enable_if to let it only match under certain constraints.</p>
-<pre><code>#include &lt;iostream&gt;
-
-class Foo {
-public:
-    template &lt;typename T&gt;
-    explicit Foo(T&amp;&amp; f) { std::cout &lt;&lt; &quot;universal ref&quot; &lt;&lt; std::endl; }
-
-    Foo(const Foo&amp; f) { std::cout &lt;&lt; &quot;copy constructor&quot; &lt;&lt; std::endl; }
-    Foo(Foo&amp;&amp; f) { std::cout &lt;&lt; &quot;move constructor&quot; &lt;&lt; std::endl; }
-};
-
-int main() {
-    Foo a(1);
-    const Foo ac(1);
-
-    auto b(a);
-    auto bc(ac);
-
-    return 0;
-}</code></pre>
-<h3 id="emplace_back">emplace_back</h3>
-<p>emplace_back is a good way to save the operation cost, but it is not a explixir and could results to different meaning. Like std::regex. push_back a null_ptr would make compiler whining, but compiler would happily accept null_ptr if you call emplace_back, and blows up at runtime.</p>
-<pre><code>#include &lt;vector&gt;
-#include &lt;regex&gt;
-
-int main()
-{
-    std::vector&lt;std::regex&gt; regexes;
-    regexes.emplace_back(nullptr);      //compile
-    regexes.push_back(nullptr);         //compile error
-
-    return 0;
-}</code></pre>
-<h3 id="epilogue">Epilogue</h3>
-<p>It’s amazing that C++ could still have great advancement in recent years, with all of its love and hate. The cost is that the language has been so complicated that few people could fully grasp. It’s also an interesting observation where that most of the interviews you met in an intervew who proclaim that they are well-versed C++ programmer are more than fifty percent likely that they are not. However, those who expresses their lack of confidence in knowing the language actually the group who are more competitive.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
         </main>
 
         <div class="pure-g">
@@ -290,7 +197,7 @@ int main()
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 36 of 51</div>
+            <div class="page-number is-center">Page 36 of 52</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>
