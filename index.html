@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="./stylesheets/customize-1570254392.css">
+  <link rel="stylesheet" href="./stylesheets/customize-1570255783.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -105,27 +105,27 @@
 <tbody>
 <tr class="odd">
 <td style="text-align: center;">i</td>
-<td style="text-align: center;">898</td>
+<td style="text-align: center;">8.98</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">ii</td>
-<td style="text-align: center;">1797</td>
+<td style="text-align: center;">17.97</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">iii</td>
-<td style="text-align: center;">8983</td>
+<td style="text-align: center;">89.83</td>
 </tr>
 </tbody>
 </table>
 <p>而投資人 C, D 決定採取不一樣的觀點，不用類似 DCF 的方式衡量，他們決定編制 FOOBAR 市值權重指數，這個指數就是</p>
-<pre><code>i 的市價 * (898 / 11678) +
-ii 的市價 * (1797 / 11678) +
-iii 的市價 * (8983 / 11678)</code></pre>
-<p>他們把他們的錢加起來成立市值權重指數基金，把他們共有的錢 11678 照上面比例分配買。也就是 i 買 898 塊， ii 買 1797 塊， iii 買 8983 塊。所以投資人 C, D 認定的價值不是根據衡量物件本身，而是因為市場中其他人的價錢而分配他們的錢的分配。加入今天 A, B 覺得 iii 其實收不到 10 塊的年租金，其實只能收到 2 塊。那就會變成 1797 塊。那 C, D 就會跟著把 iii 賣掉。因此你可以看到一般所謂的市值權重指數基金就是一種 Trend Following 的策略，是因為市場中其他對價值做出反應的人的定價而跟隨。在這個例子中，當 C, D 反應過來的時候，他們賣的價錢可能會低於 1797 塊。因為他們的對手只有 A 跟 B。而 A, B 只願意用低於 1797 塊的價格收，不賣的話就違背了他們指數的規則，所以他們一定要賣，這是機械性訂死的。 為了要賣掉他們就不得不降價，這邊的例子只有 C, D 兩個個體的資金，但你可以想像賣方是這個的 100 倍, 1000 倍然後【同時】想要賣的情況，也就是會造成 race to the bottom。最後平衡價可能遠遠低於 1797，也許 800, 900 都有可能。這有一點像是程式交易因為一些 Bug 造成大家都一起熔斷的情形。</p>
+<pre><code>i 的市價 * (8.98 / 116.78) +
+ii 的市價 * (17.97 / 116.78) +
+iii 的市價 * (89.83 / 116.78)</code></pre>
+<p>他們把他們的錢加起來成立市值權重指數基金，把他們共有的錢 116.78 照上面比例分配買。也就是 i 買 8.98 塊， ii 買 17.97 塊， iii 買 89.83 塊。所以投資人 C, D 認定的價值不是根據衡量物件本身，而是因為市場中其他人的價錢而分配他們的錢的分配。加入今天 A, B 覺得 iii 其實收不到 10 塊的年租金，其實只能收到 2 塊。那就會變成 17.97 塊。那 C, D 就會跟著把 iii 賣掉。因此你可以看到一般所謂的市值權重指數基金就是一種 Trend Following 的策略，是因為市場中其他對價值做出反應的人的定價而跟隨。在這個例子中，當 C, D 反應過來的時候，他們賣的價錢可能會低於 17.97 塊。因為他們的對手只有 A 跟 B。而 A, B 只願意用低於 17.97 塊的價格收，不賣的話就違背了他們指數的規則，所以他們一定要賣，這是機械性訂死的。 為了要賣掉他們就不得不降價，這邊的例子只有 C, D 兩個個體的資金，但你可以想像賣方是這個的 100 倍, 1000 倍然後【同時】想要賣的情況，也就是會造成 race to the bottom。最後平衡價可能遠遠低於 17.97，也許 8, 9 都有可能。</p>
 <p>但市場有趣的地方就是上述情況又不是鐵定會發生。假如今天反而是 A, B 突然都變調，也投入 C, D 的指數基金。市場中就不再有人用 DCF 去定價了。所有人都認為權重永遠都是如下：</p>
-<pre><code>i: (898 / 11678) 
-ii: (1797 / 11678) 
-iii: (8983 / 11678)</code></pre>
+<pre><code>i: (8.98 / 116.78) 
+ii: (17.97 / 116.78) 
+iii: (89.83 / 116.78)</code></pre>
 <p>整個 price discovery 的機制就不見了，不管底下的實際能收到的租金有多少，就是這樣定價，所以說股價都是所謂人類基金管理者亂炒作這說法並不公平，市值權重指數是一種跟隨策略，沒有人類基金管理者他也是不會動的。但這並不是一個穩定的平衡，遲早有人會跳出來點出國王的新衣，然後前面崩毀的情況就會發生。</p>
 <p>從上面的邏輯推導與立論可以知道，市場大多數人都在使用某個系統時，而那個系統又因為一些背後共同問題造成時，平均就是大家一起平均死。沒錯，你拿到平均的結果，但你還是死了。但同時，請不要滑坡推論就說 Boeing 或是市值權重指數基金就是該死，身為渺小個體我們應該完全摒棄，因為</p>
 <ol type="1">
@@ -136,8 +136,8 @@ iii: (8983 / 11678)</code></pre>
 <ol type="1">
 <li>統計上有瑕疵的立論並不能因此讓我不擔心 Boeing 737 MAX 的結構性問題，除非你能舉出有說服力的邏輯推論說明我舉出的情況不用擔心，因為儘管機率不高或是未知，但我一旦中了就死了。同樣對於市值權重指數基金也是，這關係到許多人畢生的積蓄。</li>
 </ol>
-<p>我想聲明，市值權重指數基金是非常偉大的發明，他讓大多數不懂金融的人都有機會分享到果實，能承受的資金量也非常巨大，所以至今都沒發生問題。</p>
-<p>我也並不是鼓勵說就不要使用指數基金，但與此同時，因為過去沒發生問題而認為以後也不會發生問題，不去用正確的邏輯回應問題。這種過度膨脹的心理而不去理解市值權重指數基金的結構所潛藏的缺陷並提醒大家，在我看來跟那些設計各種金融工程工具但不去點出工程極限的人沒有兩樣，都是不負責任的。</p>
+<p>我想聲明，市值權重指數基金是非常偉大的發明，他讓大多數不懂金融的人都有機會分享到果實，能承受的資金量也非常巨大，至今都沒發生問題。</p>
+<p>我並不是鼓勵說就不要使用指數基金，但與此同時，因為過去沒發生問題而認為以後也不會發生問題，不去用正確的邏輯回應問題。這種過度膨脹的心理而不去理解市值權重指數基金的結構所潛藏的缺陷並提醒大家，在我看來跟那些設計各種金融工程工具但不去點出工程極限的人沒有兩樣，都是不負責任的。</p>
 <p>最後安插一個軼聞。Michael Burry 在 2000 年就成立 Scion Capital 來管理家族基金，但他也接受外部他喜歡的人的投資，早年完全是採取類似 Ben Graham 或是 Warren Buffett 在 Partnership 時代的策略，很多人是因為 The Big Short 才認識他，但不知道他是跟 Warren Buffett 同一風格的投資人。好巧不巧在 2001 年的時候，市值權重指數基金的教父曾經在 Forbes 專訪上嘴 Michale Burry。</p>
 <pre><code>In the 2001 article, Forbes proposed the following as 
 a working definition of a hedge fund: &quot;A hedge fund is 
