@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1570256376.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1570338015.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,29 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2015-03-08-linux-performance-tools.html">Linux Performance Tools</a></h1>
+    <div class="post-meta"><time datetime="2015-03-08 17:30">2015-03-08 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>Working in Linux world, it’s hard not to think about the great components and tools while you works with Unix system. It could be ZFS of Solarism or DTrace of BSD. When it comes to tuning the production system, DTrace is definitely a good tool for that. Linux world doesn’t have a tool with a parallel stability and programmably customizable. However, with the momentum of the Linux community, the landscape is gradually changing. Brendan Gregg has a few marvelous slides that sums up the tracing tools in Linux world, as of 2015. They definitely worth a read.</p>
+<ul>
+<li>Linux Performance Tools 2014 from Brendan Gregg</li>
+<li>Performance Tuning EC2 Instances from Brendan Gregg</li>
+<li>Linux Performance Analysis: New Tools and Old Secrets from Brendan Gregg</li>
+</ul>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -103,67 +126,6 @@ ghci&gt; takeWhile (&lt; 1024) fibs
                  Filter: (b &lt; 1024)
 (6 rows)</code></pre>
 <p>With postgres being Turing complete, the language is basically equivalent to what Prolog does. Just one of the engine stressing more on data management, and the other more on problem solving. As Yin wang said, try challenging yourself by writing a Dijkstra shortest path finding algorithm in psql would be a good practice.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-02-28-rust-alpha-2.html">Rust-1.0 Alpha2 bench</a></h1>
-    <div class="post-meta"><time datetime="2015-02-28 17:30">2015-02-28 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>This is a follow-up of luajit’s benchmark. We use 512 bytes as the key to dedup a big random binary file. I wrote the same benchmark in Rust to get an idea how performant it is. Sadly, with the Rust-1.0 alpha2, its std::old_io runtime library is so terrible in performance. With a naive loop of IO read it would take around 20 seconds on my machine. Even worse then Nodejs’s figures. I then decided to skip the runtime library and implemented it in libc FFI, and get the figures much closer to what was expected, but it is still slower then C++’s naive implementation on Mac OS X.</p>
-<p>Here is the time result</p>
-<pre><code>➜  rust git:(master) rustc --version
-rustc 1.0.0-nightly (522d09dfe 2015-02-19) (built 2015-02-20)
-➜  rust git:(master) time ./target/uniq-blocks
-./target/uniq-blocks  2.95s user 1.58s system 99% cpu 4.560 total</code></pre>
-<p>And code.</p>
-<pre><code>#![feature(libc)] extern crate libc;
-use libc::funcs::posix88::unistd::read;
-use libc::funcs::posix88::fcntl::open;
-use libc::consts::os::posix88::O_RDONLY;
-use libc::consts::os::posix88::S_IREAD;
-use libc::types::common::c95::c_void;
-use std::ffi::CString;
-use std::str;
-use std::collections::HashMap;
-
-fn main() {
-    let path_str = CString::new(&quot;large_random.txt&quot;).unwrap();
-    let fd = unsafe {
-        open(path_str.as_ptr(), O_RDONLY, S_IREAD)
-    };
-
-    let mut buf: Vec&lt;u8&gt; = Vec::with_capacity(512);
-    let mut M: HashMap&lt;String, u32&gt; = HashMap::new();
-
-    loop {
-        let nread = unsafe { read(fd, buf.as_mut_ptr() as *mut c_void, 512) };
-        let s = str::from_utf8(buf.as_slice()).ok().expect(&quot;from_utf8 error&quot;);
-        let ss = String::from_str(s);
-        if M.contains_key(&amp;ss) {
-            match M.get_mut(&amp;ss) {
-                Some(x) =&gt; { *x += 1 },
-                None =&gt; ()
-            };
-        } else {
-            M.insert(ss, 1);
-        }
-
-        if nread == 0 {
-            break;
-        };
-    }
-}</code></pre>
 
       </article>
     </div>

@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1570256376.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1570338015.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,130 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2016-07-10-hacking-on-swift-compiler-i.html">Hacking on Swift Compiler (Part 1)</a></h1>
+    <div class="post-meta"><time datetime="2016-07-10 17:30">2016-07-10 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <h3 id="hacking-on-swift-compiler-part-1">Hacking on Swift Compiler (Part 1)</h3>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*5g0SQGJmRTvim0PRhnmvXg.jpeg" /></p>
+<p>I have been thinking to hack on the industrial-strength compiler for some time. The last time I worked on a compiler was my third year in the college, where every student has to take a required compiler course and wrote a C compiler with lex and yacc. Ever since my graduation I merely work on my own DSL but not a thorough compiler. With the advance of LLVM and as what Anders Hejlsberg has described in this Channel 9 video, the architecture of the compiler is no longer like the old school of a big pipeline, where the compilation would cost you minutes for a mid size program. The structure of compiler basically would try to make the compiler frontend as re-usable as possible to the IDE code completion part and type checking partially on code snippets.</p>
+<p>Since around two months ago I started to work on iOS end again. Which got me a good opportunity to work on Swift compiler which was architected by compiler expert Chris Lattner. My attempt of hacking on compiler is to make Swift to compile to golang. My opinion on the golang is that it has a outstanding runtime however it is so mediocre in the language design. Swift though yet is also not so advanced but at least striking some balance regarding the ergonomic and the speed (without resorting to Rust’s linear logic). Also, it got generics! I put some thought on this and I think it should be feasible since golang as the target language having garbage collection, most of the semantics could be one-to-one translated to the language. And I just need to add some keyword to make it look like libmill: <a href="https://github.com/sustrik/libmill">https://github.com/sustrik/libmill</a> , which provides C lib support for coroutines. And dropping weak, unowned semantic since golang doesn’t need that.</p>
+<p>Swift was designed to have it’s own intermediate langauge, to provide higher level structure for multi-pass optimization that llvm’s IR cannot provide.</p>
+<p>Initially I think I should codegen from SIR but actually the SIR is too low level for golang. The typechecked swift AST should be enough for that. And swiftc already providing that. By typing the following in the console</p>
+<pre><code>    swiftc -dump-ast hello.swift</code></pre>
+<p>You can get the AST dump in the format like s-expression</p>
+<pre><code>    (source_file
+      (func_decl &quot;main()&quot; type='() -&gt; ()' access=internal
+        (parameter_list)
+        (brace_stmt
+          (pattern_binding_decl
+            (pattern_typed type='Int'
+              (pattern_named type='Int' 'a')
+              (type_ident
+                (component id='Int' bind=Swift.(file).Int)))
+            (call_expr implicit type='Int' location=hello.swift:2:16 range=[hello.swift:2:16 - line:2:16] nothrow
+              (constructor_ref_call_expr implicit type='(_builtinIntegerLiteral: Int2048) -&gt; Int' location=hello.swift:2:16 range=[hello.swift:2:16 - line:2:16] nothrow
+                (declref_expr implicit type='Int.Type -&gt; (_builtinIntegerLiteral: Int2048) -&gt; Int' location=hello.swift:2:16 range=[hello.swift:2:16 - line:2:16] decl=Swift.(file).Int.init(_builtinIntegerLiteral:) specialized=no)
+                (type_expr implicit type='Int.Type' location=hello.swift:2:16 range=[hello.swift:2:16 - line:2:16] typerepr='Int'))
+              (tuple_expr implicit type='(_builtinIntegerLiteral: Int2048)' location=hello.swift:2:16 range=[hello.swift:2:16 - line:2:16] names=_builtinIntegerLiteral
+                (integer_literal_expr type='Int2048' location=hello.swift:2:16 range=[hello.swift:2:16 - line:2:16] value=1))))
+
+    (var_decl &quot;a&quot; type='Int' access=private let storage_kind=stored)
+    )))</code></pre>
+<p>If you would like to get the type alone, you can use swift-ide-test for that</p>
+<pre><code>    swift-ide-test -print-types -source-filename=hello.swift</code></pre>
+<p>You would get</p>
+<pre><code>    FuncDecl '''main''' () -&gt; ()
+        VarDecl '''a''' Int
+        BinaryExpr:2 '''1 + 1''' Int
+          DeclRefExpr:2 '''+''' (Int, Int) -&gt; Int
+          TupleExpr:2 '''1 + 1''' (Int, Int)
+            CallExpr:2 '''1''' Int
+              ConstructorRefCallExpr:2 '''1''' (_builtinIntegerLiteral: Int2048) -&gt; Int
+                TypeExpr:2 '''1''' Int.Type
+                DeclRefExpr:2 '''1''' Int.Type -&gt; (_builtinIntegerLiteral: Int2048) -&gt; Int
+              TupleExpr:2 '''1''' (_builtinIntegerLiteral: Int2048)
+                IntegerLiteralExpr:2 '''1''' Int2048
+            CallExpr:2 '''1''' Int
+              ConstructorRefCallExpr:2 '''1''' (_builtinIntegerLiteral: Int2048) -&gt; Int
+                TypeExpr:2 '''1''' Int.Type
+                DeclRefExpr:2 '''1''' Int.Type -&gt; (_builtinIntegerLiteral: Int2048) -&gt; Int
+              TupleExpr:2 '''1''' (_builtinIntegerLiteral: Int2048)
+                IntegerLiteralExpr:2 '''1''' Int2048
+        VarDecl '''b''' &lt;&lt;error type&gt;&gt;
+        BinaryExpr:3 '''a + 2.0''' &lt;&lt;error type&gt;&gt;
+          OverloadedDeclRefExpr:3 '''+''' &lt;&lt;error type&gt;&gt;
+          TupleExpr:3 '''a + 2.0''' &lt;&lt;error type&gt;&gt;
+            DeclRefExpr:3 '''a''' Int
+            FloatLiteralExpr:3 '''2.0''' &lt;&lt;error type&gt;&gt;</code></pre>
+<p>Which should be enough of information for all of the codegen. I just need to write a parser for the AST dump and walk the tree to generate the corresponding golang code. This would be left for the future series to detail my attempt.</p>
+<p>In the meantime of digging into the code base, I was also interested into how swift implemented it’s type system and type checker. I presented my learning on Hindley Milner Type system at Haskell.sg before, so I have a basic understanding of how the HM-like system works. However, for industrial strength compiler especially with the bridging to ObjC part, I am really interested into how to architect your type system and make it work.</p>
+<p>The swift repository on github is pretty undocumented, I can only find two docs drafting the whole picture but without too much detail. You have to peak into the code to look for detail.</p>
+<p><a href="https://github.com/apple/swift/blob/master/docs/TypeChecker.rst">https://github.com/apple/swift/blob/master/docs/TypeChecker.rst</a></p>
+<p>After digging into the code base I found that you can actually turn on the debug mode in Swift REPL when you compile your swift binary with DEBUG flag on. You just simply use your DEBUG version swift to run into REPL mode and type the following meta command</p>
+<pre><code>    (swift) :constraints debug on</code></pre>
+<p>Then it would spit all of the type checking process step by step</p>
+<pre><code>    (swift) let c = 1
+    ---Initial constraints for the given expression---
+    (integer_literal_expr type='$T0' location=&lt;REPL Input&gt;:1:9 range=[&lt;REPL Input&gt;:1:9 - line:1:9] value=1)
+    Score: 0 0 0 0 0 0 0 0 0 0 0 0
+    Type Variables:
+      #0 = $T0
+      #1 = $T1
+
+    Active Constraints:
+
+    Inactive Constraints:
+      $T0 conforms to IntegerLiteralConvertible [[locator@0x7ffcc5819e00 [IntegerLiteral@&lt;REPL Input&gt;:1:9]]];
+      $T0 conv $T1 [[locator@0x7ffcc5819e00 [IntegerLiteral@&lt;REPL Input&gt;:1:9]]];
+    Active bindings: $T0 := Int
+    (trying $T0 := Int
+      Active bindings: $T1 := Int
+      (trying $T1 := Int
+        (found solution 0 0 0 0 0 0 0 0 0 0 0 0)
+      )
+    )
+    ---Solution---
+    Fixed score: 0 0 0 0 0 0 0 0 0 0 0 0
+    Type variables:
+      $T1 as Int
+      $T0 as Int
+
+    Overload choices:</code></pre>
+<p>It even come with the Constraint Graph with the calculated connected components for debugging the solver. Pretty neat.</p>
+<pre><code>    ---Constraint graph---
+      $T0:
+
+    $T1:
+
+    $T2:
+        Constraints:
+          $T2 conforms to FloatLiteralConvertible [[locator@0x7ffcc4967838 [FloatLiteral@&lt;REPL Input&gt;:1:13]]];
+          $T2 operator arg conv Int [[locator@0x7ffcc4967ca8 [Binary@&lt;REPL Input&gt;:1:11 -&gt; apply argument -&gt; comparing call argument #1 to parameter #1]]];
+
+    $T3:
+        Constraints:
+          $T3 conv $T4 [[locator@0x7ffcc4967b80 [Binary@&lt;REPL Input&gt;:1:11]]];
+        Adjacencies: $T4
+
+    $T4:
+        Constraints:
+          $T3 conv $T4 [[locator@0x7ffcc4967b80 [Binary@&lt;REPL Input&gt;:1:11]]];
+        Adjacencies: $T3</code></pre>
+<p>The above is the progess so far. I also found that Swift compiler is actually a good source of C++ code base for reading. It adopts pretty modernized C++ syntax, just it is a little pity that the compiler is not reaching to bootstrapping where the compiler is written in its own language.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -96,25 +220,6 @@
 <p>It should be inherited from BEAM’s feature, most of the languages has exit to abort the program, but with BEAM’s own lightweight process. you can actually use exit as a signal to notify the parent process to do something about it.</p>
 <p>iex(17)&gt; try do<br> …(17)&gt; exit “lalala”<br> …(17)&gt; catch<br> …(17)&gt; :exit, _ -&gt; “boom”<br> …(17)&gt; end<br> “boom”</p>
 <p>Although I still prefer to program in a well-designed staic type language, overall I like Elixir. It looks like Ruby on a distant, but actually more about good inheritance from Erlang under the hood. If its community could catch up the size of Ruby, then it is definitely better than the world full of Ruby on Rails shop.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2016-05-22-%E9%80%B1%E6%9C%AB%E8%AA%AD%E3%81%BF%E3%81%AE%E6%9C%AC.html">週末読みの本</a></h1>
-    <div class="post-meta"><time datetime="2016-05-22 17:30">2016-05-22 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p><img src="https://cdn-images-1.medium.com/max/2400/1*vUTAucVFrUp-hOc0oHfb6w.jpeg" /></p>
-<p>1月前台湾から海運でシンガポールへ届けたの本をやっと着きて、週末でその一つ本を読めました。それは、Terryさん著したの「25 種類言語を喋られる人」です。この本は Terry さん自身言語習うの経験が読者に分け合います。彼はアシアの言語教育の劣勢を書き連ねります。まずは、アシア教育は文法と単語など構造的な単位を強調すぎると思います。彼は言語の没入環境を勧めて、子供様な言語を学ぶことは一番良いと思います。Terryさんは大学生時代の経験を自省に思い付くて、この結論を書きます。大量な知識を持ていて、文法を勉強してけど、外人と喋る時に彼らがTerryさんを英語喋ることをできないと思います。この事件はTerryさんの影響が遠いです。彼は言語学ぶの聖杯を探して決めます。その後、日本でポリグロット言語交換机のmeetupで言語学びのショートカットは子供様な方法を分かりました。そして、彼のquechua語学びの試験を大成功でして。shadowingはこの方法の鍵です。言語の詳細を気をつける、発言者を真似ります。その方法を聞いたと、Mike Campbellの大量分の練習方法を思い出した。大量な練習であなたの筋肉が喋ることの感じを覚えます。幸せに、私たちはインターネットの時代住んでいます。Youtubeで生活のビデオ映像が多いです。さらに、近年live steramingのサビスは人気がなりました。言語の素材がどこにでもありますよ。Youtubeのビデオダウンロード欲しいたら、youtube-dlのコメンドを使って、チャネル全部のビヂオがをワンクリックだけです。</p>
 
       </article>
     </div>

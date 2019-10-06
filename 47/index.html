@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1570256376.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1570338015.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,107 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2012-03-17-haskell-blaze-builder.html">Haskell Library Survey: Blaze-Builder</a></h1>
+    <div class="post-meta"><time datetime="2012-03-17 17:30">2012-03-17 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>Haskell is notorious for plethoric libraries on Hackage. For a beginner, it’s easy to lose in the forest of Hackage. With the establishment of Haskell Platform and the advice from experts ( link1, link2 ). the situation is getting better. But for a community, more tutorials would be more plausible. Therefore I decide to write down my library survey.</p>
+<h3 id="what-is-this-library-for">What is this library for?</h3>
+<p>If you remembered it well in Learn you a Haskell for Great Good, it mentions that the List append operation (++) takes linear time. It’s implementation in Haskell 98 Report looks like this:</p>
+<pre><code>infixr 5  ++
+(++) :: [a] -&gt; [a] -&gt; [a]
+[]     ++ ys = ys
+(x:xs) ++ ys = x : (xs ++ ys)</code></pre>
+<p>It’s obvious you have to traverse through all of the elements in the first list to get the operation done, hence linear time. And fortunately, ++ is right associative, which means when you are writing snippets like this, assuming as, bs, cs are all lists.</p>
+<p>It essentially means</p>
+<pre><code>(as ++ (bs ++ cs))</code></pre>
+<p>Based on the previous reasoning, it won’t cost us too much, merely the length of as plus the length of bs.</p>
+<p>But there IS some common cases that gets us in trouble. Let’s take a look at this example from here:</p>
+<p>appendToContent str page = page {pageContent = newContent} where newContent = (pageContent page) ++ str It is a naiive implementation usually occurs in Logger or the streaming output of a HTTP server. The problem of this pattern is it forces the concatenation to be left associative. Using the previous as ++ bs ++ cs as our example, it will become:</p>
+<pre><code>((as ++ bs) ++ cs)</code></pre>
+<p>It is unacceptable because the left associative ++ costs us quadratic time in the size of resulting list. To see that, here is an excerpt from ezyang’s post</p>
+<p>For clarity, we rewrite the definition from Haskell 98 to a ++ b = foldr (:) b a, the time complexity is the same.</p>
+<pre><code>(as ++ bs) ++ cs
+= foldr (:) cs (as ++ bs)
+= foldr (:) cs (foldr (:) bs as)
+= foldr (:) cs (foldr (:) bs (a:as'))
+= foldr (:) cs (a : foldr (:) b as')
+= a : foldr (:) cs (foldr (:) bs as')</code></pre>
+<p>“This is normal, each string append operation costs you linear time in most programming languages after all.” you said. “Joel Spolsky even make this problem famously known as Schlemiel the Painter’s algorithm.”</p>
+<p>But sometimes we DO care about performance. Logger and streaming output of a HTTP server previously mentioned are two of them. We really need efficient list append operation</p>
+<p>There are a few reasonable tactics according to Norman Ramsey</p>
+<p>Standard list with cons. Difference list (John Hughes list) with constant-time append. Algebraic data type supporting constant-time append: data Alist a = ANil | ASingle a | AAppend (Alist a) (Alist a). List of lists with final concat. It depends on the problem you are working to choose the most appropriate one. Here we focus on the second one, Difference List, because it is the one used in the blaze-builder. It’s originally designed for the streaming output of html. Therefore the append is truly the issue we care about.</p>
+<h3 id="difference-list">Difference List</h3>
+<p>The difference list is a data strucutre empowers us constant-time append. As the definition given by Haskell Wiki:</p>
+<p>It is a function f, which when given a list x, returns the list that f represents, prepended to x. Hard to imagine? Let’s take a look at a concrete example defined in Haskell: the ShowS type: The difference list specifically for List of Char.</p>
+<p>Its type in Haskell 98 Report is:</p>
+<pre><code>type ShowS = String -&gt; String</code></pre>
+<p>Judging from its type, it basically matches the description of a difference list. It is a function accepting a String, and supposedly output a String prepending something to x.</p>
+<p>Here is a toy example, using snoc (the inverse of cons) to append Char one by one to the end of difference list.</p>
+<pre><code>toString :: ShowS -&gt; String
+toString = ($ [])
+snoc ∷ ShowS → Char → ShowS
+snoc f a = f ∘ (a:)
+emptyH ∷ ShowS
+emptyH = id
+body ∷ String → ShowS → ShowS
+body (x:xs) acc = body xs (acc `snoc` x)
+body _ acc = acc
+run ∷ String → String
+run xs = toString (body xs emptyH)
+main = putStrLn $ run &quot;1234&quot;</code></pre>
+<p>We heavily rely on the function composition of (a:). With composition we can achieve the constant-time append, and stil preserve some properties of a list. To convert a difference list to a normal list of Char, apply the function to an empty list []. It is what toString is doing.</p>
+<p>The introduction of a function enables us to evaluate left-associated construction in right-associated fashion.</p>
+<pre><code>(as . (bs . cs)) 
+= as . bs .cs
+= (as . (bs . cs))</code></pre>
+<p>With ShowS, we can rewrite the previous example with showString, which is defined as showString s = (s++)`` haskell appendToContent str page = page {pageContent = newContent} where newContent = (pageContent page) . showString str ```</p>
+<p>Another excerpt from ezyang’s post proves the work of a difference list. (called Hughes List here)</p>
+<pre><code>type Hughes a = [a] -&gt; [a]
+listrep :: Hughes a -&gt; [a]
+listrep = (\l -&gt; l [])
+append :: Hughes a -&gt; Hughes a -&gt; Hughes a
+append a b = (\z -&gt; a (b z))
+listrep (append (append a b) c)
+= (\l -&gt; l []) (append (append a b) c)
+= (append (append a b) c) []
+= (\z -&gt; (append a b) (c z)) []
+= (append a b) (c [])
+= (\z -&gt; a (b z)) (c [])
+= a (b (c []))</code></pre>
+<h3 id="blaze-builder">Blaze-Builder</h3>
+<p>Difference list is not limited to list of Char. Elaborating on ShowS is merely for explanation. It can be generalized to list of Chunks, or ByteString for performant output.</p>
+<p>Data.Binary.Builder was frontier to use this pattern. The internal working of provided Builder type is essentially a difference list. The purpose of binary package is to encode the Haskell value into binary format and serialize them to external devices, network devices. And blaze-builder, as in Simon’s and Jaspervdj’s introduction (The latter one is a little bit outdated), it is a drop-in replacement for Data.Binary.Builder, with speed and expressiveness enhancement.</p>
+<p>A toy example from the documentation:</p>
+<pre><code>import Data.Monoid
+import qualified Data.ByteString.Lazy as L
+import Blaze.ByteString.Builder
+import Blaze.ByteString.Builder.Char.Utf8
+strings :: [String]
+strings = replicate 10000 &quot;Hello World!&quot;
+concatenation :: Builder
+concatenation = mconcat $ map fromString strings
+result :: L.ByteString
+result = toLazyByteString concatenation
+main = L.putStrLn result</code></pre>
+<p>This example serializes 10000 instances of “Hello World” to binary representation, which coincidently to be ASCII encoding of bytes. We use provided fromString to serialize a single String to Builder. And the Builder provides a Monoid interface, which means we have mconcat to efficiently concat them, as we do for the difference list.</p>
+<p>After that, we use toLazyByteString to transform it from Builder to ByteString, just like we call toString in the ShowS example.</p>
+<p>With ByteString we have putStrLn function to output the binary representation to external devices.</p>
+<h3 id="postscript">Postscript</h3>
+<p>According to this slide by Simon Meiser. It seems that he is working on bytestring package to incorporate similiar techniques used on blaze-builder. Perhaps after a while the blaze-builder could be replaced by binary. But at this time, a lot of packages are still using blaze-builder. It is still worth it to have a basic understanding of what this library is doing.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -221,119 +322,6 @@ quoteExprPat s = do loc &lt;- TH.location let pos = (TH.loc_filename loc, fst (T
 
 antiExprPat :: Expr -&gt; Maybe (TH.Q TH.Pat) antiExprPat (AntiIntExpr v) = Just $ TH.conP (TH.mkName “IntExpr”) [TH.varP (TH.mkName v)] antiExprPat (AntiExpr v) = Just $ TH.varP (TH.mkName v) antiExprPat _ = Nothing ```</code></pre>
 <p>Template Haskell can also arouse some problems when working with generic programming. So be careful about using it.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2012-02-25-machine-word-haskell.html">Keeping An Eye Out for the Difference between Machine Word and Fixed Word in Haskell</a></h1>
-    <div class="post-meta"><time datetime="2012-02-25 17:30">2012-02-25 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>In this discussion thread, Daniel Fischer marked the difference between Machine Word type and Fixed-Width Word type in haskell. I summarize them in a list, and attach to it with my own little experiment on the performance issue.</p>
-<p>In haskell, the signed and unsigned integer type correspond to Int of Data.Int and Word of Data.Word respectively. * The guaranteed range of Int is [-2²⁹ .. 2²⁹-1], and Word is the same size as Int. * Normally the size of Int and Word are the word size of the underlying architecture. * In general, the WordXX with XX less than the architecture machine word size, the machine word size is used for computation. * WordXX with XX greater than machine word size, it could be a library implementation. Hence slower than using XX as machine word size. * WordXX and Word with XX equals to machine word size, there is no difference.</p>
-<p>Here comes a summation of 10⁹ 1 with different word types. The experiment is run on ThinkPad X61, Core 2 Duo, 32 bits, with Ubuntu GNU/Linux Natty.</p>
-<pre><code>-# LANGUAGE BangPatterns #-}
-import Data.Word
-import Data.List
-
-sum_word :: Word -&gt; Word
-sum_word n = k n 0
-    where k 0 s = s
-          k !n !s = k (n-1) (s+1)
-
-main = do
-  print $ sum_word 1000000000</code></pre>
-<pre><code>$ ghc -O2 -ddump-simpl Word.hs
-$ time ./Word
-1000000000
-
-real 0m 6.094s
-user 0m 6.088s
-sys 0m 0.000s</code></pre>
-<pre><code>{-# LANGUAGE BangPatterns #-}
-import Data.Word
-import Data.List
-
-sum_word32 :: Word32 -&gt; Word32
-sum_word32 n = k n 0
-    where k 0 s = s
-          k !n !s = k (n-1) (s+1)
-
-main = do
-    print $ sum_word32 1000000000</code></pre>
-<pre><code>$ ghc -O2 -ddump-simpl Word32.hs
-$ time ./Word32
-1000000000
-
-real 0m 6.110s
-user 0m 6.080s
-sys 0m 0.012s</code></pre>
-<pre><code>{-# LANGUAGE BangPatterns #-}
-import Data.Word
-import Data.List
-
-sum_word64 :: Word64 -&gt; Word64
-sum_word64 n = k n 0
-    where k 0 s = s
-          k !n !s = k (n-1) (s+1)
-
-main = do
-    print $ sum_word64 1000000000</code></pre>
-<pre><code>$ ghc -O2 -ddump-simpl Word64.hs
-$ time ./Word64
-1000000000
-
-real 1m 52.981s
-user 1m 52.743s
-sys  0m 0.152s</code></pre>
-<p>Obviously, the Word64 version is much slower. If we vimdiff the core language of Word, Word16, Word32 versions, there is barely difference. The common main part is this:</p>
-<pre><code>Rec {
-Main.$wk [Occ=LoopBreaker]
-  :: GHC.Prim.Word# -&gt; GHC.Prim.Word# -&gt; GHC.Prim.Word#
-[GblId, Arity=2, Caf=NoCafRefs, Str=DmdType LL]
-Main.$wk =
-  \ (ww_sXF :: GHC.Prim.Word#) (ww1_sXJ :: GHC.Prim.Word#) -&gt;
-    case GHC.Prim.eqWord# ww_sXF __word 0 of _ {
-      GHC.Bool.False -&gt;
-        Main.$wk
-          (GHC.Prim.minusWord# ww_sXF __word 1)
-          (GHC.Prim.plusWord# ww1_sXJ __word 1);
-      GHC.Bool.True -&gt; ww1_sXJ
-    }
-end Rec }</code></pre>
-<p>We can see the unboxed GHC.Prim.Word# is used.</p>
-<p>As to Word64 version, we can see __pkg_ccall everywhere in the generated core language.</p>
-<pre><code>Main.main4 :: GHC.Word.Word64
-[GblId,
- Str=DmdType,
- Unf=Unf{Src=&lt;vanilla&gt;, TopLvl=True, Arity=0, Value=False,
-         ConLike=False, Cheap=False, Expandable=False,
-         Guidance=IF_ARGS [] 11 2}]
-Main.main4 =
-  case {__pkg_ccall ghc-prim hs_intToInt64 GHC.Prim.Int#
-                                    -&gt; GHC.Prim.State# GHC.Prim.RealWorld
-                                    -&gt; (# GHC.Prim.State# GHC.Prim.RealWorld, GHC.Prim.Int64# #)}_ayE
-         1 GHC.Prim.realWorld#
-  of _ { (# _, ds2_ayL #) -&gt;
-  case {__pkg_ccall ghc-prim hs_int64ToWord64 GHC.Prim.Int64#
-                                       -&gt; GHC.Prim.State# GHC.Prim.RealWorld
-                                       -&gt; (# GHC.Prim.State# GHC.Prim.RealWorld,
-                                             GHC.Prim.Word64# #)}_ayJ
-         ds2_ayL GHC.Prim.realWorld#
-  of _ { (# _, ds4_ayQ #) -&gt;
-  GHC.Word.W64# ds4_ayQ
-  }
-}</code></pre>
-<p>Everything matches to what Daniel Fischer has described.</p>
 
       </article>
     </div>

@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1570256376.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1570338015.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,33 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2019-07-28-managing-references-with-paperpile.html">Managing references with Paperpile</a></h1>
+    <div class="post-meta"><time datetime="2019-07-28 20:22">2019-07-28 20:22</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>For a long time I have the problem of managing papers and slides I am reading. It’s not only for the papers and slides from computer science, but also the financial reports and the letters to shareholder for my investment readings and researches. Over time I just downloaded a bunch of PDFs to my laptop and they scattered around in my Download folder without a systematic naming and indexing. It makes it hard to clean up the disk space for my laptop since I am not sure which one is what I needed if not by opening them up and review them one by one. It makes thing painful when you are backing up your system and migrating to the other. A couple of weeks back I found that I need to resolve this problem.</p>
+<p>An ideal reference management software to me in 2019 should provide the following features.</p>
+<ol type="1">
+<li>To be able to store in the cloud so that you are able to access it everywhere. It would be great to let you choose among the mainstream cloud storage providers, and provide options to make some of the papers accessible offline, but not sync everything to local.</li>
+<li>Good metadata auto completion. Not everything has a standard to label it or a good database to cross match and automatically label them, but it should be good for the parts that we are able to do it.</li>
+<li>Cross platform and reasonably performant.</li>
+<li>Providing API so that you could customise it for personal needs.</li>
+</ol>
+<p>I know the famous softwares like Zotero, Mendeley and Endnote. They have existed for a long time, but all of them feel more focus for scientific editing. I played with them for a little bit and Zotero maybe the closest but it still feels quite the exact thing I want. Until I noticed a new upcoming competitor: Paperpile. They seem to launch for some years but not that widely well-known. I tried it out and it gives me the feeling it is the closest reference management software I would like. I have lots of PDFs and my main purpose is not for scientific editing, I just need a software to edit it and help me rename them, and easy to look things up. It is a big-bonus to me that Paperpile is based on Google Drive. It resolves the issue 1, 3, 4 by leveraging on Google Drive as the backing storage. With Google Drive you could choose which file to stay offline and providing Google Drive API to let you trigger the hook, for example, to send a new card to my Trello when a new paper is added. The downside for sure is vendor lock-in, but it’s less a priority comparing to solving my need.</p>
+<p>I have tried it out for 3 weeks and I can say it is the software that’s closest to my ideal, though not perfect yet. I would stick to it before anything even better come up.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -154,58 +181,6 @@
 <p>For the <code>rust-darts</code> it is significantly slower than both of <code>cedar</code> and <code>cedarwood</code>, and it has extra requirement on the construction of the dictionary to be that the dictionary has to be lexicographically sorted. For <code>cedar</code> building contains the time for file reading (with 65536 buffer size) so it actually even slightly faster, but the querying time contains memory-only operation. I am too lazy to change the benchmarking code since it is using no-copying techniques by moving the pointer until the next new line and it is troublesome for me to change the rust implementation to be the same way so that to compare apple to apple. The <code>cedar</code> code was compiled with <code>-O3</code> and rust’s code is compiled with <code>--release</code> and only measure the time for the operations in the memory. You can see that the build time, that is <code>update</code> are roughly the same for C++ and Rust. And in the query case the Rust version is slightly slower than C++ but basically comparable. I couldn’t find where I could further optimize the Rust version since the code for the lookup case is quite simple and not much space to optimize on the source code level without going to the <code>unsafe</code> resort. Not sure where I could tune to speed it up, please let me know if you identify the part I could do further.</p>
 <h2 id="lesson-learned">Lesson Learned</h2>
 <p>Rust’s implementation is as comparable as C++’s implementation without much effort, I don’t need to go with <code>unsafe</code> and keep the majority of the code compiler-checked for memory safety. There is only one place where I need to go by <code>unsafe</code> block due to linked-list update but not due to the performance. There are a few handy features in C++ that I would miss, like const generics to make the data structure parameterized on the type level, but overall it is not a big issue in the cedar case. Or template specialization where you could leverage on different implementations based on the type you specify. Since <code>cedarwood</code> only save the word id in normal mode. It might require that for the support of reduced-trie feature where the value is stored in place, but right now <code>cedarwood</code> only has limited support on that so it is no big issue. Overall it is a smooth experience on porting.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2019-07-01-%E6%9C%80%E4%BD%B3%E5%8C%96jieba-rs%E4%B8%AD%E6%96%87%E6%96%B7%E8%A9%9E%E6%80%A7%E8%83%BD%E6%B8%AC%E8%A9%A6%28%E5%BF%AB%E4%BA%8Ecppjieba-33%25%29.html">最佳化 jieba-rs 中文斷詞性能測試 (快于 cppjieba 33%)</a></h1>
-    <div class="post-meta"><time datetime="2019-07-01 15:36">2019-07-01 15:36</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>昨晚寫了一篇關於最佳化 <a href="https://github.com/messense/jieba-rs">jieba-rs</a> 英文的<a href="https://blog.paulme.ng/posts/2019-06-30-optimizing-jieba-rs-to-be-33percents-faster-than-cppjieba.html">介紹</a>，但想說 jieba 的使用者多半還是在中文圈，對於宣傳來講 hacker news 跟 reddit 可能無法觸及到真正會使用的使用者，於是為了宣傳，也是為了讓 search engine 可以搜尋到，就來把性能的部分另外寫成中文的一篇。關於過程我就不再重新用中文再寫一次了，實在太累人了。有興趣的人可以閱讀<a href="https://blog.paulme.ng/posts/2019-06-30-optimizing-jieba-rs-to-be-33percents-faster-than-cppjieba.html">英文版</a></p>
-<p>測試機器的機器規格如下</p>
-<pre><code>MacBook Pro (13-inch, 2017, Two Thunderbolt 3 ports)
-2.5 GHz Intel Core i7
-16 GB 2133 MHz LPDDR3</code></pre>
-<p>測試過程仿照<a href="http://yanyiwu.com/work/2015/06/14/jieba-series-performance-test.html">結巴(Jieba)中文分詞系列性能評測</a>所描述，先一行一行讀取檔案圍城到一個陣列裡，然後循環 50 次對圍城每行文字作為一個句子進行斷詞。 分詞算法都是採用精確模式，也就是包含了 HMM 的部分。</p>
-<p>耗時的資料如下，從高到低排序</p>
-<table>
-<thead>
-<tr class="header">
-<th style="text-align: left;">實作</th>
-<th style="text-align: center;">耗時</th>
-<th style="text-align: center;">版本 .</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">cppjieba</td>
-<td style="text-align: center;">6.219s</td>
-<td style="text-align: center;">866d0e8</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">jieba-rs (master)</td>
-<td style="text-align: center;">4.330s</td>
-<td style="text-align: center;">a198e44</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">jieba-rs (darts)</td>
-<td style="text-align: center;">4.138s</td>
-<td style="text-align: center;">ab2fbfe</td>
-</tr>
-</tbody>
-</table>
-<p>以上耗時都是計算斷詞過程的耗時，不包括字典載入的耗時。</p>
-<p>這篇會著重於評測只是為了宣傳，並不想陷入語言之爭，這也是我英文版有寫主要是分享關於用 Rust 最佳化的經驗，也是為了我自己衡量可以在工作中多認真使用 Rust 為目的。</p>
 
       </article>
     </div>
