@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1570338209.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1571070123.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -53,12 +53,49 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2016-05-22-%E9%80%B1%E6%9C%AB%E8%AA%AD%E3%81%BF%E3%81%AE%E6%9C%AC.html">週末読みの本</a></h1>
-    <div class="post-meta"><time datetime="2016-05-22 17:30">2016-05-22 17:30</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2016-07-10-flight-with-elixir.html">Flight with Elixir</a></h1>
+    <div class="post-meta"><time datetime="2016-07-10 16:30">2016-07-10 16:30</time> </span>
     <div class="slot-content">
       <article>
-        <p><img src="https://cdn-images-1.medium.com/max/2400/1*vUTAucVFrUp-hOc0oHfb6w.jpeg" /></p>
-<p>1月前台湾から海運でシンガポールへ届けたの本をやっと着きて、週末でその一つ本を読めました。それは、Terryさん著したの「25 種類言語を喋られる人」です。この本は Terry さん自身言語習うの経験が読者に分け合います。彼はアシアの言語教育の劣勢を書き連ねります。まずは、アシア教育は文法と単語など構造的な単位を強調すぎると思います。彼は言語の没入環境を勧めて、子供様な言語を学ぶことは一番良いと思います。Terryさんは大学生時代の経験を自省に思い付くて、この結論を書きます。大量な知識を持ていて、文法を勉強してけど、外人と喋る時に彼らがTerryさんを英語喋ることをできないと思います。この事件はTerryさんの影響が遠いです。彼は言語学ぶの聖杯を探して決めます。その後、日本でポリグロット言語交換机のmeetupで言語学びのショートカットは子供様な方法を分かりました。そして、彼のquechua語学びの試験を大成功でして。shadowingはこの方法の鍵です。言語の詳細を気をつける、発言者を真似ります。その方法を聞いたと、Mike Campbellの大量分の練習方法を思い出した。大量な練習であなたの筋肉が喋ることの感じを覚えます。幸せに、私たちはインターネットの時代住んでいます。Youtubeで生活のビデオ映像が多いです。さらに、近年live steramingのサビスは人気がなりました。言語の素材がどこにでもありますよ。Youtubeのビデオダウンロード欲しいたら、youtube-dlのコメンドを使って、チャネル全部のビヂオがをワンクリックだけです。</p>
+        <h3 id="flight-with-elixir">Flight with Elixir</h3>
+<p><img src="../images/legacy/1*IZxHEx_bVFJu1F2pQFPZVg.png" /></p>
+<p>I kept hearing people saying good comments about Elixir and its most popular web framework: Phoenix, from last year. People pitched the language with the Ruby syntax however much more performant because it is built on BEAM, leveraging its robustness and speedy performance. And due to some personal business I had to travel and took about 5 hours flight and therefore I decided to get my flight time to have a brief overlook of the language. I am using the “Getting Started” documentation from the elixir-lang.org. The first impression is unlike other mainstreet langauge, elixir got a few things right.</p>
+<ol type="1">
+<li>Reference semantic</li>
+</ol>
+<p>The example is extracted from the example of Joe Armstrong’s A week of Elixir. The creator of the language apparently understand that the mechanics that the value itself should be immutable and we are just binding a value to a name, if we would like to “modify” it then we should just rebind the name to a different value, but not make the semantic having the side-effect instead.</p>
+<p>iex(9)&gt; s = HashSet.new<br> #HashSet&lt;[]&gt;<br> iex(10)&gt; s = HashSet.put(s, :element)<br> #HashSet&lt;[:element]&gt;</p>
+<ol start="2" type="1">
+<li>Closure done right</li>
+</ol>
+<p>It is common when main street language trying to catch-up with the wagon of functional programming, they did it wrong. One famous example is python’s lambda, which obviously didn’t honor the semantic of closure where the value should be captured and freezed.</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>a = 1<br> &gt;&gt;&gt; f = lambda x: x + a<br> &gt;&gt;&gt; f(5)<br> 6<br> &gt;&gt;&gt; a = 3<br> &gt;&gt;&gt; f(5)<br> 8</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>And Elixir did it right.</p>
+<p>iex(11)&gt; a = 5<br> 5<br> iex(12)&gt; f = fn(x) -&gt; x + a end<br> #Function&lt;6.50752066/1 in :erl_eval.expr/5&gt;<br> iex(13)&gt; f.(1)<br> 6<br> iex(14)&gt; a = 10<br> 10<br> iex(15)&gt; f.(1)<br> 6</p>
+<ol start="3" type="1">
+<li>Macro</li>
+</ol>
+<p>I didn’t check the manual to verify if everything in Elixir is an expression or not, but I played with a few of control flow structure and it seems like so.</p>
+<p>iex(1)&gt; if nil do<br> …(1)&gt; “haha”<br> …(1)&gt; else<br> …(1)&gt; “world”<br> …(1)&gt; end<br> “world”</p>
+<p>And the good thing is that I didn’t aware that Elixir actually comes with Macro. The above if/else control flow is actulally just a macro and rewrite it to the following structure.</p>
+<p>iex(18)&gt; if false, do: :this, else: :that<br> :that</p>
+<ol start="4" type="1">
+<li>Sigil</li>
+</ol>
+<p>Not sure if Sigil is also achieved with Macro, but it is great that with a PCRE like Regex to make the daily scripting handy.</p>
+<p>iex(16)&gt; “HELLO” =~ ~r/hello/<br> false</p>
+<ol start="5" type="1">
+<li>Exit is catchable</li>
+</ol>
+<p>It should be inherited from BEAM’s feature, most of the languages has exit to abort the program, but with BEAM’s own lightweight process. you can actually use exit as a signal to notify the parent process to do something about it.</p>
+<p>iex(17)&gt; try do<br> …(17)&gt; exit “lalala”<br> …(17)&gt; catch<br> …(17)&gt; :exit, _ -&gt; “boom”<br> …(17)&gt; end<br> “boom”</p>
+<p>Although I still prefer to program in a well-designed staic type language, overall I like Elixir. It looks like Ruby on a distant, but actually more about good inheritance from Erlang under the hood. If its community could catch up the size of Ruby, then it is definitely better than the world full of Ruby on Rails shop.</p>
 
       </article>
     </div>
@@ -72,47 +109,12 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2016-05-22-curl.html">curl を取り替えしたの httpie を使う</a></h1>
-    <div class="post-meta"><time datetime="2015-05-22 15:30">2015-05-22 15:30</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2016-05-22-%E9%80%B1%E6%9C%AB%E8%AA%AD%E3%81%BF%E3%81%AE%E6%9C%AC.html">週末読みの本</a></h1>
+    <div class="post-meta"><time datetime="2016-05-22 17:30">2016-05-22 17:30</time> </span>
     <div class="slot-content">
       <article>
-        <h3 id="curl-を取り替えしたの-httpie-を使う">curl を取り替えしたの httpie を使う</h3>
-<p>ソフトウェアエンジニアとして、curl が必要なツールです。Resful Api をデバッグもしたし、HTTP header を指定したも curl が Linux と Mac プラットフォームで最も頻繁に使うツールです。私も curl を使う経験も10年になりました。以下のコメンドラインは一般的な curl の使い方。</p>
-<pre><code>    curl --verbose -H &quot;X-SSID: ABCDEFG&quot; &quot;https://example.org&quot;</code></pre>
-<p>最近、Chrome の拡張 Postman を使うの人がますます多くなります。人々はコメンドラインで Restful Api の response 調べてのを嫌いなります。それに、curl は色の出力がありませんでした。出力を読めたら、白色だけより色が有用です。それから、httpie を知っていて、実験をしてみて後、進めて決めます。</p>
-<p>Mac で homebrew あれば、インストールは安いです。</p>
-<pre><code>    brew install httpie</code></pre>
-<p>基礎の使い方は http コメンド後、URL を指定します。</p>
-<pre><code>    $ http httpie.org
-    HTTP/1.1 302 Found
-    Connection: close
-    Content-Length: 292
-    Content-Type: text/html; charset=iso-8859–1
-    Date: Sun, 22 May 2016 03:43:17 GMT
-    Location: 
-    Server: Apache/2.2.15 (CentOS)
-    X-Awesome: Thanks for trying HTTPie :)
-
-    &lt;!DOCTYPE HTML PUBLIC “-//IETF//DTD HTML 2.0//EN”&gt;
-    &lt;html&gt;&lt;head&gt;
-    &lt;title&gt;302 Found&lt;/title&gt;
-    &lt;/head&gt;&lt;body&gt;
-    &lt;h1&gt;Found&lt;/h1&gt;
-    &lt;p&gt;The document has moved &lt;a href=”
-    &quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
-    &lt;hr&gt;
-    &lt;address&gt;Apache/2.2.15 (CentOS) Server at httpie.org Port 80&lt;/address&gt;
-    &lt;/body&gt;&lt;/html&gt;</code></pre>
-<p>Header を指定したらば、コロンが使っていて、header の key, value を指定します。</p>
-<pre><code>    http -v GET &quot;https://example.org&quot; Authorization:’ABCDEFG’ countryCode=US</code></pre>
-<p>HTTP の Verb も第二の引数を指定しできます。</p>
-<pre><code>    http PUT example.org name=John email=john@example.com</code></pre>
-<p>SSL を無視したら、 verify=no で検証をスキップします</p>
-<pre><code>    http -verify=no https://example.org</code></pre>
-<p>ダウロードしたら、download を入力します</p>
-<pre><code>    http —download https://github.com/jkbrzt/httpie/archive/master.tar.gz</code></pre>
-<p>もっとアドバイスの機能は、stream の response をログして、chunk を収集します。</p>
-<pre><code>    http - stream -f -a YOUR-TWITTER-NAME https://stream.twitter.com/1/statuses/filter.json track='Justin Bieber'</code></pre>
+        <p><img src="https://cdn-images-1.medium.com/max/2400/1*vUTAucVFrUp-hOc0oHfb6w.jpeg" /></p>
+<p>1月前台湾から海運でシンガポールへ届けたの本をやっと着きて、週末でその一つ本を読めました。それは、Terryさん著したの「25 種類言語を喋られる人」です。この本は Terry さん自身言語習うの経験が読者に分け合います。彼はアシアの言語教育の劣勢を書き連ねります。まずは、アシア教育は文法と単語など構造的な単位を強調すぎると思います。彼は言語の没入環境を勧めて、子供様な言語を学ぶことは一番良いと思います。Terryさんは大学生時代の経験を自省に思い付くて、この結論を書きます。大量な知識を持ていて、文法を勉強してけど、外人と喋る時に彼らがTerryさんを英語喋ることをできないと思います。この事件はTerryさんの影響が遠いです。彼は言語学ぶの聖杯を探して決めます。その後、日本でポリグロット言語交換机のmeetupで言語学びのショートカットは子供様な方法を分かりました。そして、彼のquechua語学びの試験を大成功でして。shadowingはこの方法の鍵です。言語の詳細を気をつける、発言者を真似ります。その方法を聞いたと、Mike Campbellの大量分の練習方法を思い出した。大量な練習であなたの筋肉が喋ることの感じを覚えます。幸せに、私たちはインターネットの時代住んでいます。Youtubeで生活のビデオ映像が多いです。さらに、近年live steramingのサビスは人気がなりました。言語の素材がどこにでもありますよ。Youtubeのビデオダウンロード欲しいたら、youtube-dlのコメンドを使って、チャネル全部のビヂオがをワンクリックだけです。</p>
 
       </article>
     </div>
@@ -146,7 +148,7 @@
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 22 of 52</div>
+            <div class="page-number is-center">Page 22 of 53</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>

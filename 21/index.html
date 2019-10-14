@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1570338209.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1571070123.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,27 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2016-07-25-%E6%88%91%E5%9C%A8%E9%A3%9B%E6%A9%9F%E4%B8%8A%E5%AD%B8%E6%9C%83%E7%9A%84%E4%BA%8B.html">【我在飛機上學會的事】書評</a></h1>
+    <div class="post-meta"><time datetime="2016-07-25 17:30">2016-07-25 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p><img src="https://cdn-images-1.medium.com/max/2400/1*SEyPsocHt-BOzT7TO-Y-Aw.jpeg" /></p>
+<p>以往每次回台灣都會順便去ㄧ趟實體書店看看有沒有一些有趣的中文新書。一方面是在海外買加上運費實在是不便宜，一方面有電子書的實在是少之又少。不如扛回家做自炊比較快。不過這樣回去比較匆忙，只有在回程第二航廈有一點時間逛書店。就看到這本書擺在最顯眼的展示區，想想等會兒起飛的時侯沒辦法用筆電或手機，不如買本書看看。反正看看人家的經驗點滴也是蠻有趣的，跟看知乎或酪梨壽司一樣，有種窺探別人生活的快感。</p>
+<p>透過這本書是大概可以了解空姐從訓練到上機實戰會實際遇上的情況。後半部是填充了一些造訪印尼跟阿姆斯特丹的觀察，我是覺得有些離題而且老梗，不過沒有造訪過的人是可以看看。對我來說最有趣的還是服務中的一些瑣事，像是清理糟塌過後的廁所那段。</p>
+<p>看完也沒什麼特別感想，大概就是速食地窺探別人兩年人生的感覺。</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -173,62 +194,6 @@
 
                 </article>
             
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2016-07-10-flight-with-elixir.html">Flight with Elixir</a></h1>
-    <div class="post-meta"><time datetime="2016-07-10 16:30">2016-07-10 16:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <h3 id="flight-with-elixir">Flight with Elixir</h3>
-<p><img src="../images/legacy/1*IZxHEx_bVFJu1F2pQFPZVg.png" /></p>
-<p>I kept hearing people saying good comments about Elixir and its most popular web framework: Phoenix, from last year. People pitched the language with the Ruby syntax however much more performant because it is built on BEAM, leveraging its robustness and speedy performance. And due to some personal business I had to travel and took about 5 hours flight and therefore I decided to get my flight time to have a brief overlook of the language. I am using the “Getting Started” documentation from the elixir-lang.org. The first impression is unlike other mainstreet langauge, elixir got a few things right.</p>
-<ol type="1">
-<li>Reference semantic</li>
-</ol>
-<p>The example is extracted from the example of Joe Armstrong’s A week of Elixir. The creator of the language apparently understand that the mechanics that the value itself should be immutable and we are just binding a value to a name, if we would like to “modify” it then we should just rebind the name to a different value, but not make the semantic having the side-effect instead.</p>
-<p>iex(9)&gt; s = HashSet.new<br> #HashSet&lt;[]&gt;<br> iex(10)&gt; s = HashSet.put(s, :element)<br> #HashSet&lt;[:element]&gt;</p>
-<ol start="2" type="1">
-<li>Closure done right</li>
-</ol>
-<p>It is common when main street language trying to catch-up with the wagon of functional programming, they did it wrong. One famous example is python’s lambda, which obviously didn’t honor the semantic of closure where the value should be captured and freezed.</p>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>a = 1<br> &gt;&gt;&gt; f = lambda x: x + a<br> &gt;&gt;&gt; f(5)<br> 6<br> &gt;&gt;&gt; a = 3<br> &gt;&gt;&gt; f(5)<br> 8</p>
-</blockquote>
-</blockquote>
-</blockquote>
-<p>And Elixir did it right.</p>
-<p>iex(11)&gt; a = 5<br> 5<br> iex(12)&gt; f = fn(x) -&gt; x + a end<br> #Function&lt;6.50752066/1 in :erl_eval.expr/5&gt;<br> iex(13)&gt; f.(1)<br> 6<br> iex(14)&gt; a = 10<br> 10<br> iex(15)&gt; f.(1)<br> 6</p>
-<ol start="3" type="1">
-<li>Macro</li>
-</ol>
-<p>I didn’t check the manual to verify if everything in Elixir is an expression or not, but I played with a few of control flow structure and it seems like so.</p>
-<p>iex(1)&gt; if nil do<br> …(1)&gt; “haha”<br> …(1)&gt; else<br> …(1)&gt; “world”<br> …(1)&gt; end<br> “world”</p>
-<p>And the good thing is that I didn’t aware that Elixir actually comes with Macro. The above if/else control flow is actulally just a macro and rewrite it to the following structure.</p>
-<p>iex(18)&gt; if false, do: :this, else: :that<br> :that</p>
-<ol start="4" type="1">
-<li>Sigil</li>
-</ol>
-<p>Not sure if Sigil is also achieved with Macro, but it is great that with a PCRE like Regex to make the daily scripting handy.</p>
-<p>iex(16)&gt; “HELLO” =~ ~r/hello/<br> false</p>
-<ol start="5" type="1">
-<li>Exit is catchable</li>
-</ol>
-<p>It should be inherited from BEAM’s feature, most of the languages has exit to abort the program, but with BEAM’s own lightweight process. you can actually use exit as a signal to notify the parent process to do something about it.</p>
-<p>iex(17)&gt; try do<br> …(17)&gt; exit “lalala”<br> …(17)&gt; catch<br> …(17)&gt; :exit, _ -&gt; “boom”<br> …(17)&gt; end<br> “boom”</p>
-<p>Although I still prefer to program in a well-designed staic type language, overall I like Elixir. It looks like Ruby on a distant, but actually more about good inheritance from Erlang under the hood. If its community could catch up the size of Ruby, then it is definitely better than the world full of Ruby on Rails shop.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
         </main>
 
         <div class="pure-g">
@@ -253,7 +218,7 @@
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 21 of 52</div>
+            <div class="page-number is-center">Page 21 of 53</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>
