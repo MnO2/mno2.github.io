@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1571231098.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1571371482.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -53,14 +53,107 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2016-07-25-%E6%88%91%E5%9C%A8%E9%A3%9B%E6%A9%9F%E4%B8%8A%E5%AD%B8%E6%9C%83%E7%9A%84%E4%BA%8B.html">【我在飛機上學會的事】書評</a></h1>
-    <div class="post-meta"><time datetime="2016-07-25 17:30">2016-07-25 17:30</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2016-07-26-hacking-on-swift-compiler-ii.html">Hacking on Swift Compiler (Part 2)</a></h1>
+    <div class="post-meta"><time datetime="2016-07-26 17:30">2016-07-26 17:30</time> </span>
     <div class="slot-content">
       <article>
-        <p><img src="https://cdn-images-1.medium.com/max/2400/1*SEyPsocHt-BOzT7TO-Y-Aw.jpeg" /></p>
-<p>以往每次回台灣都會順便去ㄧ趟實體書店看看有沒有一些有趣的中文新書。一方面是在海外買加上運費實在是不便宜，一方面有電子書的實在是少之又少。不如扛回家做自炊比較快。不過這樣回去比較匆忙，只有在回程第二航廈有一點時間逛書店。就看到這本書擺在最顯眼的展示區，想想等會兒起飛的時侯沒辦法用筆電或手機，不如買本書看看。反正看看人家的經驗點滴也是蠻有趣的，跟看知乎或酪梨壽司一樣，有種窺探別人生活的快感。</p>
-<p>透過這本書是大概可以了解空姐從訓練到上機實戰會實際遇上的情況。後半部是填充了一些造訪印尼跟阿姆斯特丹的觀察，我是覺得有些離題而且老梗，不過沒有造訪過的人是可以看看。對我來說最有趣的還是服務中的一些瑣事，像是清理糟塌過後的廁所那段。</p>
-<p>看完也沒什麼特別感想，大概就是速食地窺探別人兩年人生的感覺。</p>
+        <p>Nothing works better than actually getting a concrete task and work on it. Part 1 is only a brief overlook on the motivation and what has been provided when the Swift is compiled with debug flag on. In Part 2, I find a ticket in Kira that labeled as starter bug and attempt to implement it.</p>
+<p>This ticket is about the ambiguity when it comes to tuple as the parameter. It would cause some surprise when the tuple is implicitly expanded and bound with parameter variables. And in the Swift 3, the committee accepted the proposal and decided to impotent extra parenthesis to disambiguate the cases.</p>
+<p>To get a clue on what’s happening behind the scene, I wrote a snippet source file and use lldb to run swift compiler step by step. Initially I set the breakpoint at typeCheckDecl method and expect it to stop there. However, the program just run to finish when I pressed process launch.</p>
+<pre><code>$ lldb - swift test.swift
+(lldb) target create &quot;swift&quot;
+Current executable set to 'swift' (x86_64).
+(lldb) settings set - target.run-args &quot;test.swift&quot;
+(lldb) b typeCheckDecl
+Breakpoint 1: where = swift`swift::TypeChecker::typeCheckDecl(swift::Decl*, bool) + 38 at TypeCheckDecl.cpp:6084, address = 0x00000001012ae1e6
+(lldb) process launch
+Process 43688 launched: '/Users/mno2/Develop/grabtaxi/build/Ninja-ReleaseAssert+swift-DebugAssert/swift-macosx-x86_64/bin/swift' (x86_64)
+Process 43688 stopped
+* thread #1: tid = 0x94e653, 0x00007fff5fc01000 dyld`_dyld_start, stop reason = exec
+ frame #0: 0x00007fff5fc01000 dyld`_dyld_start
+dyld`_dyld_start:
+-&gt; 0x7fff5fc01000 &lt;+0&gt;: popq %rdi
+ 0x7fff5fc01001 &lt;+1&gt;: pushq $0x0
+ 0x7fff5fc01003 &lt;+3&gt;: movq %rsp, %rbp
+ 0x7fff5fc01006 &lt;+6&gt;: andq $-0x10, %rsp
+(lldb)</code></pre>
+<p>To figure out why, I set the breakpoint at the obvious entrance module of the whole compiler, which is Driver class. Running step by step through it. I began to identify the keyword like buildCompilation and task-&gt;execute, so it looks like when it runs without any flags specified, the default mode is to build up the tasks to be run in another processes so that the compilation could be parallelized.</p>
+<p>However, this hinders lldb to trace the actual process doing the typechecking heavylifting since lldb doesn’t support follow-fork-mode like gdb does. To figure out what is actually run I need to take a peek what’s inside the Job. I set a breakpoint at addJob, and used the handy dump() method as specified in the doc. Then you can see everything that how it should be run with the command line.</p>
+<pre><code>(lldb) n
+Process 5404 stopped
+* thread #1: tid = 0x2fe32, 0x00000001000274e0 swiftc`swift::driver::Compilation::addJob(this=0x000000010770cd40, J=&lt;unavailable&gt;) + 64 at Compilation.cpp:94, queue = 'com.apple.main-thread', stop reason = step over
+ frame #0: 0x00000001000274e0 swiftc`swift::driver::Compilation::addJob(this=0x000000010770cd40, J=&lt;unavailable&gt;) + 64 at Compilation.cpp:94
+ 91 Job *Compilation::addJob(std::unique_ptr&lt;Job&gt; J) {
+ 92 Job *result = J.get();
+ 93 Jobs.emplace_back(std::move(J));
+-&gt; 94 return result;
+ 95 }
+ 96
+ 97 static const Job *findUnfinishedJob(ArrayRef&lt;const Job *&gt; JL,
+(lldb) po result-&gt;dump()
+/Users/Paul/Develop/swift/swiftc/build/Ninja-ReleaseAssert+swift-DebugAssert/swift-macosx-x86_64/bin/swift -frontend -c -primary-file test.swift -target x86_64-apple-macosx10.9 -enable-objc-interop -color-diagnostics -module-name test -o /var/folders/l8/mhy9c9jj72l56gdybs_8l9gc0000gn/T/test-ff159c.o</code></pre>
+<p>Then I relaunched the lldb with every flags specified.</p>
+<pre><code>lldb - /Users/Paul/Develop/swift/swiftc/build/Ninja-ReleaseAssert+swift-DebugAssert/swift-macosx-x86_64/bin/swift -frontend -c -primary-file test.swift -target x86_64-apple-macosx10.9 -enable-objc-interop -color-diagnostics -module-name test -o /var/folders/l8/mhy9c9jj72l56gdybs_8l9gc0000gn/T/test-ff159c.o</code></pre>
+<p>then tried to break at typeCheckDecl as well. This time it succeeds.</p>
+<pre><code>(lldb) b typeCheckDecl
+Breakpoint 3: where = swift`swift::TypeChecker::typeCheckDecl(swift::Decl*, bool) + 38 at TypeCheckDecl.cpp:6094, address = 0x00000001012ca9f6
+(lldb) run
+Process 5446 launched: '/Users/Paul/Develop/swift/swiftc/build/Ninja-ReleaseAssert+swift-DebugAssert/swift-macosx-x86_64/bin/swift' (x86_64)
+Process 5446 stopped
+* thread #1: tid = 0x30432, 0x00000001012ca9f6 swift`swift::TypeChecker::typeCheckDecl(this=0x00007fff5fbf6470, D=0x000000010782be00, isFirstPass=true) + 38 at TypeCheckDecl.cpp:6094, queue = 'com.apple.main-thread', stop reason = breakpoint 3.1
+ frame #0: 0x00000001012ca9f6 swift`swift::TypeChecker::typeCheckDecl(this=0x00007fff5fbf6470, D=0x000000010782be00, isFirstPass=true) + 38 at TypeCheckDecl.cpp:6094
+ 6091 }
+ 6092
+ 6093 void TypeChecker::typeCheckDecl(Decl *D, bool isFirstPass) {
+-&gt; 6094 PrettyStackTraceDecl StackTrace(&quot;type-checking&quot;, D);
+ 6095 checkForForbiddenPrefix(D);
+ 6096 bool isSecondPass =
+ 6097 !isFirstPass &amp;&amp; D-&gt;getDeclContext()-&gt;isModuleScopeContext();</code></pre>
+<p>Since the testing snippet is like the following</p>
+<pre><code>$ cat test.swift
+func main() {
+let a: (Int, Int) -&gt; () = { (x, y) in x+y }
+}
+main()</code></pre>
+<p>Under the decl, it should match the pattern-binding according to the swift language reference, therefore I set breakpoint on the typeCheckPatternBinding as well</p>
+<pre><code>(lldb) b typeCheckPatternBinding
+Breakpoint 4: where = swift`swift::TypeChecker::typeCheckPatternBinding(swift::PatternBindingDecl*, unsigned int) + 23 at TypeCheckConstraints.cpp:1761, address = 0x00000001012a8a87
+(lldb) run
+Process 6331 stopped
+* thread #1: tid = 0x63b55, 0x00000001012a8a87 swift`swift::TypeChecker::typeCheckPatternBinding(this=0x00007fff5fbf6470, PBD=0x0000000108895410, patternNumber=0) + 23 at TypeCheckConstraints.cpp:1761, queue = 'com.apple.main-thread', stop reason = breakpoint 4.1
+ frame #0: 0x00000001012a8a87 swift`swift::TypeChecker::typeCheckPatternBinding(this=0x00007fff5fbf6470, PBD=0x0000000108895410, patternNumber=0) + 23 at TypeCheckConstraints.cpp:1761
+ 1758 bool TypeChecker::typeCheckPatternBinding(PatternBindingDecl *PBD,
+ 1759 unsigned patternNumber) {
+ 1760
+-&gt; 1761 Pattern *pattern = PBD-&gt;getPattern(patternNumber);
+ 1762 Expr *init = PBD-&gt;getInit(patternNumber);
+ 1763
+ 1764 if (!init) {</code></pre>
+<p>And voila, we got pattern and initializer expression. We can also apply dump method on them to have a peek into what they are.</p>
+<pre><code>1761 Pattern *pattern = PBD-&gt;getPattern(patternNumber);
+-&gt; 1762 Expr *init = PBD-&gt;getInit(patternNumber);
+ 1763
+ 1764 if (!init) {
+ 1765 PBD-&gt;setInvalid();(lldb) po pattern-&gt;dump()
+(pattern_typed type='(Int, Int) -&gt; ()'
+ (pattern_named type='(Int, Int) -&gt; ()' 'a')
+ (type_function
+ (type_tuple
+ (type_ident
+ (component id='Int' bind=Swift.(file).Int))
+ (type_ident
+ (component id='Int' bind=Swift.(file).Int)))
+ (type_tuple)))
+(lldb) po init-&gt;dump()
+(closure_expr type='&lt;null&gt;' discriminator=0 single-expression
+ (parameter_list
+ (parameter &quot;x&quot; type=&lt;null type&gt;)
+ (parameter &quot;y&quot; type=&lt;null type&gt;))
+ (sequence_expr type='&lt;null&gt;'
+ (declref_expr type='&lt;null&gt;' decl=test.(file).func decl.explicit closure discriminator=0.x@test.swift:2:31 specialized=yes)
+ (unresolved_decl_ref_expr type='&lt;null&gt;' name=+ specialized=no)
+ (declref_expr type='&lt;null&gt;' decl=test.(file).func decl.explicit closure discriminator=0.y@test.swift:2:34 specialized=yes)))</code></pre>
+<p>so I’ve zoomed down to the place where we probably need to make the change. We can add some hacks on it to make the ConstraintSystem to derive to different solution I think. I would write Part 3 for my finding afterward.</p>
 
       </article>
     </div>
@@ -74,117 +167,14 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2016-07-10-hacking-on-swift-compiler-i.html">Hacking on Swift Compiler (Part 1)</a></h1>
-    <div class="post-meta"><time datetime="2016-07-10 17:30">2016-07-10 17:30</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2016-07-25-%E6%88%91%E5%9C%A8%E9%A3%9B%E6%A9%9F%E4%B8%8A%E5%AD%B8%E6%9C%83%E7%9A%84%E4%BA%8B.html">【我在飛機上學會的事】書評</a></h1>
+    <div class="post-meta"><time datetime="2016-07-25 17:30">2016-07-25 17:30</time> </span>
     <div class="slot-content">
       <article>
-        <h3 id="hacking-on-swift-compiler-part-1">Hacking on Swift Compiler (Part 1)</h3>
-<p><img src="https://cdn-images-1.medium.com/max/2400/1*5g0SQGJmRTvim0PRhnmvXg.jpeg" /></p>
-<p>I have been thinking to hack on the industrial-strength compiler for some time. The last time I worked on a compiler was my third year in the college, where every student has to take a required compiler course and wrote a C compiler with lex and yacc. Ever since my graduation I merely work on my own DSL but not a thorough compiler. With the advance of LLVM and as what Anders Hejlsberg has described in this Channel 9 video, the architecture of the compiler is no longer like the old school of a big pipeline, where the compilation would cost you minutes for a mid size program. The structure of compiler basically would try to make the compiler frontend as re-usable as possible to the IDE code completion part and type checking partially on code snippets.</p>
-<p>Since around two months ago I started to work on iOS end again. Which got me a good opportunity to work on Swift compiler which was architected by compiler expert Chris Lattner. My attempt of hacking on compiler is to make Swift to compile to golang. My opinion on the golang is that it has a outstanding runtime however it is so mediocre in the language design. Swift though yet is also not so advanced but at least striking some balance regarding the ergonomic and the speed (without resorting to Rust’s linear logic). Also, it got generics! I put some thought on this and I think it should be feasible since golang as the target language having garbage collection, most of the semantics could be one-to-one translated to the language. And I just need to add some keyword to make it look like libmill: <a href="https://github.com/sustrik/libmill">https://github.com/sustrik/libmill</a> , which provides C lib support for coroutines. And dropping weak, unowned semantic since golang doesn’t need that.</p>
-<p>Swift was designed to have it’s own intermediate langauge, to provide higher level structure for multi-pass optimization that llvm’s IR cannot provide.</p>
-<p>Initially I think I should codegen from SIR but actually the SIR is too low level for golang. The typechecked swift AST should be enough for that. And swiftc already providing that. By typing the following in the console</p>
-<pre><code>    swiftc -dump-ast hello.swift</code></pre>
-<p>You can get the AST dump in the format like s-expression</p>
-<pre><code>    (source_file
-      (func_decl &quot;main()&quot; type='() -&gt; ()' access=internal
-        (parameter_list)
-        (brace_stmt
-          (pattern_binding_decl
-            (pattern_typed type='Int'
-              (pattern_named type='Int' 'a')
-              (type_ident
-                (component id='Int' bind=Swift.(file).Int)))
-            (call_expr implicit type='Int' location=hello.swift:2:16 range=[hello.swift:2:16 - line:2:16] nothrow
-              (constructor_ref_call_expr implicit type='(_builtinIntegerLiteral: Int2048) -&gt; Int' location=hello.swift:2:16 range=[hello.swift:2:16 - line:2:16] nothrow
-                (declref_expr implicit type='Int.Type -&gt; (_builtinIntegerLiteral: Int2048) -&gt; Int' location=hello.swift:2:16 range=[hello.swift:2:16 - line:2:16] decl=Swift.(file).Int.init(_builtinIntegerLiteral:) specialized=no)
-                (type_expr implicit type='Int.Type' location=hello.swift:2:16 range=[hello.swift:2:16 - line:2:16] typerepr='Int'))
-              (tuple_expr implicit type='(_builtinIntegerLiteral: Int2048)' location=hello.swift:2:16 range=[hello.swift:2:16 - line:2:16] names=_builtinIntegerLiteral
-                (integer_literal_expr type='Int2048' location=hello.swift:2:16 range=[hello.swift:2:16 - line:2:16] value=1))))
-
-    (var_decl &quot;a&quot; type='Int' access=private let storage_kind=stored)
-    )))</code></pre>
-<p>If you would like to get the type alone, you can use swift-ide-test for that</p>
-<pre><code>    swift-ide-test -print-types -source-filename=hello.swift</code></pre>
-<p>You would get</p>
-<pre><code>    FuncDecl '''main''' () -&gt; ()
-        VarDecl '''a''' Int
-        BinaryExpr:2 '''1 + 1''' Int
-          DeclRefExpr:2 '''+''' (Int, Int) -&gt; Int
-          TupleExpr:2 '''1 + 1''' (Int, Int)
-            CallExpr:2 '''1''' Int
-              ConstructorRefCallExpr:2 '''1''' (_builtinIntegerLiteral: Int2048) -&gt; Int
-                TypeExpr:2 '''1''' Int.Type
-                DeclRefExpr:2 '''1''' Int.Type -&gt; (_builtinIntegerLiteral: Int2048) -&gt; Int
-              TupleExpr:2 '''1''' (_builtinIntegerLiteral: Int2048)
-                IntegerLiteralExpr:2 '''1''' Int2048
-            CallExpr:2 '''1''' Int
-              ConstructorRefCallExpr:2 '''1''' (_builtinIntegerLiteral: Int2048) -&gt; Int
-                TypeExpr:2 '''1''' Int.Type
-                DeclRefExpr:2 '''1''' Int.Type -&gt; (_builtinIntegerLiteral: Int2048) -&gt; Int
-              TupleExpr:2 '''1''' (_builtinIntegerLiteral: Int2048)
-                IntegerLiteralExpr:2 '''1''' Int2048
-        VarDecl '''b''' &lt;&lt;error type&gt;&gt;
-        BinaryExpr:3 '''a + 2.0''' &lt;&lt;error type&gt;&gt;
-          OverloadedDeclRefExpr:3 '''+''' &lt;&lt;error type&gt;&gt;
-          TupleExpr:3 '''a + 2.0''' &lt;&lt;error type&gt;&gt;
-            DeclRefExpr:3 '''a''' Int
-            FloatLiteralExpr:3 '''2.0''' &lt;&lt;error type&gt;&gt;</code></pre>
-<p>Which should be enough of information for all of the codegen. I just need to write a parser for the AST dump and walk the tree to generate the corresponding golang code. This would be left for the future series to detail my attempt.</p>
-<p>In the meantime of digging into the code base, I was also interested into how swift implemented it’s type system and type checker. I presented my learning on Hindley Milner Type system at Haskell.sg before, so I have a basic understanding of how the HM-like system works. However, for industrial strength compiler especially with the bridging to ObjC part, I am really interested into how to architect your type system and make it work.</p>
-<p>The swift repository on github is pretty undocumented, I can only find two docs drafting the whole picture but without too much detail. You have to peak into the code to look for detail.</p>
-<p><a href="https://github.com/apple/swift/blob/master/docs/TypeChecker.rst">https://github.com/apple/swift/blob/master/docs/TypeChecker.rst</a></p>
-<p>After digging into the code base I found that you can actually turn on the debug mode in Swift REPL when you compile your swift binary with DEBUG flag on. You just simply use your DEBUG version swift to run into REPL mode and type the following meta command</p>
-<pre><code>    (swift) :constraints debug on</code></pre>
-<p>Then it would spit all of the type checking process step by step</p>
-<pre><code>    (swift) let c = 1
-    ---Initial constraints for the given expression---
-    (integer_literal_expr type='$T0' location=&lt;REPL Input&gt;:1:9 range=[&lt;REPL Input&gt;:1:9 - line:1:9] value=1)
-    Score: 0 0 0 0 0 0 0 0 0 0 0 0
-    Type Variables:
-      #0 = $T0
-      #1 = $T1
-
-    Active Constraints:
-
-    Inactive Constraints:
-      $T0 conforms to IntegerLiteralConvertible [[locator@0x7ffcc5819e00 [IntegerLiteral@&lt;REPL Input&gt;:1:9]]];
-      $T0 conv $T1 [[locator@0x7ffcc5819e00 [IntegerLiteral@&lt;REPL Input&gt;:1:9]]];
-    Active bindings: $T0 := Int
-    (trying $T0 := Int
-      Active bindings: $T1 := Int
-      (trying $T1 := Int
-        (found solution 0 0 0 0 0 0 0 0 0 0 0 0)
-      )
-    )
-    ---Solution---
-    Fixed score: 0 0 0 0 0 0 0 0 0 0 0 0
-    Type variables:
-      $T1 as Int
-      $T0 as Int
-
-    Overload choices:</code></pre>
-<p>It even come with the Constraint Graph with the calculated connected components for debugging the solver. Pretty neat.</p>
-<pre><code>    ---Constraint graph---
-      $T0:
-
-    $T1:
-
-    $T2:
-        Constraints:
-          $T2 conforms to FloatLiteralConvertible [[locator@0x7ffcc4967838 [FloatLiteral@&lt;REPL Input&gt;:1:13]]];
-          $T2 operator arg conv Int [[locator@0x7ffcc4967ca8 [Binary@&lt;REPL Input&gt;:1:11 -&gt; apply argument -&gt; comparing call argument #1 to parameter #1]]];
-
-    $T3:
-        Constraints:
-          $T3 conv $T4 [[locator@0x7ffcc4967b80 [Binary@&lt;REPL Input&gt;:1:11]]];
-        Adjacencies: $T4
-
-    $T4:
-        Constraints:
-          $T3 conv $T4 [[locator@0x7ffcc4967b80 [Binary@&lt;REPL Input&gt;:1:11]]];
-        Adjacencies: $T3</code></pre>
-<p>The above is the progess so far. I also found that Swift compiler is actually a good source of C++ code base for reading. It adopts pretty modernized C++ syntax, just it is a little pity that the compiler is not reaching to bootstrapping where the compiler is written in its own language.</p>
+        <p><img src="https://cdn-images-1.medium.com/max/2400/1*SEyPsocHt-BOzT7TO-Y-Aw.jpeg" /></p>
+<p>以往每次回台灣都會順便去ㄧ趟實體書店看看有沒有一些有趣的中文新書。一方面是在海外買加上運費實在是不便宜，一方面有電子書的實在是少之又少。不如扛回家做自炊比較快。不過這樣回去比較匆忙，只有在回程第二航廈有一點時間逛書店。就看到這本書擺在最顯眼的展示區，想想等會兒起飛的時侯沒辦法用筆電或手機，不如買本書看看。反正看看人家的經驗點滴也是蠻有趣的，跟看知乎或酪梨壽司一樣，有種窺探別人生活的快感。</p>
+<p>透過這本書是大概可以了解空姐從訓練到上機實戰會實際遇上的情況。後半部是填充了一些造訪印尼跟阿姆斯特丹的觀察，我是覺得有些離題而且老梗，不過沒有造訪過的人是可以看看。對我來說最有趣的還是服務中的一些瑣事，像是清理糟塌過後的廁所那段。</p>
+<p>看完也沒什麼特別感想，大概就是速食地窺探別人兩年人生的感覺。</p>
 
       </article>
     </div>

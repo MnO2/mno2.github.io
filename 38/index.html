@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1571231098.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1571371482.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,67 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2015-02-28-rust-alpha-2.html">Rust-1.0 Alpha2 bench</a></h1>
+    <div class="post-meta"><time datetime="2015-02-28 17:30">2015-02-28 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>This is a follow-up of luajit’s benchmark. We use 512 bytes as the key to dedup a big random binary file. I wrote the same benchmark in Rust to get an idea how performant it is. Sadly, with the Rust-1.0 alpha2, its std::old_io runtime library is so terrible in performance. With a naive loop of IO read it would take around 20 seconds on my machine. Even worse then Nodejs’s figures. I then decided to skip the runtime library and implemented it in libc FFI, and get the figures much closer to what was expected, but it is still slower then C++’s naive implementation on Mac OS X.</p>
+<p>Here is the time result</p>
+<pre><code>➜  rust git:(master) rustc --version
+rustc 1.0.0-nightly (522d09dfe 2015-02-19) (built 2015-02-20)
+➜  rust git:(master) time ./target/uniq-blocks
+./target/uniq-blocks  2.95s user 1.58s system 99% cpu 4.560 total</code></pre>
+<p>And code.</p>
+<pre><code>#![feature(libc)] extern crate libc;
+use libc::funcs::posix88::unistd::read;
+use libc::funcs::posix88::fcntl::open;
+use libc::consts::os::posix88::O_RDONLY;
+use libc::consts::os::posix88::S_IREAD;
+use libc::types::common::c95::c_void;
+use std::ffi::CString;
+use std::str;
+use std::collections::HashMap;
+
+fn main() {
+    let path_str = CString::new(&quot;large_random.txt&quot;).unwrap();
+    let fd = unsafe {
+        open(path_str.as_ptr(), O_RDONLY, S_IREAD)
+    };
+
+    let mut buf: Vec&lt;u8&gt; = Vec::with_capacity(512);
+    let mut M: HashMap&lt;String, u32&gt; = HashMap::new();
+
+    loop {
+        let nread = unsafe { read(fd, buf.as_mut_ptr() as *mut c_void, 512) };
+        let s = str::from_utf8(buf.as_slice()).ok().expect(&quot;from_utf8 error&quot;);
+        let ss = String::from_str(s);
+        if M.contains_key(&amp;ss) {
+            match M.get_mut(&amp;ss) {
+                Some(x) =&gt; { *x += 1 },
+                None =&gt; ()
+            };
+        } else {
+            M.insert(ss, 1);
+        }
+
+        if nread == 0 {
+            break;
+        };
+    }
+}</code></pre>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -196,36 +257,6 @@ int main()
 }</code></pre>
 <h3 id="epilogue">Epilogue</h3>
 <p>It’s amazing that C++ could still have great advancement in recent years, with all of its love and hate. The cost is that the language has been so complicated that few people could fully grasp. It’s also an interesting observation where that most of the interviews you met in an intervew who proclaim that they are well-versed C++ programmer are more than fifty percent likely that they are not. However, those who expresses their lack of confidence in knowing the language actually the group who are more competitive.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-02-26-haskell-one-liner.html">Haskell One Liners</a></h1>
-    <div class="post-meta"><time datetime="2015-02-26 17:30">2015-02-26 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>The scripting languages like Perl and Ruby are very well-known for expressing the data crunching task into one-liner. With their command line flags like -p, -e and default variable $_ with regular expression. The job just gets easier. I believe functional languages are also good at one-liner, since lambda-like structure are good in data transformation. Here is a few I would do with Haskell.</p>
-<h3 id="number-each-line-of-files">number each line of files</h3>
-<pre><code>ghc -e &quot;print . (zip [1..]) . lines =&lt;&lt; getContents&quot;
-ghc -e &quot;print . (filter (/= '\n'))  =&lt;&lt; getContents&quot;</code></pre>
-<h3 id="count-lines">count lines</h3>
-<pre><code>ghc -e &quot;print . length . lines =&lt;&lt; getContents&quot;</code></pre>
-<h3 id="print-specific-line">print specific line</h3>
-<pre><code>ghc -e &quot;print . (filter (\x -&gt; (fst x) == 1)) . (zip [1..]) . lines =&lt;&lt; getContents&quot;</code></pre>
-<h3 id="regular-expression-is-relatively-painful-in-haskell.-in-order-to-use-it-you-have-to-add-the-modules-you-would-like-to-load-in-evaluation-mode-first.">Regular expression is relatively painful in Haskell. In order to use it you have to add the modules you would like to load in evaluation mode first.</h3>
-<pre><code>:m +Text.Regex</code></pre>
-<p>Then hit with POSIX regular expression syntax.</p>
-<pre><code>ghc -e 'print . (map (\s -&gt; subRegex (mkRegex &quot;^[[:space:]]+&quot;) s &quot;&quot;)) . lines =&lt;&lt; getContents'</code></pre>
-<p>I would add more if I can think of others.</p>
 
       </article>
     </div>

@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1571231098.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1571371482.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,72 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2019-06-30-optimizing-jieba-rs-to-be-33percents-faster-than-cppjieba.html">Optimizing jieba-rs to be 33% faster than cppjieba</a></h1>
+    <div class="post-meta"><time datetime="2019-06-30 19:29">2019-06-30 19:29</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>To start this blog post with a disclaimer: I admit that it is a clickbait title since every benchmark is a lie in its own, and I have no intention to start another programming language flame war. This blog post is mainly to share my experience on taking an emerging programming language’s ecosystem seriously and evaluating it by working on a serious project, and see how far we can go in terms of performance and development experience.</p>
+<p>The project I chose as mentioned in the title is <a href="https://github.com/messense/jieba-rs">jieba-rs</a>, the rust implementation of a popular Chinese word segmentation library: <a href="https://github.com/fxsjy/jieba">Jieba</a>. A quick background introduction about <a href="https://en.wikipedia.org/wiki/Text_segmentation#Word_segmentation">word segmentation</a> for the readers who don’t speak Chinese. Chinese and Japanese in their written scripts are only delimited up to the sentence but words are not delimited. For example, the following sentence could be literally translated to “Today’s weather very good” in the same order, but you have no idea where the word boundaries are.</p>
+<pre><code>今天的天气真好</code></pre>
+<p>After the word segmentation, the sentence could be broken up as follows (space delimited):</p>
+<pre><code>今天(Today)  的('s) 天气(weather) 真(very) 好(good)</code></pre>
+<p>It’s unlike English where spaces are added between words. This makes the natural language processing harder since most of the methodologies requires the granularity of words. Therefore the word segmentation is a core part when it comes to the tasks like search engine and language understanding.</p>
+<p><a href="https://github.com/fxsjy/jieba">Jieba</a> is the original implementation and it is implemented in python. It became so popular in the wild not only due to it strikes a good trade-off between the segmentation result and the performance. It may not be the most state-of-the-art or the most accurate word segmentation library but it’s a very popular engine and got ported into different programming languages like <a href="https://github.com/wangbin/jiebago">go</a> and the bindings to the <a href="https://github.com/yanyiwu/cppjieba">cppjieba</a>. Rust as a language focus on zero-cost abstraction, naturally I would like to benchmark the rust version against cpp version.</p>
+<p>About a couple of weeks back I found that <a href="https://github.com/messense/">messense</a> already had a good version of the rust implementation with the maximum probability approach and the viterbi decoding finished. The code is well-written and self explainable therefore I decided to contribute and collaborate with messense. Even though I started following rust’s development occasionally ever since it was in 0.4, I haven’t catched up the latest 2018 edition, I started the contribution by implementing the left-out keyword extraction features using TextRank and TFIDF to get myself familiar with the language. In the meantime, I was curious how performant the rust implementation is, then I run the weicheng executable in the example folder, which is the same benchmark test used in cppjieba, by running the word segmentation on the weicheng script for 50 times and times the running time. I wasn’t not satisfied with the result since the cppjieba runs about 5-6s on the following spec of Macbook.</p>
+<pre><code>MacBook Pro (13-inch, 2017, Two Thunderbolt 3 ports)
+2.5 GHz Intel Core i7
+16 GB 2133 MHz LPDDR3</code></pre>
+<p>However, jieba-rs at the time was running like 10s-ish. It was almost the double of the running time of cppjieba.</p>
+<p>With a couple of weeks of effort, now as the time of this blog post on June 30th, 2019. The running time of the jieba-rs is now around 33% faster than cppjieba as shown in the following.</p>
+<p>Branch <code>darts</code> with the commit: ab2fbfe</p>
+<pre><code>➜  jieba-rs git:(darts) ./target/release/weicheng
+4138ms</code></pre>
+<p>Branch <code>master</code> with the commit: a198e44</p>
+<pre><code>➜  jieba-rs git:(master) ./target/release/weicheng
+4330ms</code></pre>
+<p>Branch <code>master</code> of cppjieba with the commit: 866d0e8</p>
+<pre><code>➜  build git:(master) ✗ ./load_test
+process [100 %]
+Cut: [6.219 seconds]time consumed.
+process [100 %]
+Extract: [0.679 seconds]time consumed.</code></pre>
+<p>You can see that 4138ms / 6219ms is roughly 66.5% of the running time, with the double array trie implementation adopted (not yet merged into the master).</p>
+<p>I would also like to mention the <a href="https://github.com/andelf/rust-darts">rust-darts</a> implementation finished by <a href="https://github.com/andelf/">andelf</a>. He helped a lot on updating the three-year-old library so that I could import the library into jieba-rs to try it out. It’s on my roadmap to use DARTS as the underlying data structure once the required <a href="https://github.com/andelf/rust-darts/issues/24">features</a> are implemented.</p>
+<p>Now, I’d like move on to the key steps I did to reduce the running time as much as possible.</p>
+<h3 id="identifying-the-bottleneck-with-instrument">Identifying the bottleneck with Instrument</h3>
+<p>The first step of performance tuning is to measure it and identifying the critical sections so you could put your efforts at the slowest part. The write-up from <a href="https://github.com/siddontang">siddontang</a> about <a href="https://www.jianshu.com/p/a80010878def">optimizing TiKV on Mac</a> is very helpful. By recoding the stack traces of the weicheng binary, it is easy to tell that the program spends its time on two parts: Regex and Viterbi Decoding.</p>
+<h3 id="regex">Regex</h3>
+<p><a href="https://github.com/BurntSushi">BurntSushi</a>’s regex library is very performance in general since it’s executed in DFA. The <a href="https://github.com/rust-lang/regex/blob/master/PERFORMANCE.md">documentation</a> also marked it clear where you should be looking at when the performance is the consideration you have.</p>
+<pre><code>Advice: Prefer in this order: is_match, find, captures.</code></pre>
+<p>A few lines of <a href="https://github.com/messense/jieba-rs/commit/3d013211f3d76d00680f6f670c4f96b808f43571">changes</a> from using Captures to Matches reduce the running time by 2s.</p>
+<h3 id="using-dynamic-programming-to-trace-the-best-path-in-viterbi-decoding">Using dynamic programming to trace the best path in Viterbi decoding</h3>
+<p>I have speech processing and natural language processing background so I am quite familiar with hidden markov model training and viterbi decoding. It used to be just a midterm course assignment when I was the TA of the course. I am pretty sure the viterbi decoding and path reconstruction could be done in two two-dimension matrices. In the original python implementation it has done extra memory allocation by copying the best path so far, where actually you only need to track it by a prev matrix to remember the last state. <a href="https://github.com/messense/jieba-rs/commit/2d1418092f595a3799d2d90f7a314b6855898261">changing this</a> earned us another 2s of speedup.</p>
+<h3 id="move-memory-allocation-out-of-the-loop">Move memory allocation out of the loop</h3>
+<p>With the convenient Vec and BTreeMap provided in the standard library, we often forget there are actually expensive memory allocation hidden behind the abstraction. The word segmentation is basically a task where you are running a main loop to loop through the character stream to see if it could be broken up here. By allocating the memory outside the loop would obviously boost the performance, and with the handy resize you only need to reallocate when you need more memory.</p>
+<h3 id="remove-allocation-as-much-as-possible">Remove allocation as much as possible</h3>
+<p>Transient Vec storage is convenient and it could make the code more readable, but when it comes to the scale of milli-second, it would be better to rethink if you really need them. Some cases you only need to track the states by one or two variables.</p>
+<h3 id="swisstable-is-damn-fast">SwissTable is damn fast</h3>
+<p>Right now we are using HashMap to store the dictionary and all of the prefixes of those words on the master branch. We know the HashMap in the standard library now is the hashbrown implementation, where it is based on Google’s Swiss Table. You can watch the introduction talk Google Engineer gave at <a href="https://www.youtube.com/watch?v=ncHmEUmJZf4">CppCon 2017</a>, it’s very inspiring on the approaches. SIMD instructions like SSE was used and therefore it’s damn fast when you are using Intel’s CPU. Even with the naive iteration through the prefixes of the strings to construct the DAG, it’s still performant since the scalar is so small. A theoretical better algorithm but bigger scalar absorbed into the big-O could perform far worse than naive approaches with SwissTable.</p>
+<h3 id="adopting-double-array-trie.">Adopting Double Array Trie.</h3>
+<p>There has been <a href="http://www.hankcs.com/program/algorithm/double-array-trie-vs-aho-corasick-double-array-trie.html">researches</a> comparing aho-corasik and double array trie ’s speed with respective the maximum forward-matching word segmentation algorithm, and the conclusion was double array trie performs better in the case of Chinese word segmentation due to the data access pattern. I tried it out both and the conclusion matches, at least for the implementation we have as the time of June 2019.</p>
+<p>For aho-corasick I was using the library implemented by BurntSushi, so I assumed it is the best in class. It performs much worse than DARTS, therefore I briefly looked into the code base, it seems that there are indirection on whether to use NFA or DFA when <a href="https://github.com/BurntSushi/aho-corasick/blob/master/src/ahocorasick.rs#L1001">the methods are called</a>, I am not sure this is the main reason resulting into the significant slow down though.</p>
+<p>For DARTS implementation I am using the one ported by <a href="https://github.com/andelf/">andelf</a> from <a href="http://chasen.org/~taku/software/darts/">darts</a> in C++. Its code is much easier to read than libdatrie though lacking the features of dynamic insertion and deletion and tail compression. I am intended to add those features into the <a href="https://github.com/andelf/rust-darts">rust-darts</a>.</p>
+<h2 id="lesson-learned-and-afterword">Lesson Learned and Afterword</h2>
+<p>Over the course of performance tuning and development I am convinced that Rust ecosystem has its potential and it seems to get a lot momentum in 2019, with so many Rustcons host around the world. Its spectrum of libraries is still far from the richness and matureness where you can find in C++ and Python world, but the standard library and a few core libraries contributed by star developers are very high quality and you could learn a lot by merely reading their code base. And its affine type system makes you feel safe to do a major refactoring for the performance tuning etc since you know compiler would call you dumb and catch those errors. If you are careless about a few of the details, you could still easily spit out poorly performing code. However, it’s also easy for you to improve it once you gain some experience on performance tuning and know where you should look at.</p>
+<p>Specially thanks again the <a href="https://github.com/messense/">messense</a> and <a href="https://github.com/andelf/">andelf</a> on the quick response to the pull requests and reviews. It’s a pleasant experience to work on these projects in Rust with good developers.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -81,47 +147,6 @@
 <a class="sourceLine" id="cb2-6" title="6"></a>
 <a class="sourceLine" id="cb2-7" title="7">    <span class="kw">let</span> words = jieba.cut(<span class="st">&quot;讥䶯䶰䶱䶲䶳䶴䶵𦡦&quot;</span>, <span class="cn">false</span>);</a>
 <a class="sourceLine" id="cb2-8" title="8">    <span class="pp">assert_eq!</span>(words, <span class="pp">vec!</span><span class="op">[</span><span class="st">&quot;讥䶯䶰䶱䶲䶳&quot;</span>, <span class="st">&quot;䶴䶵𦡦&quot;</span><span class="op">]</span>);</a></code></pre></div>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2019-06-05-switch-from-chrome-to-mozilla-firefox.html">Switch from Chrome to Mozilla Firefox</a></h1>
-    <div class="post-meta"><time datetime="2019-06-05 21:17">2019-06-05 21:17</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>Not only I am leaving Medium, I am also switching my default browser from Chrome to Firefox, due to the concerns that Google is creeping in and intrude the my privacy and trust after reading the news <a href="https://news.ycombinator.com/item?id=18052923">1</a> and <a href="https://news.ycombinator.com/item?id=20044430">2</a>.</p>
-<p>It’s not the first time I tried to switch my main browser to Firefox, the last time I tried was when the first version of <a href="https://wiki.mozilla.org/Quantum">Quantum</a>’s release. I heard it was shipped with its CSS engine from servo, I couldn’t help to download it and try it out. However, it wasn’t a successful attempt. There was bugs and issues I run into, apart from that, all of the extensions need to be migrated since the APIs and architectures are totally different. At the time when it was released, there wasn’t many good extensions migrated yet. But now most of my commonly used extensions are supported.</p>
-<h2 id="extensions">Extensions</h2>
-<p>Here are the list of the extensions I’ve installed so far.</p>
-<ul>
-<li>Facebook Containers</li>
-<li>Multi-Account Containers</li>
-<li>Firefox Lockwise</li>
-<li>OneTab</li>
-<li>Tampermonkey</li>
-<li>IG Helper</li>
-<li>Neat URL</li>
-</ul>
-<p>I found that Facebook Containers is extremely useful, it works pretty much like sandbox account in Android. Neat URL is also convenient in that I don’t have to manually remove those tracking parameters when I copy &amp; paste the url to others.</p>
-<h2 id="issues">Issues</h2>
-<p>It’s not working perfectly without any issue though. I’ve run into the following situations.</p>
-<ul>
-<li>FB Messenger not able to load, not sure it is because I set the content blocking rules too strict.</li>
-<li>Google Drive often hits to high cpu usage when the folders have many items.</li>
-<li>Random high cpu spike when open on certain web pages.</li>
-</ul>
-<p>It seems that when I open web pages that heavily use javascript or css, my laptop’s fan would inevitably start to work. Unlike Chrome it would also eat up battery but not to the extent of triggering the cpu’s fan running. Not sure it is due to both of browsers’ javascript engines difference.</p>
-<h2 id="summary">Summary</h2>
-<p>It is not without issue but it is good enough that I am happy to set it as my main browser, and get rid of the sneaky Google.</p>
 
       </article>
     </div>

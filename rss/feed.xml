@@ -8,8 +8,25 @@
         <name>Paul Meng</name>
         <email>me@paulme.ng</email>
     </author>
-    <updated>2019-10-15T00:00:00Z</updated>
+    <updated>2019-10-18T00:00:00Z</updated>
     <entry>
+    <title>所謂量化與質化的思考</title>
+    <link href="https://blog.paulme.ng/posts/2019-10-18-%E6%89%80%E8%AC%82%E9%87%8F%E5%8C%96%E8%88%87%E8%B3%AA%E5%8C%96%E7%9A%84%E6%80%9D%E8%80%83.html" />
+    <id>https://blog.paulme.ng/posts/2019-10-18-%E6%89%80%E8%AC%82%E9%87%8F%E5%8C%96%E8%88%87%E8%B3%AA%E5%8C%96%E7%9A%84%E6%80%9D%E8%80%83.html</id>
+    <published>2019-10-18T00:00:00Z</published>
+    <updated>2019-10-18T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>看到在 Facebook 上有對於 Bill Nygren 回覆關於有什麼他希望他當年開始投資的時候希望他自己能知道的事。他的回答大致是說希望對看中本質而不要只依賴於量化。在他的經驗裡沒有一個完全依靠量化模型賺錢的。</p>
+<p>這剛好也是我最近在思考的，AQR 之前也有一集 Podcast 講量化跟質化哪個比較好。不過我注意到大家在講量化的時候沒有一個統一的定義。金融領域之中真的充滿了缺乏嚴謹定義的名詞跟 Misnomer。 我覺得要討論必須對【量化】這個東西下定義，討論才會比較均衡。同樣的·問題拿去問 Jim Simons 跟 Ed Thorp 大概會得出完全不同的答案。</p>
+<ul>
+<li>Jim Simons 早期也是做 Fundamental 的，但他因為一些經歷後覺得質化分析不夠可靠，最後跟他研究團隊最後決定全部走量化</li>
+<li>Edward Thorp 早年其實有跟巴菲特接觸過，那時候它就有預測他會變成全美最有錢的人，但他因為覺得自己擅長量化，又不想整天搞財報拜訪公司，所以就自己最後就變成統計套利的始祖。</li>
+</ul>
+<p>當然，很明顯 Bill Nygren 的量化跟 Jim Simons, Edward Thorp 的量化是完全不同的東西。我覺得 Bill Nygren 也只能說是他自己的優勢他做不到。但我覺得對於數學天才還是可以做得很好。而且質化還是要面對各種人性的弱點，只是這些弱點不好顯現，或是這些說話的人天生比別人要強。最終還是回歸你【相信】你自己的優勢在哪裏。但說實在相信也是容易造成 confirmation bias，也許就是想要這麼相信所以才找跟你體系相近的投資人的答案。</p>
+<p>隨著科技的演進，我相信量化跟質化的差異會越來越小，以前覺得只有人能判斷的部分都可能隨著自然語言處理的進步而進入量化系統中，有聽說華爾街也是有投資一些這方面的資金在分析 twitter 上面的舉動的。只要研究有一天能夠順利做出 encode 人類的邏輯進電腦的邏輯，那純粹人的質化優勢會越來越小。</p>
+<p>我目前的思考是，人類質化在強人工智慧來臨之前。他其實很重要的一點是能判斷什麼東西儘管沒看過，但可以用邏輯判斷有違於常識。這就是有一個判斷基準說某一套邏輯不會 work，畢竟以金融市場這樣會因參與者行為改變的系統（也就是索羅斯說的反身性），沒有永遠 work 的系統。而 Ed Thorp 說過要用一個系統非常重要的是你必須事先設定一個判斷說什麼條件發生的時候你的系統有問題，而一般人用量化系統的時候沒有考慮這層（先不說亂用 R-sqaure 的結論），而那是靠人腦的質化研究可以簡單提供的。</p>
+]]></summary>
+</entry>
+<entry>
     <title>目前我看懂的幾種辨別投資機會的方式</title>
     <link href="https://blog.paulme.ng/posts/2019-10-15-%E7%9B%AE%E5%89%8D%E6%88%91%E7%9C%8B%E6%87%82%E7%9A%84%E5%B9%BE%E7%A8%AE%E8%BE%A8%E5%88%A5%E6%8A%95%E8%B3%87%E6%A9%9F%E6%9C%83%E7%9A%84%E6%96%B9%E5%BC%8F.html" />
     <id>https://blog.paulme.ng/posts/2019-10-15-%E7%9B%AE%E5%89%8D%E6%88%91%E7%9C%8B%E6%87%82%E7%9A%84%E5%B9%BE%E7%A8%AE%E8%BE%A8%E5%88%A5%E6%8A%95%E8%B3%87%E6%A9%9F%E6%9C%83%E7%9A%84%E6%96%B9%E5%BC%8F.html</id>
@@ -663,24 +680,6 @@ SUM:                            14            651             17           4867
 <p>ProtonMailのメールデータは全て暗号化された状態でサーバー上に保存されています。データはすべてのステップで暗号化されていることから傍受のリスクはないとのこと。もっと知りたいたら、<a href="https://www.ted.com/talks/andy_yen_think_your_email_s_private_think_again?language=en">Andy Yen: Think your email’s private? Think again</a>の TED トークの動画を見てください。</p>
 <h2 id="購入後1ヶ月間使用した感想">購入後1ヶ月間、使用した感想</h2>
 <p>移入が大体上手くいく、ProtonMail はカスタムドメインをセットアップすることがあります。paulme.ng のドメインをProtonMailに移行しました。スパムフィルタが ProtonMail より Gmail の方がうまい。ProtonMailのフィルタはが手動セットアップあとで、メールの分類正しいになりました。暗号化と便利のトレード・オフがと思います。暗号化したら、情報を取得できないだから、訓練データになし、機械学習的手法を使っていない、スパムメッセージの分類器を作っていこどができません。それ以外は、満足しています。</p>
-]]></summary>
-</entry>
-<entry>
-    <title>Managing references with Paperpile</title>
-    <link href="https://blog.paulme.ng/posts/2019-07-28-managing-references-with-paperpile.html" />
-    <id>https://blog.paulme.ng/posts/2019-07-28-managing-references-with-paperpile.html</id>
-    <published>2019-07-28T00:00:00Z</published>
-    <updated>2019-07-28T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<p>For a long time I have the problem of managing papers and slides I am reading. It’s not only for the papers and slides from computer science, but also the financial reports and the letters to shareholder for my investment readings and researches. Over time I just downloaded a bunch of PDFs to my laptop and they scattered around in my Download folder without a systematic naming and indexing. It makes it hard to clean up the disk space for my laptop since I am not sure which one is what I needed if not by opening them up and review them one by one. It makes thing painful when you are backing up your system and migrating to the other. A couple of weeks back I found that I need to resolve this problem.</p>
-<p>An ideal reference management software to me in 2019 should provide the following features.</p>
-<ol type="1">
-<li>To be able to store in the cloud so that you are able to access it everywhere. It would be great to let you choose among the mainstream cloud storage providers, and provide options to make some of the papers accessible offline, but not sync everything to local.</li>
-<li>Good metadata auto completion. Not everything has a standard to label it or a good database to cross match and automatically label them, but it should be good for the parts that we are able to do it.</li>
-<li>Cross platform and reasonably performant.</li>
-<li>Providing API so that you could customise it for personal needs.</li>
-</ol>
-<p>I know the famous softwares like Zotero, Mendeley and Endnote. They have existed for a long time, but all of them feel more focus for scientific editing. I played with them for a little bit and Zotero maybe the closest but it still feels quite the exact thing I want. Until I noticed a new upcoming competitor: Paperpile. They seem to launch for some years but not that widely well-known. I tried it out and it gives me the feeling it is the closest reference management software I would like. I have lots of PDFs and my main purpose is not for scientific editing, I just need a software to edit it and help me rename them, and easy to look things up. It is a big-bonus to me that Paperpile is based on Google Drive. It resolves the issue 1, 3, 4 by leveraging on Google Drive as the backing storage. With Google Drive you could choose which file to stay offline and providing Google Drive API to let you trigger the hook, for example, to send a new card to my Trello when a new paper is added. The downside for sure is vendor lock-in, but it’s less a priority comparing to solving my need.</p>
-<p>I have tried it out for 3 weeks and I can say it is the software that’s closest to my ideal, though not perfect yet. I would stick to it before anything even better come up.</p>
 ]]></summary>
 </entry>
 
