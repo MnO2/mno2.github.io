@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1571472490.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1571503768.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,157 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2011-12-24-data-typeable.html">What are Data.Typeable and Data.Dynamic in Haskell</a></h1>
+    <div class="post-meta"><time datetime="2011-12-24 17:30">2011-12-24 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>While you are tracing serious haskell package, you probably would bump into something like this and wonder what it is.</p>
+<pre><code>foo :: Typeable a =&gt; a -&gt; Maybe b</code></pre>
+<p>Then you look it up on hackage and see the following confusing paragraph.</p>
+<p>The Typeable class reifies types to some extent by associating type representations to types. These type representations can be compared, and one can in turn define a type-safe cast operation. To this end, an unsafe cast is guarded by a test for type (representation) equivalence. The module Data.Dynamic uses Typeable for an implementation of dynamics. The module Data.Data uses Typeable and type-safe cast (but not dynamics) to support the “Scrap your boilerplate” style of generic programming. You could also google to don’s writeup on stackoverflow giving the references. Don gave four of the references but I found two of them most related, they are:</p>
+<p>Lammel, Ralf and Jones, Simon Peyton, “Scrap your boilerplate: a practical design pattern for generic programming, TLDI ’03: Proceedings of the 2003 ACM SIGPLAN International Workshop on Types in Languages Design and Implementation, 2003 Martín Abadi, Luca Cardelli, Benjamin Pierce and Gordon Plotkin, “Dynamic Typing in a Statically Typed Language”, ACM Transactions on Programming Languages and Systems (TOPLAS), 1991. And here is my understanding after reading these two and doing a little experiment with GHC.</p>
+<p>Typeable literally means able to ask its type (tag). It’s a typeclass defined in Data.Typeable with a function typeOf :: a -&gt; TypeRep in it. Do you feel familiar with keyword typeOf? It reminds you either typeof in javascript, typeid in C++, or instanceof in java. Typeable mechanism is kind of like Reflection, using typeOf (1::Int) can tell you the type representation (or you can just think of it type) of (1::Int) There are numerous types in standard library defined as instances of Typeable, so I do a little experiment by printing their type represection.</p>
+<pre><code>import Data.Int
+import Data.Word
+import Data.Ord
+import Data.Typeable
+import Control.Monad.ST
+import Control.Exception
+import Foreign.C.Types
+
+main = do
+    putStrLn $ show $ typeOf (True::Bool)
+    putStrLn $ show $ typeOf ('c'::Char)
+    putStrLn $ show $ typeOf (1.0::Double)
+    putStrLn $ show $ typeOf (1.0::Float)
+    putStrLn $ show $ typeOf (1::Int)
+    putStrLn $ show $ typeOf (1::Int8)
+    putStrLn $ show $ typeOf (1::Int16)
+    putStrLn $ show $ typeOf (1::Int32)
+    putStrLn $ show $ typeOf (1::Int64)
+    putStrLn $ show $ typeOf (1::Integer)
+    putStrLn $ show $ typeOf (undefined::Ordering)
+    putStrLn $ show $ typeOf (undefined::RealWorld)
+    putStrLn $ show $ typeOf (undefined::Word)
+    putStrLn $ show $ typeOf (undefined::Word8)
+    putStrLn $ show $ typeOf (undefined::Word16)
+    putStrLn $ show $ typeOf (undefined::Word32)
+    putStrLn $ show $ typeOf (undefined::Word64)
+    putStrLn $ show $ typeOf (undefined::())
+    putStrLn $ show $ typeOf (undefined::TyCon)
+    putStrLn $ show $ typeOf (undefined::TypeRep)
+    putStrLn $ show $ typeOf (undefined::ArithException)
+    putStrLn $ show $ typeOf (undefined::ErrorCall)
+    putStrLn $ show $ typeOf (undefined::SomeException)
+    putStrLn $ show $ typeOf (undefined::IOException)
+    putStrLn $ show $ typeOf (undefined::CUIntMax)
+    putStrLn $ show $ typeOf (undefined::CIntMax)
+    putStrLn $ show $ typeOf (undefined::CUIntPtr)
+    putStrLn $ show $ typeOf (undefined::CIntPtr)
+Bool
+Char
+Double
+Float
+Int
+Int8
+Int16
+Int32
+Int64
+Integer
+Ordering
+RealWorld
+Word
+Word8
+Word16
+Word32
+Word64
+()
+TyCon
+TypeRep
+GHC.Exception.ArithException
+GHC.Exception.ErrorCall
+GHC.Exception.SomeException
+GHC.IO.Exception.IOException
+CUIntMax
+CIntMax
+CUIntPtr
+CIntPtr</code></pre>
+<p>You can see that from ArithException, the output becomes GHC.Exception.ArithException, and ErrorCall becomes GHC.Exception.ErrorCall, not just boring identity from Int to Int, Char to Char. typeOf not just show it’s type but some type representation.</p>
+<p>It’s first official definition was shown in “scrap your boilerplate.” Here is the working excerpt of a reference implementation from the paper.</p>
+<pre><code>import Unsafe.Coerce
+
+class Typeable a where
+    typeOf :: a -&gt; TypeRep
+
+data TypeRep = TR String [TypeRep] deriving (Eq, Show)
+
+instance Typeable Int where
+    typeOf x = TR &quot;Prelude.Int&quot; []
+
+instance Typeable Bool where
+    typeOf x = TR &quot;Prelude.Bool&quot; []
+
+instance Typeable a =&gt; Typeable [a] where
+    typeOf x = TR &quot;Prelude.List&quot; [typeOf (get x)]
+        where
+            get :: [a] -&gt; a
+            get = undefined
+
+instance (Typeable a, Typeable b) =&gt; Typeable (a-&gt;b) where
+    typeOf f = TR &quot;Prelude.-&gt;&quot; [typeOf (getArg f), typeOf (getRes f)]
+        where getArg :: (a-&gt;b) -&gt; a
+              getArg = undefined
+              getRes :: (a-&gt;b) -&gt; b
+              getRes = undefined
+
+cast :: (Typeable a, Typeable b) =&gt; a -&gt; Maybe b
+cast x = r
+    where
+        r = if typeOf x == typeOf (get r)
+                then Just (unsafeCoerce x)
+                else Nothing
+        get :: Maybe a -&gt; a
+        get x = undefined
+
+main = do
+    putStrLn $ show $ typeOf (1::Int)</code></pre>
+<p>Although the intention to define Typeable typeclass in “scrap your boilerplate” is for generic programming, it is found useful in defining dynamic type, and that is what Data.Dynamic used for. As the previous quote says:</p>
+<p>The module Data.Dynamic uses Typeable for an implementation of dynamics. Then why do we need dynamic type in a static type language? An excerpt from “Dynamic Typing in a Statically Typed Language” tell us. &gt; There is often the need to deal with data whose type cannot be &gt; determined at compile time. For example, full static typechecking &gt; of programs that exchange data with other programs or access persistent &gt; data is in general not possible. A certain amount of dynamic checking must &gt; be performed in order to preserve type safety.</p>
+<p>A solution to this is to define a static Dynamic type, which internally could be considered as a tuple of (binary representation, type tag). When the program communicates with external resources, all of the type is converted to Dynamic. You could achieve runtime type safety by inspecting its type tag (with typeOf function)</p>
+<p>An example of this is Heterogeneous List</p>
+<pre><code>import Data.Dynamic
+import Data.Maybe
+
+hlist :: [Dynamic]
+hlist = [toDyn &quot;string&quot;,
+         toDyn (7::Int),
+         toDyn (pi :: Double),
+         toDyn 'x',
+         toDyn ((), Just &quot;foo&quot;)]
+
+dyn :: Dynamic
+dyn = hlist !! 1
+
+v :: Int
+v = case fromDynamic dyn of
+         Nothing -&gt; error &quot;Type mismatch&quot;
+         Just x -&gt; x
+
+main = do putStrLn $ show v</code></pre>
+<p>Postscript: Haskell 98 limits the typeclass that is auto derivable. To switch on auto derivation of Typeable, please check auto deriving</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -198,258 +349,6 @@ instance C a =&gt; C [a] where
 
 main = do
     putStrLn $ toString (&quot;Hello&quot;::[Char])</code></pre>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2011-11-28-dynamic-programming-haskell.html">Writing Dynamic Programming in Haskell</a></h1>
-    <div class="post-meta"><time datetime="2011-11-28 17:30">2011-11-28 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>From the fact that the function is the composing unit in haskell, you can quickly guess that the most intuitive way to implement dynamic programming is through memoization. Of course you can implement through state modification if you insist, but that is just coding a C program in haskell.</p>
-<p>The core of dynamic programming is recursion, but with the exploitation of overlapping subproblem. Such that we can add another layer of data structure to memorize the previosuly calculated subproblem results. The power of haskell lies at you can just implement the brute force recursive version, then with little modification it just provides you the semantics of dynamic programming. There exists two most used library on hackage. They are data-memocombinators, and MemoTrie. Both uses the similar internal mechanism. MemoTrie is easier to use if you don’t need to memorize your own data type, data-memocombinators satisfies your need if you really want that.</p>
-<p>The following lists six implementations of problem31 of project euler in haskell, one uses data-memocombinators, one uses MemoTrie, another from HaskellWiki exploits lazy evaluation, one uses immutable array to implement that. The rest two are from stackoverflow provided by John Lato.</p>
-<pre><code>import qualified Data.MemoCombinators as Memo
-
-coins = [1,2,5,10,20,50,100,200]
-
-sol1 = f
-    where f :: Int -&gt; Int -&gt; Int
-          f = Memo.memo2 Memo.integral (Memo.arrayRange (0,7)) mf
-            where mf :: Int -&gt; Int -&gt; Int
-                  mf n k | (k &gt;= 8) || (n &lt; 0) = 0
-                         | n == 0 = 1
-                         | otherwise = (f n (k+1)) + (f (n - coins !! k) k)
-
-main = do
-    print $ sol1 200 0
-./sol01 +RTS -sstderr 
-       4,901,540 bytes allocated in the heap
-         220,696 bytes copied during GC
-          82,112 bytes maximum residency (1 sample(s))
-          22,864 bytes maximum slop
-               1 MB total memory in use (0 MB lost due to fragmentation)
-
-  Generation 0:     9 collections,     0 parallel,  0.00s,  0.00s elapsed
-  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
-
-  INIT  time    0.00s  (  0.00s elapsed)
-  MUT   time    0.01s  (  0.01s elapsed)
-  GC    time    0.00s  (  0.00s elapsed)
-  RP    time    0.00s  (  0.00s elapsed)
-  PROF  time    0.00s  (  0.00s elapsed)
-  EXIT  time    0.00s  (  0.00s elapsed)
-  Total time    0.01s  (  0.01s elapsed)
-
-  %GC time       6.9%  (7.3% elapsed)
-
-  Alloc rate    389,289,174 bytes per MUT second
-
-  Productivity  85.8% of total user, 91.4% of total elapsed
-coins = [1,2,5,10,20,50,100,200]
-
-sol2 = mf
-    where memo :: (Num a, Enum a) =&gt; (a -&gt; b) -&gt; [b]
-          memo f = map f (enumFrom 0)
-          mf :: Int -&gt; Int -&gt; Int
-          mf = \n k -&gt; fvalue !! n !! k
-          fvalue = fmap memo (memo f)
-          f :: Int -&gt; Int -&gt; Int
-          f n k | (k &gt;= 8) || (n &lt; 0) = 0
-                | n == 0 = 1
-                | otherwise = (if k &lt; 7 then mf n (k+1) else 0) + (if n - coins!!k &gt;= 0 then mf (n - coins !! k) k else 0)
-
-main = do
-    print $ sol2 200 0
-./sol02 +RTS -sstderr 
-         334,684 bytes allocated in the heap
-           2,096 bytes copied during GC
-          43,012 bytes maximum residency (1 sample(s))
-          26,620 bytes maximum slop
-               1 MB total memory in use (0 MB lost due to fragmentation)
-
-  Generation 0:     0 collections,     0 parallel,  0.00s,  0.00s elapsed
-  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
-
-  INIT  time    0.00s  (  0.00s elapsed)
-  MUT   time    0.00s  (  0.00s elapsed)
-  GC    time    0.00s  (  0.00s elapsed)
-  RP    time    0.00s  (  0.00s elapsed)
-  PROF  time    0.00s  (  0.00s elapsed)
-  EXIT  time    0.00s  (  0.00s elapsed)
-  Total time    0.01s  (  0.01s elapsed)
-
-  %GC time       1.9%  (2.3% elapsed)
-
-  Alloc rate    57,142,564 bytes per MUT second
-
-  Productivity  80.1% of total user, 94.6% of total elapsed
-coins = [1,2,5,10,20,50,100,200]
-
-sol3 = (!!) (ways [1,2,5,10,20,50,100,200])
-    where ways [] = 1 : repeat 0
-          ways (coin:coins) = n
-              where n = zipWith (+) (ways coins) (replicate coin 0 ++ n)
-
-main = do
-    print $ sol3 200
-./sol03 +RTS -sstderr 
-         248,052 bytes allocated in the heap
-           2,096 bytes copied during GC
-          43,012 bytes maximum residency (1 sample(s))
-          26,620 bytes maximum slop
-               1 MB total memory in use (0 MB lost due to fragmentation)
-
-  Generation 0:     0 collections,     0 parallel,  0.00s,  0.00s elapsed
-  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
-
-  INIT  time    0.00s  (  0.00s elapsed)
-  MUT   time    0.00s  (  0.00s elapsed)
-  GC    time    0.00s  (  0.00s elapsed)
-  RP    time    0.00s  (  0.00s elapsed)
-  PROF  time    0.00s  (  0.00s elapsed)
-  EXIT  time    0.00s  (  0.00s elapsed)
-  Total time    0.00s  (  0.00s elapsed)
-
-  %GC time       3.2%  (4.0% elapsed)
-
-  Alloc rate    66,041,533 bytes per MUT second
-
-  Productivity  72.3% of total user, 91.1% of total elapsed
-import qualified Data.MemoTrie as MT
-
-coins = [1,2,5,10,20,50,100,200]
-
-sol4 = f
-    where f :: Int -&gt; Int -&gt; Int
-          f = MT.memo2 mf
-            where mf :: Int -&gt; Int -&gt; Int
-                  mf n k | (k &gt;= 8) || (n &lt; 0) = 0
-                         | n == 0 = 1
-                         | otherwise = (f n (k+1)) + (f (n - coins !! k) k)
-
-main = do
-    print $ sol4 200 0
-./sol04 +RTS -sstderr 
-       3,992,108 bytes allocated in the heap
-         874,084 bytes copied during GC
-         185,192 bytes maximum residency (1 sample(s))
-          26,680 bytes maximum slop
-               2 MB total memory in use (0 MB lost due to fragmentation)
-
-  Generation 0:     7 collections,     0 parallel,  0.00s,  0.00s elapsed
-  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
-
-  INIT  time    0.00s  (  0.00s elapsed)
-  MUT   time    0.01s  (  0.01s elapsed)
-  GC    time    0.00s  (  0.00s elapsed)
-  RP    time    0.00s  (  0.00s elapsed)
-  PROF  time    0.00s  (  0.00s elapsed)
-  EXIT  time    0.00s  (  0.00s elapsed)
-  Total time    0.01s  (  0.01s elapsed)
-
-  %GC time      22.3%  (24.8% elapsed)
-
-  Alloc rate    505,650,158 bytes per MUT second
-
-  Productivity  66.4% of total user, 73.3% of total elapsed
-import Data.Maybe
-import qualified Data.Map as M
-
-
-coins = [1,2,5,10,20,50,100,200]
-
-sol5 = mf
-    where memo :: (Num a, Enum a) =&gt; (a -&gt; b) -&gt; [b]
-          memo f = map f (enumFrom 0)
-          gwvals = fmap memo (memo f)
-          gwByMap :: Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int
-          gwByMap maxX maxY = \x y -&gt;  fromMaybe (f x y) $ M.lookup (x,y) memomap
-            where memomap = M.fromList $ concat [[((x',y'), z) | (y',z) &lt;- zip [0..maxY] ys] | (x',ys) &lt;- zip [0..maxX] gwvals]
-          mf :: Int -&gt; Int -&gt; Int
-          mf = gwByMap 205 8
-          f :: Int -&gt; Int -&gt; Int
-          f n k | (k &gt;= 8) || (n &lt; 0) = 0
-                | n == 0 = 1
-                | otherwise = (if k &lt; 7 then mf n (k+1) else 0) + (if n - coins!!k &gt;= 0 then mf (n - coins !! k) k else 0)
-
-main = do
-    print $ sol5 200 0
-./sol05 +RTS -sstderr 
-       1,856,632 bytes allocated in the heap
-         265,496 bytes copied during GC
-          87,788 bytes maximum residency (1 sample(s))
-          22,236 bytes maximum slop
-               1 MB total memory in use (0 MB lost due to fragmentation)
-
-  Generation 0:     3 collections,     0 parallel,  0.00s,  0.00s elapsed
-  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
-
-  INIT  time    0.00s  (  0.00s elapsed)
-  MUT   time    0.01s  (  0.01s elapsed)
-  GC    time    0.00s  (  0.00s elapsed)
-  RP    time    0.00s  (  0.00s elapsed)
-  PROF  time    0.00s  (  0.00s elapsed)
-  EXIT  time    0.00s  (  0.00s elapsed)
-  Total time    0.01s  (  0.01s elapsed)
-
-  %GC time       8.0%  (8.7% elapsed)
-
-  Alloc rate    197,011,035 bytes per MUT second
-
-  Productivity  82.3% of total user, 89.4% of total elapsed</code></pre>
-<pre><code>import Data.Array.IArray
-
-coins = [1,2,5,10,20,50,100,200]
-
-sol6 = ans
-    where ans :: Int -&gt; Int -&gt; Int
-          ans n k = table ! (n, k)
-            where table :: Array (Int, Int) Int
-                  table = listArray ((0,0), (300,7)) [f i j | i &lt;- [0..n], j &lt;- [0..7]]
-                  f n k | (k &gt;= 8) || (n &lt; 0) = 0
-                        | n == 0 = 1
-                        | otherwise = (if k &lt; 7 then table ! (n, (k+1)) else 0) + (if (n - coins!!k) &gt;= 0 then table ! ((n - coins !! k), k) else 0)
-
-main = do
-    print $ sol6 200 0
-./sol06 +RTS -sstderr 
-         280,488 bytes allocated in the heap
-           2,096 bytes copied during GC
-          43,012 bytes maximum residency (1 sample(s))
-          26,620 bytes maximum slop
-               1 MB total memory in use (0 MB lost due to fragmentation)
-
-  Generation 0:     0 collections,     0 parallel,  0.00s,  0.00s elapsed
-  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
-
-  INIT  time    0.00s  (  0.00s elapsed)
-  MUT   time    0.00s  (  0.00s elapsed)
-  GC    time    0.00s  (  0.00s elapsed)
-  RP    time    0.00s  (  0.00s elapsed)
-  PROF  time    0.00s  (  0.00s elapsed)
-  EXIT  time    0.00s  (  0.00s elapsed)
-  Total time    0.01s  (  0.00s elapsed)
-
-  %GC time       2.4%  (2.9% elapsed)
-
-  Alloc rate    51,674,281 bytes per MUT second
-
-  Productivity  78.1% of total user, 93.7% of total elapsed</code></pre>
-<p>One thing to notice is these two are not equivalent.</p>
-<pre><code>m1      = ((filter odd [1..]) !!)
-
-m2 n    = ((filter odd [1..]) !! n)</code></pre>
-<p>This problem is related to Eta Expansion. You could probably re-evaluate a lamda function without caution. Or just checkout the discussion on stackoverflow.</p>
 
       </article>
     </div>
