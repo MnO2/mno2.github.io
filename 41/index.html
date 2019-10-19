@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1571371482.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1571472490.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,41 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2015-02-20-ipa-keyboard.html">IPA Keyboard on Mac OS X</a></h1>
+    <div class="post-meta"><time datetime="2015-02-20 17:30">2015-02-20 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>While back in school, we most probably are taught American English with the so called Kenyon and Knott Phonetic Symbol. It is a simplified IPA subset to capture the normal American pronunciation. And if you were taught with British system, then Daniel Jones Phonetic Symbol would be used instead. However, none of these are useful when you expand your eye sight to other languages. Especially when the language you are learning is in a different language family, say you are native in Romance family but learning Sino-Tibetan languages family, or vice versa. You need a phonemic transcription accurately reflect the actual sound. No matter it is tone or aspirated consonant or not.</p>
+<p>International Phonetic Alphabet is the de factor standard we use. You could find various IPA courses on youtube. Like 1, 2, 3. You could get a whole picture from watching the video, but you still have to learn it with your ear and muscle.</p>
+<p>Besides keep practicing, it is good to type it out when you hear a word. Unfortunately, the default Mac OS X system doesn’t come with an IPA keyboard. If you are a less frequent IPA user, you could use web keyboard, 1 and 2. But for frequent use, installing fonts and keyboard layout are good to have.</p>
+<p>With this article as a very good reference: Using IPA fonts with Mac OS X. I installed it successfully on my Mac OS Yosemite.</p>
+<ol type="1">
+<li>Download the keyboard layout from here:</li>
+<li>Double click the dmg and copy to your $HOME/Library</li>
+</ol>
+<pre><code>cp /Volumes/IPA-MACkbd/IPA\ Unicode\ 6.2\(v1.5\)\ MAC.keylayout $HOME/Library/Keyboard\ Layout/</code></pre>
+<ol type="1">
+<li>Download the CharisSIL fonts for IPA</li>
+<li>Copy the fonts to your Libar</li>
+</ol>
+<pre><code>cp CharisSIL-5.000/ $HOME/Library/Fonts/</code></pre>
+<ol type="1">
+<li>Launch Settings -&gt; Keyboard -&gt; ‘+’ -&gt; Others, to choose the ‘IPA Unicode 6.2’.</li>
+<li>Ctrl + Command + Space to switch to IPA input method And enjoy!</li>
+</ol>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -93,25 +128,6 @@ main = flip runContT (\_ -&gt; return ()) $ do
 
                 </article>
             
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-02-15-hangul-indian.html">The Korean 한글 Han-gul Indian Connection</a></h1>
-    <div class="post-meta"><time datetime="2015-02-15 17:30">2015-02-15 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>In this video Stuart Jay Raj briefed about the relationship between 한글 and sanskrit. Basically when king 조선 세종 created the han-gul. They learned it from Mangolia’s Phags-pa, which could be dated back to sanskrit. Therefore, looking at the picture you could see common patterns between the two of writing alphabets. Inspiring watch!</p>
-<p><img src="../images/legacy/0*ZHKHv0MqKKA6xjjl.jpg" /></p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
         </main>
 
         <div class="pure-g">
@@ -136,7 +152,7 @@ main = flip runContT (\_ -&gt; return ()) $ do
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 41 of 53</div>
+            <div class="page-number is-center">Page 41 of 54</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>

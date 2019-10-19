@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1571371482.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1571472490.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,166 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2012-04-22-haskell-arrow.html">I used to be an Haskeller like you, then I took an Arrow in the knee</a></h1>
+    <div class="post-meta"><time datetime="2012-04-22 17:30">2012-04-22 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>You hardly can miss Arrow on your path of learning Haskell. Just after struggling with Functor, Applicative and Monad, you convince yourself that you can finally take a look at those standard libraries requiring you the knowledge of Monad. A few Arrow interface libraries such as Hakyll, HXT, reactive-banana just punch you in the face. You just don’t understand what that is. Finishing tutorials on wikibook (link1, link2) do help, but you still can’t get the whole picture. What’s the relationship between Arrow and Monad? Is there non-trivial concrete example that can persuade me it is useful? Here I try to provide my answers.</p>
+<h3 id="why-monad-is-not-enough">Why Monad is not Enough</h3>
+<p>Arrow is proposed by John Hughes in 1998. As described in his paper Generalising Monads to Arrows, the purpose of Arrows is to resolve the issue of memory consumption in using moandic parser. An example from the paper is:</p>
+<pre><code>instance MonadPlus Parser where
+    P a + P b = P (\s -&gt; case a s of 
+                            Just (x, s') -&gt; Just (x, s')
+                            Nothing -&gt; b s)</code></pre>
+<p>The property of Plus corresponds to backtracking parsers. The input s is retained in the memory and not garbage collected as long as the parser a succeeding in parsing. If a succeeds a large part of the input s before it eventually fails, then a great deal of space would be used to hold these already-parsed tokens. To resolve this kind of problems, the Arrows was proposed.</p>
+<p>Besides the issue mentioned above, We know that Monads essentially provide a sequential interface to computation. One can build a computation out of a value, or sequence two computations. The structure of Monads empowers us convenience and at the same time limits its usage. Some problem domains can not be modeled with Monads, jaspervdj proposes that a building system like Hakyll is one of them.</p>
+<p>In general, the structure that is not sequental, but is much like electronic circuits can be modeled by Arrows. Monads fails to model these structures. Its composability is not as flexible as Arrows.</p>
+<h3 id="typeclassopedia">Typeclassopedia</h3>
+<p>Let’s see a diagram from Typeclassopedia by Brent Yorgey.</p>
+<p><img src="../images/legacy/0*EAp1EQzHN6cvH0px.png" /></p>
+<p>This diagram tells us the relationship between Monads and Arrows. Unlike Functor and Applicative, they are basically different things and from different lineage.</p>
+<p>First of all, an Arrow has to be an Category. Category generalizes the notion of function composition to the morphisms in Category Theory. Its definition in base package is as follows:</p>
+<pre><code>class Category cat where
+    id :: cat a a
+    (.) :: cat b c -&gt; cat a b -&gt; cat a c</code></pre>
+<p>We can see that it requires an identity morphism id, and the composition operator (.) for morphisms. Also note that Category is unequivalent to arbitrary categories in Category Theory. It only corresponds to those categories whose objects are objects of Hask.</p>
+<p>Laying on the foundation of Category, Arrow’s definition is as follows:</p>
+<pre><code>class Category a =&gt; Arrow a where
+    arr :: (b -&gt; c) -&gt; a b c
+    first :: a b c -&gt; a (b, d) (c, d)
+    second :: a b c -&gt; a (d, b) (d, c)
+    (***) :: a b c -&gt; a b' c' -&gt; a (b, b') (c, c')
+    (&amp;&amp;&amp;) :: a b c -&gt; a b c' -&gt; a b (c, c')</code></pre>
+<p>There are five methods here, but actually you only have to define arr and first. Rest of them can be automatically derived.</p>
+<p>To see how these five composing methods work, let’s try out an easy example. That is to model an OR gate with NAND gates.</p>
+<p><img src="../images/legacy/0*6ek_K8IaTNu-E0J0.png" /></p>
+<p>We can duplicate the input to the first level NAND gates with id and &amp;&amp;&amp;, and to combine the results of first level NAND gates, we can use *** operator. In chart it looks like this.</p>
+<p><img src="../images/legacy/0*1DCS_3OU5QVKmo-O.png" /></p>
+<p>To implements it in haskell we also need to define the circuit element as instances of Category and Arrow, we call it Auto.</p>
+<pre><code>{-# LANGUAGE Arrows #-}
+import Prelude hiding (id, (.))
+import Control.Arrow
+import Control.Category
+
+data Auto b c = Auto (b -&gt; c)
+
+instance Category Auto where
+    id = Auto id
+    Auto f . Auto g = Auto (f . g)
+
+instance Arrow Auto where
+    arr f = Auto f 
+    first (Auto f) = Auto $ \(x, y) -&gt; (f x, y)
+
+nand2 :: Auto (Bool, Bool) Bool
+nand2 = arr (not . uncurry (&amp;&amp;))
+
+or2 :: Auto (Bool, Bool) Bool
+or2 = ((arr (id) &amp;&amp;&amp; arr (id)) &gt;&gt;&gt; nand2) *** ((arr (id) &amp;&amp;&amp; arr (id)) &gt;&gt;&gt; nand2) &gt;&gt;&gt; nand2
+
+runAutoA :: (Bool, Bool) -&gt; Auto (Bool, Bool) a -&gt; IO a
+runAutoA x (Auto f) = return (f x)
+
+main = do 
+    let comb = [(False, False), (False, True), (True, False), (True, True)]
+    result &lt;- sequence $ flip runAutoA or2 `map` comb 
+    putStrLn $ show result</code></pre>
+<h3 id="arrow-notation">Arrow Notation</h3>
+<p>When we are tackling larger problems, the notation soon gets complicated to handle. That’s why we want to have do block syntax sugar to make it look nicer, as we do for Monad. GHC provides Arrow Notation, but it’s currently not part of Haskell 98, you must enable the corresponding extension: with -XArrow or prepend a header line to the files {-# LANGUAGE Arrows #-}. After that, we can rewrite our OR gate example above with Arrow notation.</p>
+<pre><code>{-# LANGUAGE Arrows #-}
+import Prelude hiding (id, (.))
+import Control.Arrow
+import Control.Category
+
+data Auto b c = Auto (b -&gt; c)
+
+instance Category Auto where
+    id = Auto id
+    Auto f . Auto g = Auto (f . g)
+
+instance Arrow Auto where
+    arr f = Auto f 
+    first (Auto f) = Auto $ \(x, y) -&gt; (f x, y)
+
+nand2 :: Auto (Bool, Bool) Bool
+nand2 = arr (not . uncurry (&amp;&amp;))
+
+or2' :: Auto (Bool, Bool) Bool
+or2' = proc (i0, i1) -&gt; do 
+        m1 &lt;- nand2 -&lt; (i0,i0)
+        m2 &lt;- nand2 -&lt; (i1,i1)
+        nand2 -&lt; (m1,m2)  
+
+runAutoA :: (Bool, Bool) -&gt; Auto (Bool, Bool) a -&gt; IO a
+runAutoA x (Auto f) = return (f x)
+
+main = do 
+    let comb = [(False, False), (False, True), (True, False), (True, True)]
+    result' &lt;- sequence $ flip runAutoA or2' `map` comb 
+    putStrLn $ show result'</code></pre>
+<p>The pattern is keyword proc followed with the input symbols, then -&gt; do. We describe each elemment in each line. m1 &lt;- nand2 -&lt; (i0,i0) means nand2 accept a tuple (i0, i0) and the its output is bound to the name m1. The last line must be an expression, just like Monad, its value denotes the value of the whole do block. In this case, its the output of nand2 -&lt; (m1,m2)</p>
+<h3 id="a-more-complicated-example">A More Complicated Example</h3>
+<p>Already know how to simulate OR with NAND, let’s implement a hald-adder.</p>
+<p><img src="../images/legacy/0*MIcgossP8D0G67Vu.png" /></p>
+<p>With the help of Arrow Notation, all we need to do is to define the instances, and drawing circuits with &lt;- and -&lt; symbols in the program.</p>
+<pre><code>{-# LANGUAGE Arrows #-}
+import Prelude hiding (id, (.))
+import Control.Arrow
+import Control.Category
+
+data Auto b c = Auto (b -&gt; c)
+
+instance Category Auto where
+    id = Auto id
+    Auto f . Auto g = Auto (f . g)
+
+instance Arrow Auto where
+    arr f = Auto f 
+    first (Auto f) = Auto $ \(x, y) -&gt; (f x, y)
+
+and2 :: Auto (Bool, Bool) Bool
+and2 = arr (uncurry (&amp;&amp;))
+
+or2 :: Auto (Bool, Bool) Bool
+or2 = arr (uncurry (||))
+
+nand2 :: Auto (Bool, Bool) Bool
+nand2 = arr (not . uncurry (&amp;&amp;))
+
+xor2 :: Auto (Bool, Bool) Bool
+xor2 = proc i -&gt; do
+        m0 &lt;- nand2 -&lt; i
+        m1 &lt;- or2 -&lt; i
+        and2 -&lt; (m0, m1)
+
+hAdder :: Auto (Bool, Bool) (Bool, Bool)
+hAdder = proc i -&gt; do
+          o0 &lt;- xor2 -&lt; i
+          o1 &lt;- and2 -&lt; i
+          id -&lt; (o1, o0)
+
+runAutoA :: (Bool, Bool) -&gt; Auto (Bool, Bool) a -&gt; IO a
+runAutoA x (Auto f) = return (f x)
+
+main = do 
+    putStr &quot;Hello &quot;
+    pairs &lt;- runAutoA (True, True) hAdder 
+    putStrLn $ show pairs</code></pre>
+<h3 id="postscript">Postscript</h3>
+<p>As you can see from typeclassopedia diagram, there are variants of Arrow. They are ArrowZero, ArrowPlus, ArrowLoop, ArrowChoice and ArrowApply, where ArrowApply is equivalent to Monad. I’ll write another post to introduce them another days.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -146,38 +306,6 @@ main = do
 
                 </article>
             
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2012-04-04-%E4%B8%AD%E6%9D%B1%E7%8F%BE%E5%A0%B4%E8%88%87%E6%8B%89%E4%B8%81%E7%BE%8E%E6%B4%B2%E7%9C%9F%E7%9B%B8%E4%B9%8B%E8%B7%AF.html">中東現場與拉丁美洲真相之路</a></h1>
-    <div class="post-meta"><time datetime="2012-04-04 17:30">2012-04-04 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p><img src="../images/legacy/0*lgdZshc6cizOkPY7.jpg" /></p>
-<p>這是一篇欠了很久的讀書心得。 拖了很久是因為每每讀完這類開拓視野、發人深省的書便在下筆與反覆咀嚼兩端擺盪。 想下筆是因為覺得這些書可以讓閱讀的人更進一歩接近事情的本質，想透過推薦找出願意品嘗知識所造成的孤獨感的人。就算小眾至少世上是有人可以分享的。 猶豫著反思又是怕說自己所學甚淺，未累積足夠智識可以找出脈絡獨立判斷閱讀的資料。 閱讀過後的衝擊、激動或許是一種危險、缺乏冷靜的判斷。</p>
-<p>特別是像這兩本著名的香港獨立記者張翠容所寫的中東現場與 拉丁美洲真相之路， 每每讀到這類各國現況的所聞紀實、關鍵人物採訪好似在提醒自己所學有多麼淺薄。 了解政治、人民生活的現況往往需要歷史脈絡的追尋、政治左右派之爭、經濟史各個流派強堆的學說、彼此串連糾纏在一起才能窺得真相的某一面。 讀翠容的書的好處是她用淺顯的文字，在行文中也融進了消化上數知識後的分析見解。 可以讓你自己需要做的功課少了許多。 但這樣的缺點就是會讓你的讀書心得寫不下手， 因為覺得怎麼寫都覺得自己寫的心得沒什麼附加價值，浪費了看這篇心得的人的時間。 還不如直接附上連結，指著說「趕快去看本書吧。」</p>
-<p>這邊只分享一個特別有印象的事: 眾所皆知猶太人於二戰被屠殺，是被迫害者。 二戰後以色列立國，不出幾年過去的迫害者變成了擴張主義的征服者。 撇開巴勒斯坦土地不說， 1982年在以色列的介入下，黎巴嫩的巴人難民營被血洗、屠殺。 成了難民逃到別國還要被趕盡殺絕，這是什麼道理。 同樣距今不到十年，2002另一個名為Jenin難民營亦遭到以色列屠殺。 我知道這件事的時候完全可以體會自殺炸彈這種攻擊是怎麼來的， 當你被逼到絕境，生命毫無出路時，死亡並不是一件可怕的事， 可以順便把你恨透的敵人一起拖下水可說是絕佳划算。 歷史或許就在人性中不斷地糾纏發展， 過去的被害者也不一定會記住教訓，而不要讓事情再發生。</p>
-<p>最後，儘管在現今Twitter、Facebook等短文平台被號稱為新媒體的現在， 還是來列一些早些年所謂的獨立媒體或是公民媒體平台好了。 雖然以我的學識也沒有辦法嚴格區分這些的定義有什麼不同。 但至少在這個世界受到主流美國媒體強烈主導下，提供些不同有組織性的管道可以了解世界。 相信其中也是有不少像翠容一樣智識的人在付出。</p>
-<p>最有名的是不外乎就是Global Voices，也是流量最大的。 他是Ethan Zuckerman跟Rebecca MacKinnon在2004年在哈佛法學院的贊助下成立的。 也是目前看到的平台中最容易透過多國語言翻譯來閱讀的。</p>
-<p>另外就是在1999年透過反全球化活動、希望聚集眾人力量的前提下而重力的Independent Media Center。 算是串連世界各地獨立媒體的平台。只要符合一些條件，確認你可以自己運作一個獨立媒體組織就可以申請加入串連。</p>
-<p>至於一些地區性的著名獨立媒體羅列如下</p>
-<ul>
-<li>加拿大的Now Public</li>
-<li>美國的Democracy Now</li>
-<li>韓國的Oh My News</li>
-<li>香港的獨立媒體</li>
-<li>台灣的苦勞網以及Peopo</li>
-</ul>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
         </main>
 
         <div class="pure-g">
@@ -202,7 +330,7 @@ main = do
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 47 of 53</div>
+            <div class="page-number is-center">Page 47 of 54</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>
