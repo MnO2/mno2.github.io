@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1572151999.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1572179805.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,47 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2019-06-16-cjk-unified-ideograph-developers-should-know.html">CJK Unified Ideograph developers should know</a></h1>
+    <div class="post-meta"><time datetime="2019-06-16 21:51">2019-06-16 21:51</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>I have been working on <a href="https://github.com/messense/jieba-rs">jieba-rs</a> these few weeks and traced the code from the original python <a href="https://github.com/fxsjy/jieba">implementation</a>. I found a wrong assumption in the code that is by assuming the unicode scalar only ranges from U+4E00 to U+9FD5</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb1-1" title="1">re_han_default <span class="op">=</span> re.<span class="bu">compile</span>(<span class="st">&quot;([</span><span class="ch">\u4E00</span><span class="st">-</span><span class="ch">\u9FD5</span><span class="st">a-zA-Z0-9+#&amp;\._%\-]+)&quot;</span>, re.U)</a></code></pre></div>
+<p>The same kind of mistakes have been made on Chinese websites, where developers don’t even bother to put minimum effort to understand what the unicode standard is, and therefore only assumes that the unicode range only from the BMP. They don’t know as of Unicode 12.0, it has defined a total of 87887 CJK Unifided Ideograph. And there are charaters defined in Extension A to Extension F, and the upcoming planned Extension G. What falls in the BMP was mainly the result of <a href="https://en.wikipedia.org/wiki/Han_unification">Han Unification</a></p>
+<p>To correctly defined the range of the unicode for CJK as the time of Unicode 12, you have to define at least the following ranges.</p>
+<ul>
+<li>U+3400…U+4DBF (Extesnion A)</li>
+<li>U+4E00…U+9FFF (BMP)</li>
+<li>U+F900…U+FAFF (Compatibilty Ideograph)</li>
+<li>U+20000…U+2A6DF (Extension B)</li>
+<li>U+2A700…U+2B73F (Extension C)</li>
+<li>U+2B740…U+2B81F (Extension D)</li>
+<li>U+2B820…U+2CEAF (Extension E)</li>
+<li>U+2CEB0…U+2EBEF (Extension F)</li>
+<li>U+2F800…U+2FA1F (Compatibility Supplement)</li>
+</ul>
+<p>It would cover the test cases like so that you would have your logic built on the correct foundation.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb2-1" title="1">   <span class="kw">let</span> <span class="kw">mut</span> jieba = <span class="pp">Jieba::</span>new();</a>
+<a class="sourceLine" id="cb2-2" title="2"></a>
+<a class="sourceLine" id="cb2-3" title="3">    <span class="co">//add fake word into dictionary</span></a>
+<a class="sourceLine" id="cb2-4" title="4">    jieba.add_word(<span class="st">&quot;䶴䶵𦡦&quot;</span>, <span class="cn">Some</span>(<span class="dv">1000</span>), <span class="cn">None</span>);</a>
+<a class="sourceLine" id="cb2-5" title="5">    jieba.add_word(<span class="st">&quot;讥䶯䶰䶱䶲䶳&quot;</span>, <span class="cn">Some</span>(<span class="dv">1000</span>), <span class="cn">None</span>);</a>
+<a class="sourceLine" id="cb2-6" title="6"></a>
+<a class="sourceLine" id="cb2-7" title="7">    <span class="kw">let</span> words = jieba.cut(<span class="st">&quot;讥䶯䶰䶱䶲䶳䶴䶵𦡦&quot;</span>, <span class="cn">false</span>);</a>
+<a class="sourceLine" id="cb2-8" title="8">    <span class="pp">assert_eq!</span>(words, <span class="pp">vec!</span><span class="op">[</span><span class="st">&quot;讥䶯䶰䶱䶲䶳&quot;</span>, <span class="st">&quot;䶴䶵𦡦&quot;</span><span class="op">]</span>);</a></code></pre></div>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -90,28 +131,6 @@
 
                 </article>
             
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2019-05-26-moving-away-from-medium.html">Moving away from Medium</a></h1>
-    <div class="post-meta"><time datetime="2019-05-26 17:30">2019-05-26 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>I was a happy user of medium until they started to raise the paywall due to they need to manage to turn it into a business not losing a lot of money. I am quite OK with paying or accept that the website needs to inject ads or something else to generate revenue. However, the way the medium has been doing is annoying. They put up the warning on the top of your write-ups saying that it is not behind the paywall, and you could not hide it by clicking it away, every time you visit the page it would show, and only the author would see it.</p>
-<p><img src="../images/paywall.png" /></p>
-<p>One of the benefit of Medium is that it comes with an app that I could simply just edit a write-up while I am traveling (though it could not be used without internet). I also found the replacement which is <a href="https://www.mweb.im/">MWeb</a> markdown editor. I could edit the writeup offline and easily publish it to the platforms supported. The Medium’s app is no longer exclusive benefit to me.</p>
-<p>I decided to move back to the static site generator. I updated the Hakyll’s theme and make it as clean as possible. I was using the old Caspor theme but this time I used purecss to make one by myself. It is responsive and look very clean with all the white color around it. Without those large size javascript and css files need to be loaded, my static website loaded much faster as well, and I have full access to edit it as much as I like. This static website is also run on the digitalocean’s managerd kubernetes.</p>
-<p>My journey so far has been Octopress, Hakyll, Medium, and then move back to Hakyll.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
         </main>
 
         <div class="pure-g">
@@ -136,7 +155,7 @@
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 10 of 54</div>
+            <div class="page-number is-center">Page 10 of 55</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>

@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1572151999.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1572179805.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -53,17 +53,47 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2016-04-08-tampermonkey.html">TampermonkeyでChromeもっと便利に使おう</a></h1>
-    <div class="post-meta"><time datetime="2016-04-08 17:30">2016-04-08 17:30</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2016-05-22-curl.html">curl を取り替えしたの httpie を使う</a></h1>
+    <div class="post-meta"><time datetime="2015-05-22 15:30">2015-05-22 15:30</time> </span>
     <div class="slot-content">
       <article>
-        <p><img src="../images/legacy/1*E3O_pk89r4LK216loMPWOw.png" /></p>
-<p>Tampermonkeyは,Firefoxの有名な拡張機能Greasemonkeyとほぼ互換の拡張機能である。インストールすれば、ユーザースクリプトの機能を利用できます。それは、JavascriptでHTML文書のDOMを操作して、ウエブペイジの内容を書き換えることができる。プラグインも同じのことを遂げられたけど、プラグインより、ユーザースクリプトがリソースを少し利用して、軽量化です。それに、ユーザースクリプトが指定のdomainをロードされだから、とっても軽量して、大量のインストールも問題ではありません。</p>
-<p>大量なユーザースクリプトはgreasyforkからダウンロードことができます。greasyforkが最初のgreasemonkeyの鏡像であって、greasemonkeyは閉められた後に、ユーザースクリプトをホスティングして続けていた。最初からユーザースクリプトは私にとって、imgchiliやimgbabeなど写真のリンクをプレビューすることが易いなります。この写真のリンクは往々にアドを含めています。クリックしたら、アドポップアップを掲げっています。私は長い間FirefoxのNoscriptを使って、ポップアップアドを止めっで、写真を内覧するや、アドを取り除くや、リンクを自動的ジャンプするなど機能が欲しいです。恰もよし、列挙の機能はgreasyforkで現存のユーザースクリプトがあります。ここでは、インストールするスクリプトです。</p>
-<ul>
-<li>AdsByPasser<br> * Bypass Wait, Code &amp; Login on Webiste<br> * Download Youtube Videos as MP4<br> * Mouseover Popup Image Viewer<br> * The Pirate Bay Cleaner</li>
-</ul>
-<p>特に、alaboutなどのサイトブラウズする時、Mouseover Popup Image Viewerがとても有用です（笑う）。</p>
+        <h3 id="curl-を取り替えしたの-httpie-を使う">curl を取り替えしたの httpie を使う</h3>
+<p>ソフトウェアエンジニアとして、curl が必要なツールです。Resful Api をデバッグもしたし、HTTP header を指定したも curl が Linux と Mac プラットフォームで最も頻繁に使うツールです。私も curl を使う経験も10年になりました。以下のコメンドラインは一般的な curl の使い方。</p>
+<pre><code>    curl --verbose -H &quot;X-SSID: ABCDEFG&quot; &quot;https://example.org&quot;</code></pre>
+<p>最近、Chrome の拡張 Postman を使うの人がますます多くなります。人々はコメンドラインで Restful Api の response 調べてのを嫌いなります。それに、curl は色の出力がありませんでした。出力を読めたら、白色だけより色が有用です。それから、httpie を知っていて、実験をしてみて後、進めて決めます。</p>
+<p>Mac で homebrew あれば、インストールは安いです。</p>
+<pre><code>    brew install httpie</code></pre>
+<p>基礎の使い方は http コメンド後、URL を指定します。</p>
+<pre><code>    $ http httpie.org
+    HTTP/1.1 302 Found
+    Connection: close
+    Content-Length: 292
+    Content-Type: text/html; charset=iso-8859–1
+    Date: Sun, 22 May 2016 03:43:17 GMT
+    Location: 
+    Server: Apache/2.2.15 (CentOS)
+    X-Awesome: Thanks for trying HTTPie :)
+
+    &lt;!DOCTYPE HTML PUBLIC “-//IETF//DTD HTML 2.0//EN”&gt;
+    &lt;html&gt;&lt;head&gt;
+    &lt;title&gt;302 Found&lt;/title&gt;
+    &lt;/head&gt;&lt;body&gt;
+    &lt;h1&gt;Found&lt;/h1&gt;
+    &lt;p&gt;The document has moved &lt;a href=”
+    &quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+    &lt;hr&gt;
+    &lt;address&gt;Apache/2.2.15 (CentOS) Server at httpie.org Port 80&lt;/address&gt;
+    &lt;/body&gt;&lt;/html&gt;</code></pre>
+<p>Header を指定したらば、コロンが使っていて、header の key, value を指定します。</p>
+<pre><code>    http -v GET &quot;https://example.org&quot; Authorization:’ABCDEFG’ countryCode=US</code></pre>
+<p>HTTP の Verb も第二の引数を指定しできます。</p>
+<pre><code>    http PUT example.org name=John email=john@example.com</code></pre>
+<p>SSL を無視したら、 verify=no で検証をスキップします</p>
+<pre><code>    http -verify=no https://example.org</code></pre>
+<p>ダウロードしたら、download を入力します</p>
+<pre><code>    http —download https://github.com/jkbrzt/httpie/archive/master.tar.gz</code></pre>
+<p>もっとアドバイスの機能は、stream の response をログして、chunk を収集します。</p>
+<pre><code>    http - stream -f -a YOUR-TWITTER-NAME https://stream.twitter.com/1/statuses/filter.json track='Justin Bieber'</code></pre>
 
       </article>
     </div>
@@ -77,12 +107,17 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2016-03-26-FOSSASIA-2016.html">FOSSASIA 2016 中文感想</a></h1>
-    <div class="post-meta"><time datetime="2016-03-26 17:30">2016-03-26 17:30</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2016-04-08-tampermonkey.html">TampermonkeyでChromeもっと便利に使おう</a></h1>
+    <div class="post-meta"><time datetime="2016-04-08 17:30">2016-04-08 17:30</time> </span>
     <div class="slot-content">
       <article>
-        <p>這是在新加坡舉辦類似台灣 COSCUP 大拜拜的 Conference。這次跑去主要是對 Postgres 的議程有興趣。但仔細研究之後其實 Linux Track 的部分也是有不少有趣的 Talk。拜 Redhat 之賜，請到了 Lennart Pottering 來講 systemd，直接面對面看到 Linux 社群的爭議人物也是別有一番滋味。</p>
-<p>這一篇主要是想抒發一下新加坡 IT 生態的發展現況。大概兩年前我都覺得新加坡要發展 IT 生態真的有好長一段路要走。現在其實還有很多地方不足，不過我覺得兩年來的進步真的很大，我相信一些本地人感受會更深。除了一些 Developer Meetup 如雨後春筍冒出來，社群的發展也是活躍，有志願者願意花時間到處把 Meetup 的演講錄下來 (<a href="https://engineers.sg/">https://engineers.sg/</a>) 。時間下來真的是累積不少成果。雖然很多 Talk 的內容目前還是顯得不足，不過作為國際大都市的好處還有英語為主體的好處就是有不少潛在的國際性大神在這邊工作或是短期造訪。久而久之可以看到的是演講內容越來越提升。然後此次的 FOSSASIA 撇除國際型方面就內容還有協作開放性而言，我個人認為還是比不上 COSCUP，但加了國際性之後我認為其實不會顯得相形失色。如果再過個兩年，東南亞的開發者起來了，其實台灣固守自己的小圈圈就更顯得交流不足。嚴重交流不足，我想這也是 Aja Huang 提到的，台灣人在走出去的時候顯得自信不足的一部份成因吧。</p>
+        <p><img src="../images/legacy/1*E3O_pk89r4LK216loMPWOw.png" /></p>
+<p>Tampermonkeyは,Firefoxの有名な拡張機能Greasemonkeyとほぼ互換の拡張機能である。インストールすれば、ユーザースクリプトの機能を利用できます。それは、JavascriptでHTML文書のDOMを操作して、ウエブペイジの内容を書き換えることができる。プラグインも同じのことを遂げられたけど、プラグインより、ユーザースクリプトがリソースを少し利用して、軽量化です。それに、ユーザースクリプトが指定のdomainをロードされだから、とっても軽量して、大量のインストールも問題ではありません。</p>
+<p>大量なユーザースクリプトはgreasyforkからダウンロードことができます。greasyforkが最初のgreasemonkeyの鏡像であって、greasemonkeyは閉められた後に、ユーザースクリプトをホスティングして続けていた。最初からユーザースクリプトは私にとって、imgchiliやimgbabeなど写真のリンクをプレビューすることが易いなります。この写真のリンクは往々にアドを含めています。クリックしたら、アドポップアップを掲げっています。私は長い間FirefoxのNoscriptを使って、ポップアップアドを止めっで、写真を内覧するや、アドを取り除くや、リンクを自動的ジャンプするなど機能が欲しいです。恰もよし、列挙の機能はgreasyforkで現存のユーザースクリプトがあります。ここでは、インストールするスクリプトです。</p>
+<ul>
+<li>AdsByPasser<br> * Bypass Wait, Code &amp; Login on Webiste<br> * Download Youtube Videos as MP4<br> * Mouseover Popup Image Viewer<br> * The Pirate Bay Cleaner</li>
+</ul>
+<p>特に、alaboutなどのサイトブラウズする時、Mouseover Popup Image Viewerがとても有用です（笑う）。</p>
 
       </article>
     </div>
@@ -116,7 +151,7 @@
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 25 of 54</div>
+            <div class="page-number is-center">Page 25 of 55</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>
