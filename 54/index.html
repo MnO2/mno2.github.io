@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1572179805.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1574082108.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,258 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2011-11-28-dynamic-programming-haskell.html">Writing Dynamic Programming in Haskell</a></h1>
+    <div class="post-meta"><time datetime="2011-11-28 17:30">2011-11-28 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>From the fact that the function is the composing unit in haskell, you can quickly guess that the most intuitive way to implement dynamic programming is through memoization. Of course you can implement through state modification if you insist, but that is just coding a C program in haskell.</p>
+<p>The core of dynamic programming is recursion, but with the exploitation of overlapping subproblem. Such that we can add another layer of data structure to memorize the previosuly calculated subproblem results. The power of haskell lies at you can just implement the brute force recursive version, then with little modification it just provides you the semantics of dynamic programming. There exists two most used library on hackage. They are data-memocombinators, and MemoTrie. Both uses the similar internal mechanism. MemoTrie is easier to use if you don’t need to memorize your own data type, data-memocombinators satisfies your need if you really want that.</p>
+<p>The following lists six implementations of problem31 of project euler in haskell, one uses data-memocombinators, one uses MemoTrie, another from HaskellWiki exploits lazy evaluation, one uses immutable array to implement that. The rest two are from stackoverflow provided by John Lato.</p>
+<pre><code>import qualified Data.MemoCombinators as Memo
+
+coins = [1,2,5,10,20,50,100,200]
+
+sol1 = f
+    where f :: Int -&gt; Int -&gt; Int
+          f = Memo.memo2 Memo.integral (Memo.arrayRange (0,7)) mf
+            where mf :: Int -&gt; Int -&gt; Int
+                  mf n k | (k &gt;= 8) || (n &lt; 0) = 0
+                         | n == 0 = 1
+                         | otherwise = (f n (k+1)) + (f (n - coins !! k) k)
+
+main = do
+    print $ sol1 200 0
+./sol01 +RTS -sstderr 
+       4,901,540 bytes allocated in the heap
+         220,696 bytes copied during GC
+          82,112 bytes maximum residency (1 sample(s))
+          22,864 bytes maximum slop
+               1 MB total memory in use (0 MB lost due to fragmentation)
+
+  Generation 0:     9 collections,     0 parallel,  0.00s,  0.00s elapsed
+  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
+
+  INIT  time    0.00s  (  0.00s elapsed)
+  MUT   time    0.01s  (  0.01s elapsed)
+  GC    time    0.00s  (  0.00s elapsed)
+  RP    time    0.00s  (  0.00s elapsed)
+  PROF  time    0.00s  (  0.00s elapsed)
+  EXIT  time    0.00s  (  0.00s elapsed)
+  Total time    0.01s  (  0.01s elapsed)
+
+  %GC time       6.9%  (7.3% elapsed)
+
+  Alloc rate    389,289,174 bytes per MUT second
+
+  Productivity  85.8% of total user, 91.4% of total elapsed
+coins = [1,2,5,10,20,50,100,200]
+
+sol2 = mf
+    where memo :: (Num a, Enum a) =&gt; (a -&gt; b) -&gt; [b]
+          memo f = map f (enumFrom 0)
+          mf :: Int -&gt; Int -&gt; Int
+          mf = \n k -&gt; fvalue !! n !! k
+          fvalue = fmap memo (memo f)
+          f :: Int -&gt; Int -&gt; Int
+          f n k | (k &gt;= 8) || (n &lt; 0) = 0
+                | n == 0 = 1
+                | otherwise = (if k &lt; 7 then mf n (k+1) else 0) + (if n - coins!!k &gt;= 0 then mf (n - coins !! k) k else 0)
+
+main = do
+    print $ sol2 200 0
+./sol02 +RTS -sstderr 
+         334,684 bytes allocated in the heap
+           2,096 bytes copied during GC
+          43,012 bytes maximum residency (1 sample(s))
+          26,620 bytes maximum slop
+               1 MB total memory in use (0 MB lost due to fragmentation)
+
+  Generation 0:     0 collections,     0 parallel,  0.00s,  0.00s elapsed
+  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
+
+  INIT  time    0.00s  (  0.00s elapsed)
+  MUT   time    0.00s  (  0.00s elapsed)
+  GC    time    0.00s  (  0.00s elapsed)
+  RP    time    0.00s  (  0.00s elapsed)
+  PROF  time    0.00s  (  0.00s elapsed)
+  EXIT  time    0.00s  (  0.00s elapsed)
+  Total time    0.01s  (  0.01s elapsed)
+
+  %GC time       1.9%  (2.3% elapsed)
+
+  Alloc rate    57,142,564 bytes per MUT second
+
+  Productivity  80.1% of total user, 94.6% of total elapsed
+coins = [1,2,5,10,20,50,100,200]
+
+sol3 = (!!) (ways [1,2,5,10,20,50,100,200])
+    where ways [] = 1 : repeat 0
+          ways (coin:coins) = n
+              where n = zipWith (+) (ways coins) (replicate coin 0 ++ n)
+
+main = do
+    print $ sol3 200
+./sol03 +RTS -sstderr 
+         248,052 bytes allocated in the heap
+           2,096 bytes copied during GC
+          43,012 bytes maximum residency (1 sample(s))
+          26,620 bytes maximum slop
+               1 MB total memory in use (0 MB lost due to fragmentation)
+
+  Generation 0:     0 collections,     0 parallel,  0.00s,  0.00s elapsed
+  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
+
+  INIT  time    0.00s  (  0.00s elapsed)
+  MUT   time    0.00s  (  0.00s elapsed)
+  GC    time    0.00s  (  0.00s elapsed)
+  RP    time    0.00s  (  0.00s elapsed)
+  PROF  time    0.00s  (  0.00s elapsed)
+  EXIT  time    0.00s  (  0.00s elapsed)
+  Total time    0.00s  (  0.00s elapsed)
+
+  %GC time       3.2%  (4.0% elapsed)
+
+  Alloc rate    66,041,533 bytes per MUT second
+
+  Productivity  72.3% of total user, 91.1% of total elapsed
+import qualified Data.MemoTrie as MT
+
+coins = [1,2,5,10,20,50,100,200]
+
+sol4 = f
+    where f :: Int -&gt; Int -&gt; Int
+          f = MT.memo2 mf
+            where mf :: Int -&gt; Int -&gt; Int
+                  mf n k | (k &gt;= 8) || (n &lt; 0) = 0
+                         | n == 0 = 1
+                         | otherwise = (f n (k+1)) + (f (n - coins !! k) k)
+
+main = do
+    print $ sol4 200 0
+./sol04 +RTS -sstderr 
+       3,992,108 bytes allocated in the heap
+         874,084 bytes copied during GC
+         185,192 bytes maximum residency (1 sample(s))
+          26,680 bytes maximum slop
+               2 MB total memory in use (0 MB lost due to fragmentation)
+
+  Generation 0:     7 collections,     0 parallel,  0.00s,  0.00s elapsed
+  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
+
+  INIT  time    0.00s  (  0.00s elapsed)
+  MUT   time    0.01s  (  0.01s elapsed)
+  GC    time    0.00s  (  0.00s elapsed)
+  RP    time    0.00s  (  0.00s elapsed)
+  PROF  time    0.00s  (  0.00s elapsed)
+  EXIT  time    0.00s  (  0.00s elapsed)
+  Total time    0.01s  (  0.01s elapsed)
+
+  %GC time      22.3%  (24.8% elapsed)
+
+  Alloc rate    505,650,158 bytes per MUT second
+
+  Productivity  66.4% of total user, 73.3% of total elapsed
+import Data.Maybe
+import qualified Data.Map as M
+
+
+coins = [1,2,5,10,20,50,100,200]
+
+sol5 = mf
+    where memo :: (Num a, Enum a) =&gt; (a -&gt; b) -&gt; [b]
+          memo f = map f (enumFrom 0)
+          gwvals = fmap memo (memo f)
+          gwByMap :: Int -&gt; Int -&gt; Int -&gt; Int -&gt; Int
+          gwByMap maxX maxY = \x y -&gt;  fromMaybe (f x y) $ M.lookup (x,y) memomap
+            where memomap = M.fromList $ concat [[((x',y'), z) | (y',z) &lt;- zip [0..maxY] ys] | (x',ys) &lt;- zip [0..maxX] gwvals]
+          mf :: Int -&gt; Int -&gt; Int
+          mf = gwByMap 205 8
+          f :: Int -&gt; Int -&gt; Int
+          f n k | (k &gt;= 8) || (n &lt; 0) = 0
+                | n == 0 = 1
+                | otherwise = (if k &lt; 7 then mf n (k+1) else 0) + (if n - coins!!k &gt;= 0 then mf (n - coins !! k) k else 0)
+
+main = do
+    print $ sol5 200 0
+./sol05 +RTS -sstderr 
+       1,856,632 bytes allocated in the heap
+         265,496 bytes copied during GC
+          87,788 bytes maximum residency (1 sample(s))
+          22,236 bytes maximum slop
+               1 MB total memory in use (0 MB lost due to fragmentation)
+
+  Generation 0:     3 collections,     0 parallel,  0.00s,  0.00s elapsed
+  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
+
+  INIT  time    0.00s  (  0.00s elapsed)
+  MUT   time    0.01s  (  0.01s elapsed)
+  GC    time    0.00s  (  0.00s elapsed)
+  RP    time    0.00s  (  0.00s elapsed)
+  PROF  time    0.00s  (  0.00s elapsed)
+  EXIT  time    0.00s  (  0.00s elapsed)
+  Total time    0.01s  (  0.01s elapsed)
+
+  %GC time       8.0%  (8.7% elapsed)
+
+  Alloc rate    197,011,035 bytes per MUT second
+
+  Productivity  82.3% of total user, 89.4% of total elapsed</code></pre>
+<pre><code>import Data.Array.IArray
+
+coins = [1,2,5,10,20,50,100,200]
+
+sol6 = ans
+    where ans :: Int -&gt; Int -&gt; Int
+          ans n k = table ! (n, k)
+            where table :: Array (Int, Int) Int
+                  table = listArray ((0,0), (300,7)) [f i j | i &lt;- [0..n], j &lt;- [0..7]]
+                  f n k | (k &gt;= 8) || (n &lt; 0) = 0
+                        | n == 0 = 1
+                        | otherwise = (if k &lt; 7 then table ! (n, (k+1)) else 0) + (if (n - coins!!k) &gt;= 0 then table ! ((n - coins !! k), k) else 0)
+
+main = do
+    print $ sol6 200 0
+./sol06 +RTS -sstderr 
+         280,488 bytes allocated in the heap
+           2,096 bytes copied during GC
+          43,012 bytes maximum residency (1 sample(s))
+          26,620 bytes maximum slop
+               1 MB total memory in use (0 MB lost due to fragmentation)
+
+  Generation 0:     0 collections,     0 parallel,  0.00s,  0.00s elapsed
+  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
+
+  INIT  time    0.00s  (  0.00s elapsed)
+  MUT   time    0.00s  (  0.00s elapsed)
+  GC    time    0.00s  (  0.00s elapsed)
+  RP    time    0.00s  (  0.00s elapsed)
+  PROF  time    0.00s  (  0.00s elapsed)
+  EXIT  time    0.00s  (  0.00s elapsed)
+  Total time    0.01s  (  0.00s elapsed)
+
+  %GC time       2.4%  (2.9% elapsed)
+
+  Alloc rate    51,674,281 bytes per MUT second
+
+  Productivity  78.1% of total user, 93.7% of total elapsed</code></pre>
+<p>One thing to notice is these two are not equivalent.</p>
+<pre><code>m1      = ((filter odd [1..]) !!)
+
+m2 n    = ((filter odd [1..]) !! n)</code></pre>
+<p>This problem is related to Eta Expansion. You could probably re-evaluate a lamda function without caution. Or just checkout the discussion on stackoverflow.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -438,90 +690,6 @@ test case 3 for iteratee case. The GC time is greatly reduced since a layer is a
   Productivity  99.0% of total user, 99.3% of total elapsed</code></pre>
 <p>On one hand, this example serves as my excercise to help me understand iteratee, on the otherhand, it addresses the problem of lazy IO with such a simple concrete case, which is not seen on the web.</p>
 <p>I list other useful links for further info.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2011-11-17-vim-plugins-haskell.html">Vim Plugins for Haskell Programmers</a></h1>
-    <div class="post-meta"><time datetime="2011-11-17 17:30">2011-11-17 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>It appears that there is no clear choice with a naive google search with “haskell vim” at this time. I decide to contribute a blog post to make a few comments about the existing vim plugins for haskell programmers.</p>
-<h2 id="made-for-haskell">Made for Haskell</h2>
-<h3 id="haskellmode">Haskellmode</h3>
-<p>Without a doubt, Haskellmode is the most full-fledged vim plugin for haskell programmers. It features handy module importing, tags generation, haddock/hoogle look up, type info insertion. You can almost say it resolves the problem once and for all, other plugins became minor patch in the presence of it. The follows are two screenshots showing the features I love most.</p>
-<p>You can type _T in normal mode, vim will insert the inferred type for the function keyword under the cursor. Or just type _t instead, the info will be displayed in the status bar.</p>
-<p><img src="../images/legacy/0*lnjSvHMgy4LolDNC.png" /></p>
-<p>Tags generation is a very useful feature. Type _ct in normal mode, tag files will be generated. After that, you can hit Ctrl-] on a function keyword to jump directly to its definition, then jump back with Ctrl-t</p>
-<p><img src="../images/legacy/0*fGbQBzO2mRs7D4vI.png" /></p>
-<p>Evaluate a function in the buffer with ghci</p>
-<p><img src="../images/legacy/0*d_ZtxILwDVXCjgJP.png" /></p>
-<p>For further demo, check the screencast on the official website.</p>
-<h3 id="neco-ghc">neco-ghc</h3>
-<p>neco-ghc is a neocomplcache plugin for haskell, it grants you completion funtionality for average keyword. It depends on ghc-mod, so you need to install it. Do cabal install ghc-mod and a sudo ln -s ~/.cabal/ghc-mod /usr/loca/bin/ghc-mod in case it’s missing in the runtime path.</p>
-<p>Sadly, there are a few more tweaks before you can use it. neco-ghc is built upon vimshell and vimproc, the continusing developing makes the latest versions incompatible to each other. I successfully reproduce some of the functionalities the author claims with the following settings.</p>
-<ul>
-<li>use an older version neco-ghc</li>
-<li>use the commit ec0e7f3c52d for vimshell (git checkout ec0e7f3c52d)</li>
-<li>use the commit eea8993c555 for vimproc (git checkout eea8993c555)</li>
-</ul>
-<p>Here is a few screenshots.</p>
-<p><img src="../images/legacy/0*SLHNSHZBOgYk-sKw.png" /> <img src="../images/legacy/0*1BnpTgXn8NpyWOgz.png" /></p>
-<p>The LANGUAGE flags and OPTION_GHC completion are missing, possibly because I use an older version.</p>
-<h3 id="vim-haskellfold">vim-haskellFold</h3>
-<p>vim-haskellFold improves upon the default fold provided by vim, and automatically folds functions when you open a haskell source code. It complements haskellmode, which lacks folding as far as I know.</p>
-<p><img src="../images/legacy/0*1YlkVaclVyrFesAW.png" /></p>
-<h3 id="vim-haskellconceal">vim-haskellConceal</h3>
-<p>This plugin takes advantage of newly provided conceal feature in Vim 7.3. To use this feature, you must install version 7.3. Basiscally, this plugin defines the substituting characters for specific patterns used in haskell. For example, it replaces  to λ when the code displayed on the screen. It comes back to ascii when you edit and save it.</p>
-<p><img src="../images/legacy/0*FtryRJqmTTHcT6pW.png" /></p>
-<p>But still, I run into small issue. The trailing letters of a line just become hidden when I move the cursor off the line containing matching patterns. It seems that it is vim’s problem</p>
-<h3 id="vim-hoogle">vim-hoogle</h3>
-<p>Although haskellmode provide hoogle search, personally I don’t like to view it in a browser since I write code through remote terminal. w3m just mess the buffer for reasons I don’t know. vim-hoogle is a lite version, it opens a split window and show just the type info.</p>
-<p><img src="../images/legacy/0*SbFx00mMChpW127X.png" /></p>
-<h3 id="haskell.vim-and-lhaskell.vim">haskell.vim and lhaskell.vim</h3>
-<p>They are just syntax files for .hs and .lhs respectively. Here is a screenshot for .lhs</p>
-<p><img src="../images/legacy/0*cAYjp-_iSy4j-aXW.png" /></p>
-<h3 id="repl">repl</h3>
-<p>It is a successor of SHIM. It looks like it is just more than :GHCi of hakellmode. Sadly, I can’t get it installed correctly. It keeps tell me a pipe open error.`</p>
-<p>A power-up for the rapidly growing tagbar plugin for haskell. I didn’t try it, since it is pathogen incompatible. It does look good.</p>
-<p><img src="../images/legacy/0*AcfGJrfoazNZSKbi.png" /></p>
-<h3 id="uncode-haskell">uncode-haskell</h3>
-<p>Automatically translates the ascii combination to the corresponding unicode, like -&gt; to → Unlike haskellConceal, it replaces the ascii to unicode character when editing, and translates back to ascii when saving. an -&gt; becomes → right after you type it. In haskellConceal, the translation occurs after you move off the line, and translates it back when you move back to the line. unicode-haskell doesn’t do that. I prefer conceal feature personally although it is buggy.</p>
-<h2 id="not-pretty-useful">Not pretty useful</h2>
-<h3 id="ghci-vim">ghci-vim</h3>
-<p>It is just a subset of haskellmode GHCi, unable to detect the function currently in the buffer. It lets you execute ghci without leaving vim but not beyond that.</p>
-<p>Here are a few I found them useful but not directly related to haskell editing.</p>
-<h3 id="delimitmate">delimitMate</h3>
-<p>Save you from typing right parenthesis, right single/double quote.</p>
-<h3 id="textobj-indent">textobj-indent</h3>
-<p>It depends on textobj-user. It lets you quickly select the lines of the same indentation.</p>
-<h3 id="vim-surround">vim-surround</h3>
-<p>Quickly replaces surrounding parenthesis to other surrounding characters. For instances, [1,2,3] to (1,2,3) with the command of cs[(</p>
-<p>Another tips: to delete the contents between parenthesis, type ci[, then [1,2,3] would become []</p>
-<p>Lots of people use them I make a list of popular plugins just in case someone need it. There are already lots of article elaborating on them.</p>
-<ul>
-<li>vim-pathogen</li>
-<li>vim-matchit</li>
-<li>nerdcommenter</li>
-<li>nerdtree</li>
-<li>supertab</li>
-<li>xptemplate]</li>
-</ul>
-<h3 id="additonal">Additonal</h3>
-<p>If you would like to use unicode in the source code, refer to the following contents on haskell.org</p>
-<ul>
-<li>Unicode-symbols</li>
-<li>Unicode syntax</li>
-</ul>
 
       </article>
     </div>

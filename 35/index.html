@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1572179805.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1574082108.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,61 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2015-05-30-elasticsearch_dsl.html">elasticsearch_dsl: Domain Specific Language in Python for Elasticsearch</a></h1>
+    <div class="post-meta"><time datetime="2015-05-30 17:30">2015-05-30 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>An emerging trend in recent year for software, including mongodb, elasticsearch and Chef, is to expose an JSON interface to accept complex requests. They give up the traditional SQL query and adopt JSON as the text encoding of abstract syntax tree. Therefore, whenever you are making up a request to these services, you are actually hand coding an abstract syntax tree in JSON. Although it is flexible and easy to extend, it is also error prone and hard to maintain. A common solution for this is to write a Domain Specific Language. And with python’s language design, a naive and natural solution is to use Class to denote AST node and Visitor pattern to code-generate the underlying JSON. And above is the reason I created elasticsearch_dsl</p>
+<p>Think that you type the program this way:</p>
+<pre><code>nested_agg = ast.NestedAggregation(&quot;name&quot;, &quot;tags&quot;, ast.TermsAggregation(&quot;tags.name&quot;, size=20, order_type=&quot;_count&quot;, order=&quot;desc&quot;, min_doc_count=100))
+aggregation = ast.TopLevelAggregation(&quot;tag&quot;, nested_agg)
+ast_root = ast.TopLevelQuery(MatchAllQuery(), aggs=[aggregation])
+
+codegen = CodeGeneratorVisitor()
+codegen.visit(ast_root)
+query_py_obj = codegen.query
+and_clauses = []
+and_clauses.append(ast.GeoDistanceFilter(&quot;geocode&quot;, user.geocode[&quot;latitude&quot;], user.geocode[&quot;longitude&quot;], 10))
+
+tag_names = []
+should_clauses= []
+for t, ind in tags:
+    should_clauses.append(ast.TermQuery(&quot;tags.name&quot;, t.name.lower()))
+
+nested_queries= ast.BoolQuery(should=should_clauses)
+f = ast.NestedQuery(&quot;tags&quot;, nested_queries)
+
+query = ast.FilteredQuery(f, ast.AndFilter(and_clauses))
+query_size = 20
+query_from = 0
+ast_root = ast.TopLevelQuery(query, query_size, query_from, sort={&quot;_score&quot;: {&quot;order&quot;: &quot;desc&quot;}})
+
+codegen = CodeGeneratorVisitor()
+codegen.visit(ast_root)
+query_py_obj = codegen.query</code></pre>
+<p>But not this way</p>
+<pre><code>query = {}
+query[&quot;tags&quot;] = []
+for t, ind in tags:
+    query[&quot;tags].append({&quot;tags.name&quot;: t.name.lower()})
+
+query[&quot;size&quot;] = query_size
+query[&quot;from&quot;] = query_from
+query[&quot;sort&quot;] = {&quot;_score&quot;: {&quot;order&quot;: &quot;desc&quot;}}</code></pre>
+<p>which is error prone, and hard to know the intention of each query. There has been a elasticsearch-dsl package on pypi, but one thing I don’t like is the big runtime that comes with it. If anything gets wrong, you have to read almost all of its implementation to know what is error and how to fix it. And this version of elasticsearch_dsl is just a thin wrapper to compile the class into JSON. You could even do it in the command line.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -77,32 +132,6 @@
       :prepared_sql &quot;insert into units (payload) values (?);&quot;
       :password &quot;&quot;}}</code></pre>
 <p>In the future it could support more output mode if the demand is clear.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-05-26-ec2-container.html">Thoughts After Playing with Amazon EC2 Container Service</a></h1>
-    <div class="post-meta"><time datetime="2015-05-26 17:30">2015-05-26 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>Docker has been getting more and more popular in the past year. Even though with its loves and hates, and with the acomppanying security vunerability. The emergence of immutable micro service seems to be unstoppable. And Docker definitely is one of the pain killers in the market. Amazon launched EC2 container service in the end of the last year, to provides solution similar to open-sourced shipyard to manage docker host cluster. At the very beginning it could only be accessed through API, but now you could get into its own dashboard fro the AWS Console.</p>
-<p>However, from a few days of trial experience, I am still quite unsatisifed with it. It is usable but having lots of gotcha getting your nerve. I would list a few of complaints as follows:</p>
-<ul>
-<li>By default, after you clicking through all of the buttons to “Get Started”, it would go for a complete new settings of AWS Cloudformation, and that would launch a whole new VPC and putting the docker host in the public subnet, which is undesirable in terms of the security, and ignore the possibility that you already have a VPC at your service. You have to find a way to workaround this default settings. That is, launch a Amazon Linux Container Optimized image from the “EC2” dashboard but not “ECS” console, and then lcreate a new cluster in the EC Container service, so that the instances you just launched in your exisiting VPC could be registered to the cluster you created. This is very unintuitive.</li>
-<li>It still lacks the integration with Opsworks, you are unable to laucnh Amazon Container Optimized Linux image from the Opsworks. This greatly reduce the accessibility of the EC2 container service. After all, you don’t get lots of monitoring provided by Opsworks for free.</li>
-<li>It is possible to pull the private image from docker hub, or your docker api in the docker image hosting managed by yourself. But you have to logged-in to the instance to change the settings for that. That is a pain if you manage a lot of machines. I hope there should be a tab in the console so that I could change it and automatically be effective.</li>
-<li>No error message forwarded by the agent in the console so that you know why the docker failed to run. In Opsworks, you would have the log generated by the Chef recipe.</li>
-</ul>
-<p>Having to setup your own docker cluster is kind of painful and time consuming. I wish AWS could refine the EC2 container service to be truuly easy to use in the upcoming few months. At this moment, I have to stick with the CLI interface.</p>
 
       </article>
     </div>

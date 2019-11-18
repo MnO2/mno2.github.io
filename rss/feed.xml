@@ -8,8 +8,29 @@
         <name>Paul Meng</name>
         <email>me@paulme.ng</email>
     </author>
-    <updated>2019-10-27T00:00:00Z</updated>
+    <updated>2019-11-18T00:00:00Z</updated>
     <entry>
+    <title>The Man Who Solved The Market</title>
+    <link href="https://blog.paulme.ng/posts/2019-11-18-the-man-who-solved-the-market.html" />
+    <id>https://blog.paulme.ng/posts/2019-11-18-the-man-who-solved-the-market.html</id>
+    <published>2019-11-18T00:00:00Z</published>
+    <updated>2019-11-18T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>To me this is the book of the year 2019.</p>
+<p>I can barely recall when was the first time I heard about the name of Renaissance Technologies. It is probably back in 2010 when I got intrigued by the world of Quant and I was reading Derman’s book: My life as a Quant. I googled a little bit of the development of the financial modeling and tried to know the landscape of the hedge funds that are quantitative funds. It didn’t take too long to run into the name of Jim Simons. As a STEM student growing up in Asia, his associate with Shiing-shen Chern and Chern–Simons theory immediately brought my attention. By further digging up the techniques adopted by Renaissance Technologies. The names of Peter brown and Robert mercer came up, they are the students of Frederick Jelinek, a figure you must know if you were in my topic of research: Speech Recognition. The rumor that they were using Hidden Markov Model at the time of early 90s excited me, where HMM was the model you could not skip in my field. Most of the research was trying to build adds-on to the core HMM infrastructure.</p>
+<p>This book isn’t about to tell you about the skills adopted by Renaissance Technmologies, but a biography of Jim Simons by Gregory Zuckerman. Renaissance Technologies has stayed low-key for a long time and their secretive style makes few people know the history of the fund. Gregory did a good job to piece together the history, the challenges and the crisis where Jim has faced, and key figures helped establish the foundation of the company. It shed more humanity colors to the stereotype that a group of mathematicians and scientists should be run the company rationally and pursue the path of philosopher king as described by Plato. However, it is far from what was happening in the fund. Drama and crisis was no different from other companies.</p>
+<p>The book is so much fun to read and I would like to put down a few notes and thoughts in bullet points.</p>
+<ul>
+<li>It sounds to me the most important thing to quantitative fund is cost estimation with control and risk management, unlike the most of the people intuitively think it is the precision of the prediction. It reads like Renaissance Technologies have its moat because its early setback so Simons was more risk-aware than others like LTCM, so they are less susceptible to the tail risk.</li>
+<li>On the cost end, apart from hiring the talents to discover signals, a new breed of quantitative fund like World Quant is to shift the cost of the mathematicians and scientist to Asia, where they only need to pay half of the salary than in the USA, which reduce the expense ratio for a fund to succeed. It sounds so much like running a bank where the metric is to check the expense rate.</li>
+<li>The early pioneers of the quant is more connected than I thought, Kelly’s criterion was known and was applied by Berlekamp to their trading models.</li>
+<li>They also look for the statistically significant signals that don’t necessarily obvious in its logical cause, which is a surprise to me. But it seems that it made them a moat since they have a scaling bet strategy that could safely try it out and shrink it back if the signal fade away.</li>
+<li>Ed Thorp was almost to invest in Renaissance Technology, but he decided not to when he found Jim was a chain smoker.</li>
+<li>Statistical Arbitrage, though so obvious on the paper, there are so many details to take care to put into the practice it seems.</li>
+<li>George Soros and Jim Simons are neighbors. In the congress hearing during the financial crisis, you could see that Soros and Jim were sitting together in the picture. It seems that Jim agrees with the worldview of Soros. In the epilogue, a MIT student asked Jim which investor’s advice they should listen to on the path of learning investment. Jim pondered and replied George Soros. The same answer was given by Nassim Taleb.</li>
+</ul>
+]]></summary>
+</entry>
+<entry>
     <title>新加坡住宅房地產的粗略研究</title>
     <link href="https://blog.paulme.ng/posts/2019-10-27-%E6%96%B0%E5%8A%A0%E5%9D%A1%E4%BD%8F%E5%AE%85%E6%88%BF%E5%9C%B0%E7%94%A2%E7%9A%84%E7%B2%97%E7%95%A5%E7%A0%94%E7%A9%B6.html" />
     <id>https://blog.paulme.ng/posts/2019-10-27-%E6%96%B0%E5%8A%A0%E5%9D%A1%E4%BD%8F%E5%AE%85%E6%88%BF%E5%9C%B0%E7%94%A2%E7%9A%84%E7%B2%97%E7%95%A5%E7%A0%94%E7%A9%B6.html</id>
@@ -720,35 +741,6 @@ lftp ftp.put.io -u $PUTIO_PASSWD -e &quot;set ftp:ssl-allow no; cd Hook; rm $fil
     <published>2019-08-23T00:00:00Z</published>
     <updated>2019-08-23T00:00:00Z</updated>
     <summary type="html"><![CDATA[<p>After listening to the <a href="http://lucien.cc/about-2/">Lucien C.H. Lin</a>’s talk at <a href="https://coscup.org/2019/">Coscup 2019</a> about his experience on working with corporates dealing with FLOSS communities and licenses, I learn more about the practice in the industry. It also makes me to think about the license I would be using for my open source projects. <a href="http://neilmitchell.blogspot.com/2018/08/licensing-my-haskell-packages.html">This</a> article from Neil Mitchell in Haskell community explained his stance very well, and by carefully reading his article I would tend to agree with his intent. I would be inclined to change all of my projects to be Apache-2.0 and BSD-3 dual license so that it has patent grant protection and at the same time compatible with GPL. Rust is using Apache-2.0 and MIT dual license but to my personal I like the clause in BSD-3 where it requires you can’t use my name to endorse things you build, that makes sense to me. I would relicense my projects one by one from now on.</p>
-]]></summary>
-</entry>
-<entry>
-    <title>go-pdqsort - Pattern Defeating Quicksort in Go</title>
-    <link href="https://blog.paulme.ng/posts/2019-08-21-go-pdqsort---pattern-defeating-quicksort-in-go.html" />
-    <id>https://blog.paulme.ng/posts/2019-08-21-go-pdqsort---pattern-defeating-quicksort-in-go.html</id>
-    <published>2019-08-21T00:00:00Z</published>
-    <updated>2019-08-21T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<p><a href="https://github.com/MnO2/go-pdqsort">go-pdqsort</a> is my implementation of pattern defeating sort in golang. I knew about pattern defeating sort from rust’s standard library documentation. I’ve never heard about this algorithm and it immediately intrigues my interest. I googled about it and found the original <a href="https://github.com/orlp/pdqsort">implementation</a> and their discussion threads on <a href="https://news.ycombinator.com/item?id=14661659">hacker news</a> and <a href="https://www.reddit.com/r/cpp/comments/2z6hgx/patterndefeating_quicksort/">reddit</a>. Then I read the <a href="https://paperpile.com/view/c3820723-6d9c-0a86-ab02-8e46dc22aec5">technical report</a> from Orson Peters. The key observation from the algorithm is that merely reducing the miss rate from CPU branch prediction, it would make the sorting speed greatly improved (no need to flush the cache line etc), so the technique adopted was to put the index of the array in the buckets and don’t swap them immediately, but put them in the right bin and swap them in one batch at the end of the loop. This works perfectly in the language with zero cost abstraction like C/C++ and Rust. I wasn’t sure about that would work in the heap-managed languages like golang, python and ruby etc, since most of the things are on the heap (with pointer indirection) and often results into cache misses, the impact of branch prediction miss rate might be neglectable. (For sure it would depend on the escape analysis in golang compiler, it would put the things on stack if it doesn’t escape in general). Though my hunch was that it would be slower, it still a good practice to implement the algorithm by myself so that I would get to know the details of the algorithm. And here are the results</p>
-<table>
-<thead>
-<tr class="header">
-<th style="text-align: center;">implementation</th>
-<th style="text-align: center;">speed</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">pdqsort</td>
-<td style="text-align: center;">80874 ns/op</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">std-lib sort</td>
-<td style="text-align: center;">69828 ns/op</td>
-</tr>
-</tbody>
-</table>
-<p>I am not sure about what std-lib’s sort is, but it looks like introsort since it switches to heapsort when the recursion is too deep, and it incorporates the techniques from shellsort as well, but the main part is still Bently’s quicksort technique. You can tell from the result that pdqsort is significantly slower than std-lib’s sort, probably due to the overhead of those memory batch swap, where it triggers extra allocation or cache eviction, pretty much as expected.</p>
-<p>If you are interested in the algorithm, you could check out the <a href="https://github.com/MnO2/go-pdqsort">code</a> by yourself.</p>
 ]]></summary>
 </entry>
 

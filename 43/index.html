@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1572179805.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1574082108.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -53,12 +53,37 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-02-15-hangul-indian.html">The Korean 한글 Han-gul Indian Connection</a></h1>
-    <div class="post-meta"><time datetime="2015-02-15 17:30">2015-02-15 17:30</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2015-02-17-breaking-loop-haskell.html">Day of week in Japanese</a></h1>
+    <div class="post-meta"><time datetime="2015-05-31 17:30">2015-05-31 17:30</time> </span>
     <div class="slot-content">
       <article>
-        <p>In this video Stuart Jay Raj briefed about the relationship between 한글 and sanskrit. Basically when king 조선 세종 created the han-gul. They learned it from Mangolia’s Phags-pa, which could be dated back to sanskrit. Therefore, looking at the picture you could see common patterns between the two of writing alphabets. Inspiring watch!</p>
-<p><img src="../images/legacy/0*ZHKHv0MqKKA6xjjl.jpg" /></p>
+        <p>Solving online judge’s porblems, you would definitely keep dealing with the pattern of breaking a infinite loop on reading a specific input. For example, a variable “n” signifying the size of the input, but when it is specified as “0”, it represents the end of the input. Haskell’s IO Monad, however, doesn’t grant you the ability to “exit” or “break”. And there are various ways to do this.</p>
+<p>First one is using MaybeT to stack on the IO Monad. Since it follows the monoid law, and its mzero denotes the “exit”. It is easy to understand just a little bit inconvenient. You have to lift other IO action into the Monad stack.</p>
+<pre><code>{-# LANGUAGE OverloadedStrings #-}
+import Control.Monad
+import Control.Monad.Trans
+import Control.Monad.Trans.Maybe
+import qualified Data.ByteString.Char8 as B
+
+main = runMaybeT $ forever $ do
+  s &lt;- lift B.getLine
+  when (s == “0”) $ mzero
+  lift $ print s</code></pre>
+<p>One other way it to use the notorious Continuation Monad. Or more correctly, ContT to transform the IO Monad into ContT r IO. Obviously it is much more complicated than the MaybeT solution. You have to get your head around the callCC and call the passed-in exit action when you would like to jump out the loop.</p>
+<pre><code>{-# LANGUAGE OverloadedStrings #-}
+import Control.Monad
+import Control.Monad.Trans
+import Control.Monad.Trans.Cont
+import qualified Data.ByteString.Char8 as B
+
+
+main :: IO ()
+main = flip runContT (\_ -&gt; return ()) $ do
+           callCC $ \exit -&gt; forever $ do
+                                      s &lt;- lift B.getLine
+                                      when (s == &quot;0&quot;) $ exit ()
+                                      lift $ print s</code></pre>
+<p>For online judge problem I would most likely use the first one. callCC style is more like to exploring the possiblities.</p>
 
       </article>
     </div>
@@ -72,48 +97,12 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-02-14-haskell-online-judge.html">Online Judge Systems accepting Haskell</a></h1>
-    <div class="post-meta"><time datetime="2015-02-14 17:30">2015-02-14 17:30</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2015-02-15-hangul-indian.html">The Korean 한글 Han-gul Indian Connection</a></h1>
+    <div class="post-meta"><time datetime="2015-02-15 17:30">2015-02-15 17:30</time> </span>
     <div class="slot-content">
       <article>
-        <p>Online judge system is a good way to hone your problem solving skills and sharp your expressibility in specific languages. Back in school, I was always using C++98 as the main programming language for submission, but purely based on the reason that it is the main stream choice. Now, many years later, with the proliferation of online judge system, many niche or less popular languages are supported as well. And my favorite is Haskell. The problem is that most of the judge system does not keep up the speed of the growth of GHC, with their compilers used for judging not as the latest one. For example, Sphere Online Judge does support Haskell, but it only support ghc-7.6, and without haskell-platform installed.Codeforces has the similar issue since the last time I checked</p>
-<p>Good news is, rennovated TIOJ is now support ghc-7.8.3 + Haskell Platform. I picked a dynamic programming problem and was judged without issue. Just it might be because it was run on an older machine, it is bit of slow. Otherwise, it did go very well.</p>
-<p>My Program:</p>
-<pre><code>{-# LANGUAGE OverloadedStrings, MultiWayIf #-}
-import Control.Monad
-import Control.Monad.Trans
-import Control.Monad.Trans.Maybe
-import qualified Data.ByteString.Char8 as B
-import Data.Array.Unboxed
-import Data.Array.MArray as MArray
-import Data.Array.ST (runSTArray)
-import Data.Char (digitToInt)
-
-go :: ByteString -&gt; Int -&gt; Int -&gt; Int
-go s n =
-  let arr :: Array Int Int
-      arr = listArray (0, n) [f i | i &lt;- [0 .. n]]
-      f :: Int -&gt; Int
-      f i
-        | i &lt;= 1 = 1
-        | otherwise =
-            let c1 = digitToInt $ B.index s (i-2)
-                c2 = digitToInt $ B.index s (i-1)
-                in if | c2 == 0 -&gt; arr ! (i-2)
-                      | (c1 == 1) || (c1 == 2 &amp;&amp; c2 &gt;= 1 &amp;&amp; c2 &lt;= 6) -&gt; (arr ! (i-1)) + (arr ! (i-2))
-                      | otherwise -&gt; arr ! (i-1)
-  in \x -&gt; arr ! x
-
-solve :: ByteString -&gt; Int
-solve s =
-  let l = B.length s
-  in (go s l)  l
-
-main = runMaybeT $ forever $ do
-  s &lt;- lift B.getLine
-  when (s == “0”) $ mzero
-  let sol = solve s
-  lift $ print sol</code></pre>
+        <p>In this video Stuart Jay Raj briefed about the relationship between 한글 and sanskrit. Basically when king 조선 세종 created the han-gul. They learned it from Mangolia’s Phags-pa, which could be dated back to sanskrit. Therefore, looking at the picture you could see common patterns between the two of writing alphabets. Inspiring watch!</p>
+<p><img src="../images/legacy/0*ZHKHv0MqKKA6xjjl.jpg" /></p>
 
       </article>
     </div>
