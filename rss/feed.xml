@@ -8,8 +8,111 @@
         <name>Paul Meng</name>
         <email>me@paulme.ng</email>
     </author>
-    <updated>2019-11-18T00:00:00Z</updated>
+    <updated>2019-11-19T00:00:00Z</updated>
     <entry>
+    <title>Global Deep Value Strategy</title>
+    <link href="https://blog.paulme.ng/posts/2019-11-19-global-deep-value-strategy.html" />
+    <id>https://blog.paulme.ng/posts/2019-11-19-global-deep-value-strategy.html</id>
+    <published>2019-11-19T00:00:00Z</published>
+    <updated>2019-11-19T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>I noticed an introduction on xueqiue about <a href="https://www.cambriafunds.com/gval">GVAL</a> ETF the other day. I got intrigued by its strategy and had a look. Its issued Cambria is run by Meb Faber, who runs the podcast on iTunes and quite well-known among investors. I watched his interview with Ed Thorp before. It is a good one.</p>
+<p>Roughly speaking the fund’s strategy is to value the countries or regions by Shiller 10 year CAPE ratio and pick the bottom 25% as the universe, and then select the top 30 stocks by the market cap and filter them further by traditional P/E, P/B, P/FCF, EV/EBITDA etc. The final picks are about 100 stocks and rebalance the portfolio every year. For the detail, you could check the <a href="https://www.cambriafunds.com/Data/Sites/30/media/docs/GVAL_Methodology.pdf">prospectus</a></p>
+<p>And the pie chart for the regions and countries like this. <img src="/images/2019-11-19/by_region.png" /> <img src="/images/2019-11-19/by_country.png" /></p>
+<p>Since fund’s introduction mentioned Graham and Dodds. I couldn’t help to link that with Graham’s net-net strategy, to use a bag of extremely low value to bet it statistically would “somehow” reverse to the mean. I know Graham in general encourage to hold it for 3 years, if nothing happen then sell it. However, seeing the fund’s underperformance in the last two years, I couldn’t help to list a few of the reasons that may not happen.</p>
+<ol type="1">
+<li>Country suffers longer than individual company from the structural reason. You could insert new management or somehow an earning quarter activate the hidden value. But country’s policy move slower. New bill need to be passed, and cabinet need to be formed in any of democratic regimes.</li>
+<li>Comparing to the companies in the same currency zone, the international flow of the money is decided by too many factors. If the money not flowing in those countries then the value wouldn’t recover. There has to be some reason to flow in, and merely undervalue may not be a strong enough reason.</li>
+</ol>
+<p>I tried to make another list by the <a href="http://pages.stern.nyu.edu/~adamodar/New_Home_Page/datacurrent.html">data</a> compiled by Damodaran. I removed the countries that has too few stocks listed, and sorted the list by from high to low by ROIC, then ROE. and low to high by EV/EBIT. The reason to make this sorting is that I think marginal investment return would be a stronger reason to attract the money to flow in, but not simply low value. The list is like the following:</p>
+<table>
+<thead>
+<tr class="header">
+<th>country</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Thailand</td>
+</tr>
+<tr class="even">
+<td>Finland</td>
+</tr>
+<tr class="odd">
+<td>China</td>
+</tr>
+<tr class="even">
+<td>Singapore</td>
+</tr>
+<tr class="odd">
+<td>Denmark</td>
+</tr>
+<tr class="even">
+<td>Japan</td>
+</tr>
+<tr class="odd">
+<td>Hong Kong</td>
+</tr>
+<tr class="even">
+<td>South Africa</td>
+</tr>
+<tr class="odd">
+<td>Taiwan</td>
+</tr>
+<tr class="even">
+<td>Bangladesh</td>
+</tr>
+<tr class="odd">
+<td>Vietnam</td>
+</tr>
+<tr class="even">
+<td>United Arab Emirates</td>
+</tr>
+<tr class="odd">
+<td>Argentina</td>
+</tr>
+<tr class="even">
+<td>Italy</td>
+</tr>
+<tr class="odd">
+<td>Nigeria</td>
+</tr>
+<tr class="even">
+<td>Jordan</td>
+</tr>
+<tr class="odd">
+<td>Netherlands</td>
+</tr>
+<tr class="even">
+<td>Russia</td>
+</tr>
+<tr class="odd">
+<td>Mexico</td>
+</tr>
+<tr class="even">
+<td>Switzerland</td>
+</tr>
+<tr class="odd">
+<td>Romania</td>
+</tr>
+<tr class="even">
+<td>Turkey</td>
+</tr>
+<tr class="odd">
+<td>Sri Lanka</td>
+</tr>
+<tr class="even">
+<td>Egypt</td>
+</tr>
+<tr class="odd">
+<td>Oman</td>
+</tr>
+</tbody>
+</table>
+<p>For the top 20 there are some overlaps, but the rankings that was in the low Shiller 10 year CAPE are ranked lower. This ranking somehow matches with some of my private findings of good value company globally. I would argue this ranking should be a relative good pool to fish. But not the simply low multiple ranking. With that said, I didn’t do thorough research to do back-testing etc. It’s simply my hunch though.</p>
+<p>This is just a rundown of my thoughts, not a rigorous research.</p>
+]]></summary>
+</entry>
+<entry>
     <title>The Man Who Solved The Market</title>
     <link href="https://blog.paulme.ng/posts/2019-11-18-the-man-who-solved-the-market.html" />
     <id>https://blog.paulme.ng/posts/2019-11-18-the-man-who-solved-the-market.html</id>
@@ -732,15 +835,6 @@ rm -rf $TARGET_DIR
 lftp ftp.put.io -u $PUTIO_PASSWD -e &quot;set ftp:ssl-allow no; cd Hook; rm $filename; exit;&quot; 2&gt; /dev/null</code></pre>
 <p>With these scripts I need to pay zero attention to the contents, the push would be sent to my Telegram, it’s all customizable and I could turn off the app notification completely. All I need to make sure there is health check script that would remind me when the server is down (with the warnings also sent by Telegram since I don’t need a full solution of health monitoring).</p>
 <p>Next milestone I would turn to the browser automation by developing my own browser extension. Due to my heavy usage pattern of Read It Later, I accumulate thousands of links over the years and I am trying to design a workflow that would help me read the information more effective, but not just by dumping the information into Pocket and pretend that I would read it and create a delusion that makes myself feel satisfied. I hope that it could automatically tagging the information and create Trello card so that I could put the tasks into my personal planning priorization. Once I feel the workflow is running well I would have another post on that.</p>
-]]></summary>
-</entry>
-<entry>
-    <title>Changing the License of my open source projects</title>
-    <link href="https://blog.paulme.ng/posts/2019-08-23-changing-the-license-of-my-open-source-projects.html" />
-    <id>https://blog.paulme.ng/posts/2019-08-23-changing-the-license-of-my-open-source-projects.html</id>
-    <published>2019-08-23T00:00:00Z</published>
-    <updated>2019-08-23T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<p>After listening to the <a href="http://lucien.cc/about-2/">Lucien C.H. Lin</a>’s talk at <a href="https://coscup.org/2019/">Coscup 2019</a> about his experience on working with corporates dealing with FLOSS communities and licenses, I learn more about the practice in the industry. It also makes me to think about the license I would be using for my open source projects. <a href="http://neilmitchell.blogspot.com/2018/08/licensing-my-haskell-packages.html">This</a> article from Neil Mitchell in Haskell community explained his stance very well, and by carefully reading his article I would tend to agree with his intent. I would be inclined to change all of my projects to be Apache-2.0 and BSD-3 dual license so that it has patent grant protection and at the same time compatible with GPL. Rust is using Apache-2.0 and MIT dual license but to my personal I like the clause in BSD-3 where it requires you can’t use my name to endorse things you build, that makes sense to me. I would relicense my projects one by one from now on.</p>
 ]]></summary>
 </entry>
 
