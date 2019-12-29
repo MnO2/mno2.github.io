@@ -8,8 +8,118 @@
         <name>Paul Meng</name>
         <email>me@paulme.ng</email>
     </author>
-    <updated>2019-11-19T00:00:00Z</updated>
+    <updated>2019-12-29T00:00:00Z</updated>
     <entry>
+    <title>Linux materials in the past few weeks</title>
+    <link href="https://blog.paulme.ng/posts/2019-12-29-linux-materials-in-the-past-few-weeks.html" />
+    <id>https://blog.paulme.ng/posts/2019-12-29-linux-materials-in-the-past-few-weeks.html</id>
+    <published>2019-12-29T00:00:00Z</published>
+    <updated>2019-12-29T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>I’ve been watching videos and books to get myself familiar with eBPF tooling, more toward Linux network stack and VFS. This post serves as a note on what I’ve learned.</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/bj3qdEDbCD4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+</iframe>
+<p>Brendan Gregg has listed the command line tools that are useful for analyzing a Linux instance if he has to ssh into the instance. They could be preliminary analysis to quickly get a feel on what’s going on on a specific instance.</p>
+<ol type="1">
+<li>uptime</li>
+<li>dmesg -T | tail</li>
+<li>vmstat 1</li>
+<li>mpstat -P ALL 1</li>
+<li>pidstat 1</li>
+<li>iostat -xz 1</li>
+<li>free -m</li>
+<li>sar -n DEV 1</li>
+<li>sar -n TCP,ETCP 1</li>
+<li>top</li>
+</ol>
+<p>To dig deeper into the detail, these eBPF-based tooling would be helpful.</p>
+<ol type="1">
+<li>execsnoop</li>
+<li>opensnoop</li>
+<li>ext4slower</li>
+<li>biolatency</li>
+<li>biosnoop</li>
+<li>cachestat</li>
+<li>tcpconnect</li>
+<li>tcpaccept</li>
+<li>tcpretrans</li>
+<li>gethostlatency</li>
+<li>runqlat</li>
+<li>profile</li>
+</ol>
+<p>When the information you are trying to get are not there, and <code>strace</code> is not enough. The following tools could be helpful to peek into the critical paths in the kernel modules.</p>
+<ol type="1">
+<li>trace</li>
+<li>argdist</li>
+</ol>
+<p>A nice book to read is a <a href="https://www.amazon.com/Performance-Tools-Addison-Wesley-Professional-Computing-ebook-dp-B081ZDXNL3/dp/B081ZDXNL3">new book</a> authored by Brendan.</p>
+<p>While studying for the SRE materials, I also found Cloudflare has many good blog posts that I could learn from.</p>
+<p>A blog post on how to optimize for <a href="https://blog.cloudflare.com/http-2-prioritization-with-nginx/">http2</a> stack gives really good insight on how the Linux network stack works.</p>
+<pre><code>net.core.default_qdisc = fq
+net.ipv4.tcp_congestion_control = bbr
+net.ipv4.tcp_notsent_lowat = 16384</code></pre>
+<p>Their interview questions also makes you start to question yourself if you really know the modern TCP/IP stack.</p>
+<pre><code>Archaeology
+
+    What is the lowest TCP port number?
+
+    The TCP frame has an URG pointer field, when is it used?
+
+    Can the RST packet have a payload?
+
+    When is the &quot;flow&quot; field in IPv6 used?
+
+    What does the IP_FREEBIND socket option do?
+
+Forgotten Quirks
+
+    What does the PSH flag actually do?
+
+    The TCP timestamp is implicated in SYN cookies. How?
+
+    Can a &quot;UDP&quot; packet have a checksum field set to zero?
+
+    How does TCP simultaneous open work? Does it actually work?
+
+Fragmentation and Congestion
+
+    What is a stupid window syndrome?
+
+    What are the CWE and ECE flags in TCP header?
+
+    What is the IP ID field and what does it have to do with DF bit? Why do some packets have a non-zero IP ID and a DF set?
+
+Fresh Ideas
+
+    Can a SYN packet have a payload? (hint: new RFC proposals)
+
+    Can a SYN+ACK packet have a payload?
+
+ICMP Path MTU
+
+    ICMP packet-too-big messages are returned by routers and contain a part of the original packet in the payload. What is the minimal length of this payload that is accepted by Linux?
+
+    When an ICMP packet-too-big message is returned by an intermediate router it will have the source IP of that router. In practice though, we often see a source IP of the ICMP message to be identical to the destination IP of the original packet. Why could that happen?
+
+Linux Configuration
+
+    Linux has a &quot;tcp_no_metrics_save&quot; sysctl setting. What does it save and for how long?
+
+    Linux uses two queues to handle incoming TCP connections: the SYN queue and the accept queue. What is the length of the SYN queue?
+
+    What happens if the SYN queue grows too large and overflows?
+
+Touching the router
+
+    What are BGP bogons, and why are they less of a problem now?
+
+    TCP has an extension which adds MD5 checksums to packets. When is it useful?
+
+And finally:
+
+    What are the differences in checksumming algorithms in IPv4 and IPv6?</code></pre>
+]]></summary>
+</entry>
+<entry>
     <title>Global Deep Value Strategy</title>
     <link href="https://blog.paulme.ng/posts/2019-11-19-global-deep-value-strategy.html" />
     <id>https://blog.paulme.ng/posts/2019-11-19-global-deep-value-strategy.html</id>
@@ -703,138 +813,6 @@ he takes a short position -- I hope you&#39;re all sitting
 down for this -- it is because he believes the stock will 
 decline.&quot;</code></pre>
 <p>很可惜，他完全就挑錯了人來嘴，我們都知道 2008 發生了什麼事。</p>
-]]></summary>
-</entry>
-<entry>
-    <title>Workflow Automation</title>
-    <link href="https://blog.paulme.ng/posts/2019-08-23-workflow-automation.html" />
-    <id>https://blog.paulme.ng/posts/2019-08-23-workflow-automation.html</id>
-    <published>2019-08-23T00:00:00Z</published>
-    <updated>2019-08-23T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<p>In 2019 the information overflow has become a problem, not being able to fine tune my information channel has annoyed me for sometime, and they could be summarized as follows:</p>
-<ol type="1">
-<li>The service would mixed-in the Ads with the useful information you need. For example, if you install a comics app, apart from the newly released episode it also sends you the recommendation you are not interested into.</li>
-<li>Even the service provides certain level of customization on what should be pushed. It’s not 100% matching what you really need or simply lacking some of the contents you care the most.</li>
-<li>It’s the same for RSS, it only provides RSS for everything but you might be only interested into one specific category from this site.</li>
-<li>Not to mention that the site doesn’t provide RSS at all and contains all of the Ads. It needs you to keep polling the site so that they could generate revenue from the Ads, or they could track your usage since the content is behind the paywall and requires your login.</li>
-<li>Push notification could interrupt you at anytime, you could set it to be muted at certain time range but it is the OS level and not able to customise it to what you would prefer.</li>
-</ol>
-<p>I would like to have 100% control about my information consumption.</p>
-<ol type="1">
-<li>I could set the push notification to be delivered at certain time so that the context switch is reduced. The stress on information overflow could be eased without worrying that I would lose track of some of the information</li>
-<li>Customise the push and pull model to my like.</li>
-<li>Reduce the overhead of polling so that I could reclaim my hours to focus on the important stuffs. If I could reclaim 30 minutes every week, I could reclaim 2 hours a month. Given that a ballpark calculation that office workers has about 112 hours of disposable free time every month, reclaiming 2 hours is significant. (every work day for 2 hours on average and 9 hours each day for weekend excluding that you would like to get up late and fool around to get healthy rest, then in total is 28 hours per week and 112 hours per month).</li>
-</ol>
-<p>Initially I look up the site to see if there is any pre-existing service that I could leverage by simply just paying to automate the tasks, I tried out a few and decided to roll my own solution. Here are the ones I tried.</p>
-<ol type="1">
-<li><a href="https://ifttt.com/">IFTTT</a> has been around for a long time, but it is only for If-then-Else and the integration it provided are too simple. The only useful thing I could find is the task for putio.</li>
-<li>iPhone’s Workflow is only for iPhone specific macro, it is not what I would like to have a constantly monitoring service and listening to the trigger.</li>
-<li>Azure Workflow is better than IFTTT in terms of the complex tasks, and it is pricing model is more friendly if you don’t want to pay. However I felt its UI is unintuitive and buggy.</li>
-<li>The best combination is <a href="https://zapier.com/">Zapier</a> and <a href="https://apify.com/">Apify</a>. Apify provides crawling site and turn it into the CSV and JSON, you could also set it to be cron jobs as well, if your crawling volume is not high then it’s free. Zapier maybe the most affordable integration service provider out there. The rest of them often charges several hundred dollars and it is business oriented. For multi-steps workflow you could chose the $25 a month plan from Zapier to integrate stuffs, and you could basically use Google Sheets as your database to wire everything. It is convenient by clicking through forms and set things up and you could test the setup by replay test. However, 25 dollars a month is simply too expensive for personal usage.</li>
-</ol>
-<p>I decided to roll my own solution in the end, the decision was based on</p>
-<ol type="1">
-<li>It is much much cheaper by paying 5 dollars a month to Virtual Hosting than 25 dollars a month to Zapier.</li>
-<li>There are still automation that neither Apify nor Zapier could match where I need full programming environment.</li>
-<li>It’s not significantly more complicated to setup headless-chrome and crawl by yourself to a developer. For sure it is not possible for non-tech-savvy group of people.</li>
-</ol>
-<p>headless-chrome and puppeteer maybe the best things in these two years to that could make your life easier. It makes the site very hard to tell the difference between bot and your normal activity. Therefore the content that used to be troublesome to crawl is so much easier now. For the content behind paywall you could just load your cookie from the local storage to pretend that you are logged-in and crawl the content. And for the content rendered by javascript you could simply just wait for certain elements to appear then dump the snapshot. As long as you rate-limited your requests, you don’t have to worry about the recaptcha since the site looks your activity pretty much like normal users.</p>
-<p>Here is an example of crawling SeekingAlpha.</p>
-<pre><code>import * as puppeteer from &#39;puppeteer&#39;;
-import * as fs from &#39;fs&#39;;
-import * as program from &#39;commander&#39;;
-
-program
-    .version(&#39;0.1.0&#39;)
-    .option(&#39;-c, --cookie [file]&#39;, &#39;Use the cookie to crawl the website&#39;)
-    .parse(process.argv);
-
-if (program.args.length == 0) {
-    program.outputHelp();
-    process.exit(0)
-}
-
-let url_or_file = program.args[0];
-
-function extractItems(): Array&lt;any&gt; {
-    let single_articles = document.querySelectorAll(&#39;.author-single-article&#39;);
-
-    var comments = [] as any;
-    for (let single_article of single_articles) {
-        let comment = single_article.querySelector(&#39;.author-comment-content&#39;);
-        let article_link = single_article.querySelector(&#39;.article-link&#39;);
-
-        if (comment != null &amp;&amp; article_link != null) {
-            let o: any = {
-                &quot;comment&quot;: comment.textContent,
-                &quot;article_link&quot;: &quot;https://seekingalpha.com&quot; + article_link.getAttribute(&quot;href&quot;),
-                &quot;article_title&quot;: article_link.textContent
-            };
-
-            comments.push(o);
-        }
-    }
-
-    return comments
-}
-
-async function loadCookie(cookie_path, page): Promise&lt;void&gt; {
-    var objects = JSON.parse(fs.readFileSync(program.cookie, &#39;utf8&#39;));
-    if (objects.length) {
-        for (let cookie of objects) {
-            await page.setCookie(cookie);
-        }
-    }
-}
-
-(async () =&gt; {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-
-    if (program.cookie &amp;&amp; fs.existsSync(program.cookie)) {
-        await loadCookie(program.cookie, page);
-    }
-
-    if (url_or_file.startsWith(&#39;http&#39;)) {
-        await page.goto(url_or_file, { waitUntil: &#39;domcontentloaded&#39; });
-        await page.waitForSelector(&#39;.author-comment-content&#39;);
-    } else {
-        let htmlContent = fs.readFileSync(url_or_file, &#39;utf-8&#39;);
-        await page.setContent(htmlContent);
-    }
-
-    let items = await page.evaluate(extractItems);
-    console.log(JSON.stringify(items));
-    await browser.close();
-})();</code></pre>
-<p>It’s pretty intuitive and you could deploy the script to your virtual host. And deliver the content to Telegram as push notification. What you need to do is just to create a bot from Telegram and leverage the rubygem to send the text. The richness in Rubygem makes the glue programming quite easy and short. It’s not really significantly difficult to an experienced developer to do it than using the service like Zapier.</p>
-<p>Since the bandwitdh on Virtual Host is also much faster than your home’s ADSL, it is also better to move the large files between services on the server. I could easily use the script to move the file from putio to google drive.</p>
-<pre><code>#!/usr/bin/env bash
-TARGET_DIR=$HOME/file_pipe
-
-cd $HOME
-filename=$(lftp ftp.put.io -u $PUTIO_PASSWD -e &quot;set ftp:ssl-allow no; cd Hook; ls; exit;&quot; 2&gt; /dev/null | awk &#39;{print $9}&#39; | head -1)
-
-if [ -z &quot;$filename&quot; ]
-  echo &#39;no file to pipe&#39;
-  exit
-fi
-
-lftp ftp.put.io -u $PUTIO_PASSWD -e &quot;set ftp:ssl-allow no; cd Hook; get $filename; exit;&quot; 2&gt; /dev/null
-mkdir -p $TARGET_DIR
-mv $filename $TARGET_DIR
-renamer.rb $TARGET_DIR/$filename
-
-cd $HOME
-for f in $(ls $TARGET_DIR)
-do
-    drive push -no-prompt --files $TARGET_DIR/$f
-done
-
-rm -rf $TARGET_DIR
-lftp ftp.put.io -u $PUTIO_PASSWD -e &quot;set ftp:ssl-allow no; cd Hook; rm $filename; exit;&quot; 2&gt; /dev/null</code></pre>
-<p>With these scripts I need to pay zero attention to the contents, the push would be sent to my Telegram, it’s all customizable and I could turn off the app notification completely. All I need to make sure there is health check script that would remind me when the server is down (with the warnings also sent by Telegram since I don’t need a full solution of health monitoring).</p>
-<p>Next milestone I would turn to the browser automation by developing my own browser extension. Due to my heavy usage pattern of Read It Later, I accumulate thousands of links over the years and I am trying to design a workflow that would help me read the information more effective, but not just by dumping the information into Pocket and pretend that I would read it and create a delusion that makes myself feel satisfied. I hope that it could automatically tagging the information and create Trello card so that I could put the tasks into my personal planning priorization. Once I feel the workflow is running well I would have another post on that.</p>
 ]]></summary>
 </entry>
 
