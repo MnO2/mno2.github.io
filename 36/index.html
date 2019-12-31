@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1577629002.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1577809495.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,27 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2015-05-31-anki.html">Anki 使用して言語を勉強する</a></h1>
+    <div class="post-meta"><time datetime="2015-05-31 17:30">2015-05-31 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>Anki は教材のカードのソフトウエアにとして便利です。何でも言語の学習者へお進めます。カードの重複は科学に基づいたの Spaced Repetition 方法です。答えを見せてあと、簡単、普通、難しの中で貴方の意見選択ます。難しを選ぶんたら、カード現れる再びの可能性は高いです。しかし、ほとんどの人は Anki に使用して、言語の語彙を復習だけです。間違ってはないけど、正しではないです。文にユニットとして覚えた方がいい。ぞれでは、単語の使用の方法がわかります。</p>
+<p>Mike Campbellは大量な文トレーニングメソッドの方法論を提出しました。私もこの方法論を支持します。Mike Campbell 設立の会社 Glossika は色んな言語の大量な文の教材を出版した。教材が品質を持ったけれども、文のトピックは私の興味をあわせないです。自分のトランプを作りしたいです、ニュースから、慣用句の本から文を集めたい。それでは、教科書を使うより、モチベーションが強いです。しかし、質良いネイティブスピーカーで録音したのオーディオを捨てたくない。オーディオは文を覚えることが役立ちます。</p>
+<p>心配しない、Anki は Awesome TTS のプラグインをインストールできます。インストールあと、文を Google Translate の API で唱えられる。オーデイオはカードと一緒に保存することがでります。もちろん、TTSの声は録音の声ほど自然ではないけれども、空ほど良いです。それでは、自分の大量な面白い文と読み出しのオーディオを作ることが安いなります。</p>
+<p>Anki は iOS と Android のバージョンがあります。ダワンロードとインストール後、Ankiweb のアカウントでカードのデータがシンクできる。自分で作るの文を携帯電話に復習できます。</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -104,43 +125,6 @@ query[&quot;sort&quot;] = {&quot;_score&quot;: {&quot;order&quot;: &quot;desc&qu
 
                 </article>
             
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-05-29-solrdump.html">solrdump: A serialization tool for Lucene index</a></h1>
-    <div class="post-meta"><time datetime="2015-05-30 17:30">2015-05-30 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>Apache lucene is a quite commonly seen open sourced index engine in the market. Basically every company owning a text search software stack has lucene inside it. No matter it is a direct lucene API call or its wrappers like Elasticsearch and Apache Solr. In a well-designed architecture and common use cases, the search engine shouldn’t be used as source of truth of data. Unfortunately the reality doesn’t come always with a bright situation like this. Sometimes the legacy system have all of the data stored in a search engine, with lucene format hard to do any further process. In particular, in Solr’s terminology they are segment files, they are in binary format where any meaningful access must through Apache lucene API.</p>
-<p>That’s the background where this solrdump was created. I would like to export the data stuck in Solr to a format for easier processing or archiving, say JSON. The proper and correct way is to program in java and acess the binary format field with lucene API. However, it is quite boring to write it in java. Cloujre is an interesting alternative and that’s how the decision was made.</p>
-<p>The tool at this moment provides two output modes, you oculd either print the JSON format into the console, or insert the record to a JSONB field in the postgres 9.4</p>
-<ul>
-<li>print the data to console</li>
-</ul>
-<pre><code>lein run test/data/solr-segment</code></pre>
-<ul>
-<li>insert the record into postgres</li>
-</ul>
-<pre><code>lein run --output=postgres test/data/solr-segment</code></pre>
-<p>In order to insert the record into the database, you have to specify the database information in the edn file.</p>
-<pre><code>{:db {:protocol &quot;postgres&quot;
-      :hostname &quot;localhost&quot;
-      :dbname   &quot;test&quot;
-      :dbport   5432
-      :username &quot;mno2&quot;
-      :prepared_sql &quot;insert into units (payload) values (?);&quot;
-      :password &quot;&quot;}}</code></pre>
-<p>In the future it could support more output mode if the demand is clear.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
         </main>
 
         <div class="pure-g">
@@ -165,7 +149,7 @@ query[&quot;sort&quot;] = {&quot;_score&quot;: {&quot;order&quot;: &quot;desc&qu
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 36 of 56</div>
+            <div class="page-number is-center">Page 36 of 57</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>

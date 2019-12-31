@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1577629002.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1577809495.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -53,18 +53,96 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2019-10-06-life-reliability-engineering.html">Life Reliability Engineering</a></h1>
-    <div class="post-meta"><time datetime="2019-10-06 12:58">2019-10-06 12:58</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2019-10-15-%E7%9B%AE%E5%89%8D%E6%88%91%E7%9C%8B%E6%87%82%E7%9A%84%E5%B9%BE%E7%A8%AE%E8%BE%A8%E5%88%A5%E6%8A%95%E8%B3%87%E6%A9%9F%E6%9C%83%E7%9A%84%E6%96%B9%E5%BC%8F.html">目前我看懂的幾種辨別投資機會的方式</a></h1>
+    <div class="post-meta"><time datetime="2019-10-15 00:21">2019-10-15 00:21</time> </span>
     <div class="slot-content">
       <article>
-        <p>I have the feeling that we have an epidemic of stress, unhappiness and anxiety in the tech industry. It may be due to the working culture, perfectionism or simply because of toxic working environment. You could tell that from the suicide of Facebook employee a couple of weeks back, and Amazon employee in the last year. From time to time I would also experience such kind of tide in emotion in life. In order to tackle this I have developed my own kind of system to keep my mental health in control. And I didn’t find a good way to describe it by metaphor to explain it to another engineer until I am more familiar with the terminology of Site Reliability Engineering.</p>
-<p>First, we have to identify catastrophic patterns to cause your system downtime. In life, it means you go depressed, and want to kill yourself, or simply lack of motivation to anything. One important observation is that the stuffs you might consider important are correlated to each other. The life could give you a straight of bloody Marry due to this. One bad thing could lead to the other. Even you are born in a middle-class family and have a good enough income, or slightly better in recent year as a software engineer. Your life could be easily destroyed. It doesn’t have to be financially, if you are depressed and committed suicide even you have billions in bank it is still a checkmate to your life. For example, it could be your marriage affects your work performance and get you fired, and you lose your income. Or it could also be your important partner is sick, it not only costs you a fortune to pay the medical bill if you are living in countries like U.S.A or Singapore, where medical bills are expensive comparing to the median incomes. And since you have financial burden, your significant partners could be tempted to abandon you since they would not like to be involved etc. In order to prevent the chain reaction, you have to manage your “components” to be more resilient against each other, and not be over-confident to have too many components in your life. For example: getting overly leverage financially on your housing but at the same time raising kids, after all raising kids and marriage are liabilities that is off balance sheet. And if you already have components you are reluctant to get rid off, make sure you have insurance covered in a proper way to reduce the over all risks, at least stopping the chain effect when it happens. The best, for sure, to have low liability.</p>
-<p>Once you find a way to manage your portfolio of liability, a portfolio of “bomb shelters” or “chambers” where you could find peaceful time to recover is important. Over-stretching on a specific goal is dangerous since if that goal fails your mental health would be seriously damaged. For example, if you would like to climb the ladder of corporate or build a company. You have to go all out but make sure not to over stretch that could cause a total meltdown. If your goal fails, if you still have other goals like playing sports/games where you could find small achievement, that’s a hedge for your mental meltdown when you fail to build a company or climb the ladder. It’s a diversification of your goal, to make sure it’s unlikely that they correlate each other. If your secondary goal is to tied to your kids or partner, due to human minds are not stable. They might not care or understand your situation when you are down for those goals. It could be a shelter but not a reliable hedge. Having nice food is a good one since it’s unlikely that it would be affected by human factors, but having it too often it could hurt your lookings or physical health as well.</p>
-<p>Other than the diversification, I find stoicism is also useful to me. Here is a video from Tim Ferriss.</p>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/5J6jAC6XxAI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-</iframe>
-<p>I am not a fan of what’s been in American main stream culture on the alpha-male like of “Leadership.” Human are not infalable and actually quite easy to be broken. Overly stretching to the image of “confidence” and “overcome your poster syndrome by pretend it until you make it.” would easily make yourself vulnerable to a strike-back. I believe the Newton’s third law of motion applies here as well, if you stretch too much, you are exerting the same magnitude of force in the opposite in the same time.</p>
-<p>These are the “tips” or “speculation” that I have in mind for years. It’s not a science or corollary that would be deemed as universal and could be applied any kind of extreme situation (for example, war time or you are put in concentration camp). But at least it kind of works for me in modern time living in big cities.</p>
+        <p>來寫一下我目前的理解。寫作也是為了理清自己的思路。以下要講的都是公開市場的機會，對於像是投資銀行跟 Private Equity 他們的投資及會對於一般人太遠了。我目前看懂的大致分為下面幾種:</p>
+<ol type="1">
+<li>Organic Growth</li>
+<li>Roll-up</li>
+<li>Asset Play</li>
+<li>Turn Around</li>
+<li>Commodity Cycle</li>
+</ol>
+<h2 id="organic-growth">Organic Growth</h2>
+<p>這一類通常都是初學者會接觸的，也是電視名嘴特別愛講的。特別是巴菲特晚期的一些名言透過媒體變得廣為所知後，一大堆投資部落客都愛說自己是遵循巴菲特哲學，滿嘴巴菲特但其實他們九成以上都沒有仔細去研究巴菲特早年 Partnership 的投資模式。不過巴菲特晚期的哲學的確是王道，這一類也的確都是優質的企業，如果可以用合理或是便宜的價格買到真的就是不要輕易放掉。只是主要的問題是等到你知道的時候都已經漲上去了。譬如說，現在 Visa 跟 Google 的簡易指標都很高</p>
+<ul>
+<li>Visa: EV/EBITDA = 25</li>
+<li>GOOG: EV/EBITDA = 16</li>
+</ul>
+<p>EV/EBITDA 大致代表的意義是付出一定的價錢買的的現金流或是收入回收所需要的時間。跟 P/E 不同的是 EV 計入了債權一起進去考量，並且扣點 Balance Sheet 上的現金，用會計上的收入扣掉折舊等等來當作現金流的快速計算。所以 EV/EBITDA = 25 就是我花錢買 Visa 的股票假設經營狀況不變的情況下至少要 25 年才能回本。在沒有爆發性成長的前提下這是一個很貴的價錢。根據經驗還有我聽其他投資人的分享，一般來說都是 EV/EBITDA = 10 是合理價，EV/EBITDA &lt;= 8 是便宜，EV/EBITDA &lt;= 5 是大甩賣。不過也是要看市場，在日本的話企業經營都比較保守，帳上會有很多現金，因此經常會看到 EV/EBITDA &lt;= 8</p>
+<p>雖說也是可以追高，特別是現在有指數基金提供動能的情況下追高的動能有可能還是可以運作好一陣子，這些也都是好企業，但這就表示你的投資邏輯是奠基於</p>
+<ol type="1">
+<li>業績會不斷如預期增長，甚至超越</li>
+<li>之後有人願意用更高的價錢接受</li>
+</ol>
+<p>這預測的難度其實是不低的，只要你預測出錯就是除了一個很貴的價錢卡在那邊。特別是大企業多少投資法人請最好的人全職去研究，就算不說法人通常明顯的優勢大家都看得出來，也就是你沒有特別有優勢。你要能夠贏過其他人，通常有可能的就是</p>
+<ol type="1">
+<li>這是你的本業，而且你是行業中的佼佼者。</li>
+<li>因為一些因素你先看到了，可能是因為你看到的生意是地區性的而你就住在那邊。</li>
+<li>你對行業也有足夠了解。</li>
+</ol>
+<p>衡量競爭優勢跟成長性都沒有想像中容易。隨著時代轉變，所謂競爭優勢也不斷出現非傳統的護城河，像是 Netflix。但多多少少企業不到短短幾年又被後來者追過。所以巴菲特才會喜歡消費股，因為被科技演進淘汰的機率較小。這一點會牽扯到你抱不抱得住股票</p>
+<ul>
+<li>過程並不平順，而且人會不斷有新的想法或改變想法而抱不住。就算職業投資人也非常難。</li>
+<li>外行人不好評估跑道多長。</li>
+<li>非職業投資人的話一生能抓到一兩個 10 bagger （10 倍股) 就不錯了</li>
+</ul>
+<p>針對如上的各個困難點，要能夠彌補的話並沒有什麼好方法</p>
+<ol type="1">
+<li>盡量挑你本業相關的，或是相近的產業。</li>
+<li>除非是金融危機千載難逢的機會你可以用低價買到好的大企業，不然 Micro-cap or Nano-cap 也是有機會的，可以避開跟法人做對手。只是盡量在歐美法治公司治理比較好的地方比較不會碰到老千，香港跟台灣的問題就是公司治理問題會讓人不敢碰小企業。</li>
+</ol>
+<h2 id="roll-up-leveraged-roll-up">Roll-up / Leveraged Roll-up</h2>
+<p>跟自然地業績成長不同，這一類型的公司是不斷透過收購合併來成長。最有名的就是 John Malone 的 TCI 還有他建立的 Liberty Complex。巴菲特投資 Liberty Complex 也是有頗長的歷史，如果把大大小小合併起來的話可能佔他頭幾大部位。</p>
+<p>這類的玩法原理說起來很簡單，但實際做起來不容易。要簡單解釋的話就是他很類似某一類房地產玩家的做法。</p>
+<ol type="1">
+<li>我選好適合出租的房子，背槓桿買下房子改裝出租。如果自己一開始出 20% 股債比就是 1:4。也就是如果租金收入對房價是 4% 的話 (ROA = 4%)，那 ROE 就放大成將近 20%。不及 20% 是因為還要付利息。</li>
+<li>出租的租金足夠多，而且穩定。就可以依靠他來付房子的貸款，然後長期降槓桿。如果付掉一半的話股債比就降到 1:1，ROE 也會下降到約 10%</li>
+<li>如果這時候房子的房價太高了，那就把房子脫手賺取泡沫的估值價差。</li>
+<li>如果沒有泡沫，同時有看到其他不錯適合出租的物件，就用現在手上的房子再貸出更多錢買下房子出租，回到步驟一如此重複。ROE 又回到 20% 以上</li>
+</ol>
+<p>同一套玩法也可以拿來套在做企業上，而這就是 John Malone 的玩法。但這個玩法有很多前提。</p>
+<ol type="1">
+<li>現金流的穩定度很重要，因為你要拿來付債息。</li>
+<li>降息的環境也重要，這跟槓桿的資金成本密切相關。</li>
+<li>業務要有整合性，房子的話是相對容易。但企業整合的話會有文化的問題。員工可能會反彈。你要整合業務省錢的話，也是會有原有企業動機不足的問題。</li>
+<li>產業要足夠零碎讓你有整合的空間，並且業務不複雜。太複雜的業務整合不易。</li>
+</ol>
+<p>失敗的案例就是 Bill Ackman 曾經的最大持股 Valeant。最後爆掉也是因為整合後提升藥價受到整體社會反彈。而且後期付出收購企業的錢越來越高，因為產業不夠零碎，人家知道你的玩法後就提價讓你收購價高到無法負荷。</p>
+<p>通常房地產在社會發展前期會有這樣發展的空間，房地產商也通常是這樣起家的，從小做到大，只是他們不是用出租而是用販賣物件的方式風險，但槓桿的原理是類似。但因為也是這樣因為槓桿現金流不足爆掉的風險會更大，多半在經濟週期後段爆掉也是因為太貪心或沒遠見而沒有適時降槓桿。</p>
+<h2 id="asset-play-net-net">Asset Play / Net-Net</h2>
+<p>這就是巴菲特的啟蒙者 Ben Graham 所開發出來的一種方法。巴菲特早期在合夥人時期也幾乎都是用這種方法，他是到波克夏時期遇到查理孟格才逐漸轉變投資方式。</p>
+<p>這種方法的核心是奠基在邏輯推導，如果一個企業的市值小於他的淨現金部位，也就是【現金 + 待收貨款 + 折價後的存貨跟短期投資 - 所有負債】。那這個企業理論上不應該存在，因為清算還比你繼續經營還划得來。巴菲特早期就靠入股這種企業然後清算賺了很多錢，不是像現在他在媒體上慈眉善目的形象。</p>
+<p>計算資產的時候現金跟待收貨款是最好，存貨的話像是流行服飾清算的話就沒什麼價值，但如果是勞力士之類的話二手市場是存在價值的。而其他硬資產像是土地是最好，飛機通常也能賣到五折，在做這架的時候要根據產業不同用不同估算方法。</p>
+<p>這種方法的缺陷就是你對企業沒有直接的控制權，除非你想巴菲特直接買到最大持股去影響董事會。所以最初的方法論是你要買一籃子這種企業，而且平均分散在不同產業。搭配上一些基本指標譬如說不要太多負債等等，然後靜靜地等待未知的催化劑，有可能是均值回歸，或是清算，或繼續賠錢而倒閉。 Ben Graham 提倡的是你買入一籃子然後等三年或賺 50% 賣掉。</p>
+<p>這種方法的缺點是，現在已經廣為所知，所以在比較有效率的市場都已經被套利完了。剩下就是日本比較多，所以後來就有點拓展到其他方法。</p>
+<ol type="1">
+<li>公司有隱蔽性資產，譬如公司有一筆很早買的土地，在 Balance Sheet 上沒有根據市價重估。</li>
+<li>公司有一些經營危機，但如果分拆賣個 Private Equity 或競爭對手的話，可以賣到比繼續經營好的價錢</li>
+</ol>
+<p>但這些的缺點都是要有 Active Investors 去處理，因為職業經理人只是打工的，沒有動機去做。因為企業清算或是賣掉了管理層就失業了。比起清算還不如繼續吸血領高薪。而 Active Investors 的能力目標利益是否一致也是很重要。這類型都是理論上會 Work，但最後因為人為因素搞砸的機率也是有。</p>
+<h2 id="commodity-cycle">Commodity Cycle</h2>
+<p>原物料一個特性是他有週期，而且週期很明顯，如果能夠大致抓對時機耐心等待的話就能夠賺到錢。只是要抓對能夠撐過週期的企業不容易，而某些商品因為是國際性商品，特別難以預測，像是石油就是，因為參與的國家太多，賽局太複雜。俄羅斯，沙烏地阿拉伯，美國，委內瑞拉等等。通常連專家都預測不太準。一般來講都是要搭配總經數據，看到等到確定的信號再投進去，放棄頭尾段只賺中間的部分。股價特性常常是低迷很長一段時間然後暴衝。</p>
+<p>但產業中有一些特別的部分，像是有煤業是只賺權利金的部分的企業，也就是他不出資開採，他是幫別人開採然後賺綁定通膨的差價部分，就會比較抗週期。或是有一些開採後的成品有運送成本的限制，像是水泥的原料 Lime Stone，那如果公司是在內陸的話，那就會有對於國際供應的護城河。或是看天然氣裡面擁有的地的開採成本比其他地方都低，那在賽局中大家都不得不擴產賺取現金的時候，他就可以撐比較久，然後在最後的賽局中活下來。</p>
+<p>同樣這一類難度也是不低，但好的是你幾乎可以確定會有下一次週期，不像有些產業被革命了就再也回不來了。</p>
+<h2 id="turn-around-over-pessimistic">Turn Around / Over-Pessimistic</h2>
+<p>這一類很像是買賣二手物品一樣，許多二手物品都有瑕疵，但稍微整理一下都能買到好價錢。如果有在二手拍賣網站像是 Carousell 買賣過東西一樣，就知道有一類二手商整天就在上面看有沒有人大甩賣商品，他用超低的價格撿到，稍微整理一下就可以賣出差價。而股票也是，這類通常都是有些問題的企業，但股價超便宜。如果成功 Turn around 的話，估值修復很容易至少成為 2-bagger 或 3-bagger 股。或是用房地產舉例，說有人開玩笑一百塊錢台幣賣你一棟鬼屋你要不要？有些人不理性不計算就覺得給我鬼屋我也不能住送我也不要，但理性人應該是計算整理後是否能賣出合理價，扣除稅費後是不是比一百塊便宜，可以想見只要價錢夠低，就算是爛物件很高的機率你的推論會是對的。</p>
+<p>這類企業有時候跟 Asset Play 重疊，譬如說 Balance Sheet 裡面有其他值錢的投資，可以 cover 掉負債。但很多時候你對產業有些瞭解，知道一些眉角。譬如說在零售業裡面店租是很高的成本，但你發現某家零售業雖然業績下滑但 Operational Lease 裡面是 Cancellable 也就是可以退租不用被合約綁住五年的，如果 Balance Sheet 上面沒有負債的話變成 0 的機率就更低。或是香菸雖然被法規限制，但法規限制的同時，小企業沒辦法付出法遵的成本，所以實際上會造成寡占。或是企業雖然槓桿很高但現金流沒有惡化。並且債券到期日是平均分散的。債多不是問題，流動性才是問題。也有可能是因為減稅或會計規則的變化而大多數人漏算了某部分的資產。如果 CEO / CFO / COO 有自己買進股票並在股東會上透露一些訊息通常會是一個 confirmation。而通常公司業績下降在商業發達的地方都會很有動機拉回來的，畢竟股東不想賠錢，管理層不想失業。最差可能就賣個競爭對手多少回收一些比清算要好的價錢。</p>
+<p>但玩這套最好要要在法治跟商業道德比較好，還有 Investor 比較容易介入的地方會比較容易。台灣跟香港有太多公司治理的問題，大陸就更不用說了。而且大陸很多地方政策，法治，公共政策資料也不透明。而且產業跟地區最好分散，這樣比較不會有系統性連動的問題。可參見我講指數基金的問題那篇。</p>
+<p>如果你有一籃子，假設股價彼此沒有強相關性。用簡單的數學計算：保守估計平均 3 年內 Turn Around，不然歸零，你如果有 7 成的機率猜對，那期望值如下。</p>
+<pre><code>2 * 0.7 + 0 * 0.3 = 1.4</code></pre>
+<p>年化報酬率有 12%。你如果有 8 成的機率猜對，那期望值如下。</p>
+<pre><code>2 * 0.8 + 0 * 0.2 = 1.6</code></pre>
+<p>年化報酬率有 17%。</p>
+<p>如果長期關注的話，小部位多做多觀察加大經驗可以隨著交易經驗越來越多，學習越來愈多產業經驗，辨別失敗跟詐騙的情況會越來越準而增加獲勝機率。</p>
+<p>比較怕的是有時候你會看到邏輯上特別好的機會而賭大部位，但實際上是 Value Trap，被稱為下一個巴菲特的 Eddie Lampert 就因為 Sears 死在這裡。Bill Ackman 的 JC Penny 也是。包含巴菲特自己都中過好幾個爆掉的投資，Berkshire Hathway 這個殼就是其中一個爆掉的，他把原本業務清算掉變成投資公司。所以有人也認為巴菲特有可能是倖存者偏差。現今巴菲特的左右手 Ted 也是靠賭大的這類企業賭對的而發家的。</p>
+<p>經過之前經驗我覺得還是小部位分散多個會比較穩定，這種方式其實有一點像 Morgage Backed Security，慢慢賺讓期望值站在你這邊。然後隨著更多的資訊的揭露 Buying up，就好像玩撲克的時候隨著牌越開越多加賭注一樣。等逆轉了被確定再加一些，但嚴格控制部位上限。</p>
+<h2 id="dumped-by-mechanical-device">Dumped by Mechanical Device</h2>
+<p>這一類就是某些因為機械性原因而被無條件拋棄，最簡單的就是被 Index delist 的股票，反過來如果被加進 Index 的話也可能漲上許多。或是一些基金因為股票太便宜而不能購買，或是有一些道德因素而必須被清掉。Spin-off 雖然不是機械性的原因，但也很容易因為投資人不熟而無條件賣掉。Joel Greenblatt 就是靠 Spinoff 發家的。</p>
+<h2 id="結語">結語</h2>
+<p>除了基本的方法論之外，具體的產業知識是很重要的，這些都藏在 CEO 的談話中，或是有些秘密只能反向去推敲，沒有人會跟你講。都是要長期累積，但了解的話勝率會提高不少。</p>
 
       </article>
     </div>
@@ -78,115 +156,18 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2019-10-04-%E5%B8%82%E5%80%BC%E6%AC%8A%E9%87%8D%E6%8C%87%E6%95%B8%E5%9F%BA%E9%87%91%E8%88%87%E7%B3%BB%E7%B5%B1%E6%80%A7%E8%A8%AD%E8%A8%88%E5%95%8F%E9%A1%8C.html">市值權重指數基金與系統性設計問題</a></h1>
-    <div class="post-meta"><time datetime="2019-10-04 18:35">2019-10-04 18:35</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2019-10-06-life-reliability-engineering.html">Life Reliability Engineering</a></h1>
+    <div class="post-meta"><time datetime="2019-10-06 12:58">2019-10-06 12:58</time> </span>
     <div class="slot-content">
       <article>
-        <p>前一陣子因為 The Big Short 而出名的 Michael Burry 回覆了 Bloomberg 對於市場看法的信而又引發了網路上一場論戰。因為他的回覆中關於 Index Fund 的說法提到了 “Bubble” 這個詞而許多人擺錯了重點，把重點擺在是不是有 Bubble 這件事。其實他的說法跟之前 Howard Marks 還有 Seth Klarman 提到的並沒有不同，其實關鍵的重點在於結構設計，而每個結構設計跟實體工程一樣都有他的極限在，特別是在金融市場中因為結構承重量或容錯量是不可見的，涉及抽象的概念。雖然我完全同意 Micael Burry 的說法，但我一直想不到一個好的比喻跟一般人解釋這件事。直到我前幾天看到 yinwang 關於自動駕駛責任的<a href="http://www.yinwang.org/blog-cn/2019/09/30/autopilot-responsibility">文章</a>。我覺得解釋得非常清楚，而同樣的邏輯謬誤也是可以套用在市值權重指數基金擁護者的回覆上。</p>
-<p>要討論這件事涉及兩個層面</p>
-<ol type="1">
-<li>為什麼用【市值權重指數基金拿到的是市場報酬】不足以回應 Michael Burry 點出的風險？</li>
-<li>市值權重指數基金的缺陷在哪？什麼情景下會觸發？</li>
-</ol>
-<p>首先用一個例子來說明第一點。在今年初發生了 Boeing 737 MAX 因為設計不良而造成的事故。一時間人心惶惶，而各國政府也相繼搬出政策禁飛 Boeing 737 MAX。為什麼大家會擔心這件事？不是說 “平均” 來講，發生空難的事件極低嗎？ 機率上來講你死在去機場的路上是遠高於你發生空難的機率。這主要的問題是因為 Boeing 737 MAX 有共同的因素驅動，也就是設計的缺陷。</p>
-<p>就機率來解釋的話，就是</p>
-<pre><code>P(其它 Boeing 737 MAX 墜機  | 一架 Boeing 737 MAX 墜機)</code></pre>
-<p>高於</p>
-<pre><code>P(其它非 Boeing 737 MAX 墜機 | 一架非 Boeing 737 MAX 墜機)</code></pre>
-<p>因為他們不是類似於獨立事件。而是有共同的缺陷。假如每一家航空公司全部都是提供 Boeing 737 MAX 的話，說我身為一個個體明天搭的飛機墜機的機率趨近於平均發生空難的機率一點意義都沒有，因為平均的結果是大家一起因為起飛後因為設計的缺陷造成機頭直接往下墜毀死亡。</p>
-<p>所以說【市值權重指數基金拿到的是市場報酬】並不足以回應。正確的回應要解釋為什麼市場報酬背後沒有共同驅動因素造成大家一起死的結果。這在大多數時候是對的，畢竟市場報酬是買方跟賣方資金平衡投票出來的，而且市場中每個人的想法不同，就好像是不同設計的飛機一樣。所以大多數時候市場的驅動的因子沒有共同背後的因素驅動。但接下來解釋的第二點，我會說明在某種特殊情況底下是有可能發生的，也就是市場上的參與玩家是同一個想法佔大多數的時候，而指數權重基金佔大多數也就是其中一個實現。</p>
-<p>要了解第二點必須說明市值權重指數基金的運作，這邊舉一個簡單的小例子說明。台灣人很愛買房子出租，所以用房子來舉例，</p>
-<p>今天市場中有三種分十年折舊的房子可以帶來租金收入，然後市場裡面有四個投資人 A, B, C, D</p>
-<table>
-<thead>
-<tr class="header">
-<th style="text-align: center;">房子</th>
-<th style="text-align: center;">年租金</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">i</td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">ii</td>
-<td style="text-align: center;">2</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">iii</td>
-<td style="text-align: center;">10</td>
-</tr>
-</tbody>
-</table>
-<p>期間是 10 年，十年後房子價值歸零。市場無風險利率是不會動的 1%，而對於房地產的投資人 A, B 風險利率要求是 2%，加上通膨 3% 折現率共 5%。那這些房子在他們兩個人間的平衡價錢應該是多少呢？用十年的 DCF 可以得到</p>
-<table>
-<thead>
-<tr class="header">
-<th style="text-align: center;">房子</th>
-<th style="text-align: center;">價格</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">i</td>
-<td style="text-align: center;">7.72</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">ii</td>
-<td style="text-align: center;">15.44</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">iii</td>
-<td style="text-align: center;">77.22</td>
-</tr>
-</tbody>
-</table>
-<p>而投資人 C, D 決定採取不一樣的觀點，不用類似 DCF 的方式衡量，他們決定編制 FOOBAR 市值權重指數，這個指數就是</p>
-<pre><code>i 的市價 * (7.72 / 100.38) +
-ii 的市價 * (15.44 / 100.38) +
-iii 的市價 * (77.22 / 100.38)</code></pre>
-<p>他們把他們的錢加起來成立市值權重指數基金，把他們共有的錢 100.38 照上面比例分配買。也就是 i 買 7.72 塊， ii 買 15.44 塊， iii 買 77.22 塊。所以投資人 C, D 認定的價值不是根據衡量物件本身，而是因為市場中其他人的價錢而分配他們的錢的分配。假如今天 A, B 覺得 iii 其實收不到 10 塊的年租金，其實只能收到 2 塊。那就會變成 15.44 塊。那 C, D 就會跟著把 iii 賣掉。因此你可以看到一般所謂的市值權重指數基金就是一種 Trend Following 的策略，是因為市場中其他對價值做出反應的人的定價而跟隨。在這個例子中，當 C, D 反應過來的時候，他們賣的價錢可能會低於 15.44 塊。因為他們的對手只有 A 跟 B。而 A, B 只願意用低於 15.44 塊的價格收，不賣的話就違背了他們指數的規則，所以他們一定要賣，這是機械性訂死的。 為了要賣掉他們就不得不降價，這邊的例子只有 C, D 兩個個體的資金，但你可以想像賣方是這個的 100 倍, 1000 倍然後【同時】想要賣的情況，也就是會造成 race to the bottom。最後平衡價可能遠遠低於 15.44，也許 7, 8 都有可能。</p>
-<p>但市場有趣的地方就是上述情況又不是鐵定會發生。假如今天反而是 A, B 突然都變調，也投入 C, D 的指數基金。市場中就不再有人用 DCF 去定價了。所有人都認為權重永遠都是如下：</p>
-<pre><code>i: (7.72 / 100.38) 
-ii: (15.44 / 100.38)
-iii: (77.22 / 100.38)</code></pre>
-<p>整個 price discovery 的機制就不見了，不管底下的實際能收到的租金有多少，就是這樣定價，所以說股價都是所謂人類基金管理者亂炒作這說法並不公平，市值權重指數是一種跟隨策略，沒有人類基金管理者他也是不會動的。但這並不是一個穩定的平衡，遲早有人會跳出來點出國王的新衣，然後前面崩毀的情況就會發生。</p>
-<p>從上面的邏輯推導與立論可以知道，市場大多數人都在使用某個系統時，而那個系統又因為一些背後共同問題造成時，平均就是大家一起平均死。沒錯，你拿到平均的結果，但你還是死了。但同時，請不要滑坡推論就說 Boeing 或是市值權重指數基金就是該死，身為渺小個體我們應該完全摒棄，因為</p>
-<ol type="1">
-<li>統計上 Boeing 跟 Airbus 造的飛機比起你自己亂造的飛機要強，儘管 Boeing 737 MAX 有問題。</li>
-<li>統計上 Boeing 跟 Airbus 造的飛機比起你自己請的飛機廠商也要強，儘管 Boeing 737 MAX 有問題。</li>
-</ol>
-<p>但反面來說</p>
-<ol type="1">
-<li>統計上有瑕疵的立論並不能因此讓我不擔心 Boeing 737 MAX 的結構性問題，除非你能舉出有說服力的邏輯推論說明我舉出的情況不用擔心，因為儘管機率不高或是未知，但我一旦中了就死了。同樣對於市值權重指數基金也是，這關係到許多人畢生的積蓄。</li>
-</ol>
-<p>我想聲明，市值權重指數基金是非常偉大的發明，他讓大多數不懂金融的人都有機會分享到果實，能承受的資金量也非常巨大，至今都沒發生問題。</p>
-<p>我並不是鼓勵說就不要使用指數基金，但與此同時，因為過去沒發生問題而認為以後也不會發生問題，不去用正確的邏輯回應問題。這種過度膨脹的心理而不去理解市值權重指數基金的結構所潛藏的缺陷並提醒大家，在我看來跟那些設計各種金融工程工具但不去點出工程極限的人沒有兩樣，都是不負責任的。</p>
-<p>最後安插一個軼聞。Michael Burry 在 2000 年就成立 Scion Capital 來管理家族基金，但他也接受外部他喜歡的人的投資，早年完全是採取類似 Ben Graham 或是 Warren Buffett 在 Partnership 時代的策略，很多人是因為 The Big Short 才認識他，但不知道他是跟 Warren Buffett 同一風格的投資人。好巧不巧在 2001 年的時候，市值權重指數基金的教父曾經在 Forbes 專訪上嘴 Michale Burry。</p>
-<pre><code>In the 2001 article, Forbes proposed the following as 
-a working definition of a hedge fund: &quot;A hedge fund is 
-any investment company that is unregulated, has limited
-redemption privileges, and charges outrageous fees.&quot; 
-The author also enlisted the help of John Bogle, the 
-Vanguard index fund czar, to make the case against hedge 
-funds. Bogle obliged, noting that it is not realistic 
-for investors to expect the hedge fund industry of more 
-than 6,000 funds and $500 billion in assets to outperform 
-the rest of the market over the long term.
-
-This is a reasonable observation, and I don't necessarily 
-disagree with him. Unfortunately, he then went on to pick
-a name at random from a hedge fund directory to disparage, 
-saying: &quot;I don't know what to do about Scion Capital, 
-started by Michael Burry M.D. after leaving his third year 
-of residency in neurology.  He started it mostly with his 
-own money, $1.4 million, and he's looking for more. His 
-technique to manage risk is to buy on the cheap and, if 
-he takes a short position -- I hope you're all sitting 
-down for this -- it is because he believes the stock will 
-decline.&quot;</code></pre>
-<p>很可惜，他完全就挑錯了人來嘴，我們都知道 2008 發生了什麼事。</p>
+        <p>I have the feeling that we have an epidemic of stress, unhappiness and anxiety in the tech industry. It may be due to the working culture, perfectionism or simply because of toxic working environment. You could tell that from the suicide of Facebook employee a couple of weeks back, and Amazon employee in the last year. From time to time I would also experience such kind of tide in emotion in life. In order to tackle this I have developed my own kind of system to keep my mental health in control. And I didn’t find a good way to describe it by metaphor to explain it to another engineer until I am more familiar with the terminology of Site Reliability Engineering.</p>
+<p>First, we have to identify catastrophic patterns to cause your system downtime. In life, it means you go depressed, and want to kill yourself, or simply lack of motivation to anything. One important observation is that the stuffs you might consider important are correlated to each other. The life could give you a straight of bloody Marry due to this. One bad thing could lead to the other. Even you are born in a middle-class family and have a good enough income, or slightly better in recent year as a software engineer. Your life could be easily destroyed. It doesn’t have to be financially, if you are depressed and committed suicide even you have billions in bank it is still a checkmate to your life. For example, it could be your marriage affects your work performance and get you fired, and you lose your income. Or it could also be your important partner is sick, it not only costs you a fortune to pay the medical bill if you are living in countries like U.S.A or Singapore, where medical bills are expensive comparing to the median incomes. And since you have financial burden, your significant partners could be tempted to abandon you since they would not like to be involved etc. In order to prevent the chain reaction, you have to manage your “components” to be more resilient against each other, and not be over-confident to have too many components in your life. For example: getting overly leverage financially on your housing but at the same time raising kids, after all raising kids and marriage are liabilities that is off balance sheet. And if you already have components you are reluctant to get rid off, make sure you have insurance covered in a proper way to reduce the over all risks, at least stopping the chain effect when it happens. The best, for sure, to have low liability.</p>
+<p>Once you find a way to manage your portfolio of liability, a portfolio of “bomb shelters” or “chambers” where you could find peaceful time to recover is important. Over-stretching on a specific goal is dangerous since if that goal fails your mental health would be seriously damaged. For example, if you would like to climb the ladder of corporate or build a company. You have to go all out but make sure not to over stretch that could cause a total meltdown. If your goal fails, if you still have other goals like playing sports/games where you could find small achievement, that’s a hedge for your mental meltdown when you fail to build a company or climb the ladder. It’s a diversification of your goal, to make sure it’s unlikely that they correlate each other. If your secondary goal is to tied to your kids or partner, due to human minds are not stable. They might not care or understand your situation when you are down for those goals. It could be a shelter but not a reliable hedge. Having nice food is a good one since it’s unlikely that it would be affected by human factors, but having it too often it could hurt your lookings or physical health as well.</p>
+<p>Other than the diversification, I find stoicism is also useful to me. Here is a video from Tim Ferriss.</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/5J6jAC6XxAI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+</iframe>
+<p>I am not a fan of what’s been in American main stream culture on the alpha-male like of “Leadership.” Human are not infalable and actually quite easy to be broken. Overly stretching to the image of “confidence” and “overcome your poster syndrome by pretend it until you make it.” would easily make yourself vulnerable to a strike-back. I believe the Newton’s third law of motion applies here as well, if you stretch too much, you are exerting the same magnitude of force in the opposite in the same time.</p>
+<p>These are the “tips” or “speculation” that I have in mind for years. It’s not a science or corollary that would be deemed as universal and could be applied any kind of extreme situation (for example, war time or you are put in concentration camp). But at least it kind of works for me in modern time living in big cities.</p>
 
       </article>
     </div>
@@ -220,7 +201,7 @@ decline.&quot;</code></pre>
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 5 of 56</div>
+            <div class="page-number is-center">Page 5 of 57</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>

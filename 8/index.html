@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1577629002.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1577809495.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,107 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2019-08-20-travel-planning-with-trello.html">Travel Planning with Trello</a></h1>
+    <div class="post-meta"><time datetime="2019-08-20 18:55">2019-08-20 18:55</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>As a frequent traveller who has been to 55+ countries/regions, I know that travel planning is a time consuming process. I enjoyed the process pretty much as it would get me to know the destination and the culture more. Being to the destination is only small part of it. However, planning it with the right tool definitely would make your life much easier.</p>
+<p>I was quite used to put everything into one Google Doc. I have been using the template I created for myself all over these years. I would revise the template from the experience from the journey to make sure the template is thorough and it could handle 90% of the scenario. Whenever I am about to plan my next trip, I’ll just copy from my template and dump the materials and the links to the wikitravel and blog posts into the Google Doc and use it as a draft to plan my trip.</p>
+<p>Until I find a significant better way to do it. It’s part of the movement I set for myself to make most of the things in my life to be managed by Trello. I would centralize the notification/update by integrating the crawler and Trello API. But soon I found that Trello is especially suitable for travel planning. This blog post is not sponsored by Trello but I whole-heartedly think so.</p>
+<p>Travel planning is a classic type of tasks that has the following properties:</p>
+<ol type="1">
+<li>Start from a simple idea and expanded into details and converge to a final plan</li>
+<li>The final outcome is a detailed itinerary with contingency plan.</li>
+<li>Itinerary alone is not enough. Analytical reporting is required since you need budgeting.</li>
+</ol>
+<p>Therefore at least to me, a good software for travel planning need to have the following features:</p>
+<ol type="1">
+<li>A pin board to collect the materials you are gonna to read.</li>
+<li>Easy to re-organize and label items to suit your need or your mind map looks like.</li>
+<li>Rich media supports</li>
+<li>It provides APIs so that you could export and analyze it with a proper tooling.</li>
+<li>Synchronization and Offline access.</li>
+</ol>
+<p>And Trello just matches all of them to me as the time of Aug 2019, and this is how I use it.</p>
+<p>At the brainstorming phase, I would install the Send-to-Trello button to my Firefox. Whenever I looked up a relevant blog post and I don’t have time to read it full, I would use Send-to-Trello button to save it later. Usually I would create a List in Trello and name it as <code>Lead</code>.</p>
+<p><img src="../images/2019-08-20/send_to_trello.png" /></p>
+<p>And I would read them and create the digested steps into Cards and organize them into days. This is an iterative process, I would first focus on the ballpark schedule so that I could put everything into the my scheduled numbers of days, and make sure the big transporation items are possible to tickets in the budget. In the later iterations, I would add more detailed steps including the ticket and transfer information etc, so that I could just follow the instructions when I am on the road. The Card design just makes this iterative process easy and intuitive.</p>
+<p><img src="../images/2019-08-20/trello_cards.png" /></p>
+<p>With the Adds-on, Trello could even show you the Map View of your cards, it’s especially useful when you are planning the places you would like to visit in the city. You could see the obvious clusters for the markers on the map, and put them in the same day.</p>
+<p><img src="../images/2019-08-20/trello_map_view.png" /></p>
+<p>Also I would leverage on the Custom Fields adds-on to create extra field to document the cost and duration of the transportation. These are for further analysis at the later phase.</p>
+<p>After finishing the planning and make sure I was correctly labeling the cards. I would run a script against Trello API to generate the Google Sheets budget spreadsheet.</p>
+<pre><code>#!/usr/bin/env ruby
+
+require &quot;google_drive&quot;
+require 'trello'
+require 'time'
+require 'json'
+
+spreadsheet_id = '&lt;Your Spread Sheet ID&gt;'
+target_currency = 'TWD'
+
+config_file = File.read(&quot;config/trello.json&quot;)
+config_for_trello = JSON.parse(config_file)
+
+Trello.configure do |config|
+  config.developer_public_key = config_for_trello['developer_public_key'] 
+  config.member_token = config_for_trello['member_token'] 
+end
+
+cards = {}
+
+Trello::Board.find('&lt;Your Board ID&gt;').lists.each do |list|
+  Trello::List.find(list.id).cards.each do |card|
+    cards[card.id] = { :name =&gt; card.name }
+    card.custom_field_items.each do |item|
+      pp item.custom_field_id
+      if item.custom_field_id == '5d5978f014ab2f17fcb6a2cd'
+        if not item.value['number'].nil?
+          cards[item.model_id][:cost] = item.value['number']
+        end
+      elsif item.custom_field_id == '5d59795638dd318d1a53471a'
+        if not item.option_value().nil?
+          cards[item.model_id][:currency] = item.option_value()['text']
+        end
+      end
+    end
+  end
+end
+
+pp cards
+
+row = 1
+session = GoogleDrive::Session.from_config(&quot;config/google.json&quot;)
+ws = session.spreadsheet_by_key(spreadsheet_id).worksheets[0]
+
+cards.each do |card_id, card|
+  if not card[:cost].nil? and not card[:currency].nil?
+    ws[row, 1] = card[:name]
+    ws[row, 2] = card[:cost]
+    ws[row, 3] = card[:currency]
+    ws[row, 4] = target_currency
+
+    row += 1
+  end
+end
+ws.save</code></pre>
+<p>And here is what it looks like in Google Sheets.</p>
+<p><img src="../images/2019-08-20/budget_table.png" /></p>
+<p>I used it to plan my trip to Kyoto in the upcoming month, and it is so much better than what I was doing by Google Doc, reducing the big share of time to do copy pasting and adjusting the format. I would use this method to plan my trip in the future.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -215,29 +316,6 @@ SUM:                            14            651             17           4867
 
                 </article>
             
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2019-07-30-%E3%80%8Cprotonmail%E3%80%8D%E3%81%AB%E7%A7%BB%E8%A1%8C%E3%81%97%E3%81%A6%E3%80%81%E3%80%8Cgmail%E3%80%8D%E3%82%92%E8%BE%9E%E3%82%81%E3%81%BE%E3%81%99.html">「ProtonMail」に移行して、「Gmail」を辞めます</a></h1>
-    <div class="post-meta"><time datetime="2019-07-30 10:53">2019-07-30 10:53</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>Googleが想像以上にいろんな情報を取得した。何か調べ物がある時はGoogleで検索し、ブラウザはChromeを使って、メールはGmailで送信し、どこかに行く時Googleマープで所在地を確認し、YouTubeの動画を見て、Googleドライブに入れて、仕事はGoogle Docsを使いて。すべての閲覧履歴をGoogleが保存します。インターネット生活のほぼ全てをGoogleに絡め取られているの事は、良いことではない。そのため、Googleの依存度を減らしたい。</p>
-<p>最初の辞めるのサービスは Gmail。メールは全ての情報は含まれている、クレジットカードでも、応募の情報でも、旅行情報でも、メールサービスは自分の情報を取得している、それが飛行機のチケット予約すると、Googleがカレンダーに予約を作成できるの理由。</p>
-<h2 id="protonmail-の特徴">ProtonMail の特徴</h2>
-<p>ProtonMailのメールデータは全て暗号化された状態でサーバー上に保存されています。データはすべてのステップで暗号化されていることから傍受のリスクはないとのこと。もっと知りたいたら、<a href="https://www.ted.com/talks/andy_yen_think_your_email_s_private_think_again?language=en">Andy Yen: Think your email’s private? Think again</a>の TED トークの動画を見てください。</p>
-<h2 id="購入後1ヶ月間使用した感想">購入後1ヶ月間、使用した感想</h2>
-<p>移入が大体上手くいく、ProtonMail はカスタムドメインをセットアップすることがあります。paulme.ng のドメインをProtonMailに移行しました。スパムフィルタが ProtonMail より Gmail の方がうまい。ProtonMailのフィルタはが手動セットアップあとで、メールの分類正しいになりました。暗号化と便利のトレード・オフがと思います。暗号化したら、情報を取得できないだから、訓練データになし、機械学習的手法を使っていない、スパムメッセージの分類器を作っていこどができません。それ以外は、満足しています。</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
         </main>
 
         <div class="pure-g">
@@ -262,7 +340,7 @@ SUM:                            14            651             17           4867
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 8 of 56</div>
+            <div class="page-number is-center">Page 8 of 57</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>

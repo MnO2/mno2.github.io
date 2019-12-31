@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1577629002.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1577809495.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,320 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2012-01-17-eta-expansion.html">Floated Out and Eta Expansion</a></h1>
+    <div class="post-meta"><time datetime="2012-01-17 17:30">2012-01-17 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>This write-up was inspired by a question on stackoverflow. The answers explain almost everything, but I still want to dig deeper from GHC implementation. That is to say, I am viewing this problem with core langauge generated with option -ddump-simpl when you compile haskell programs. Let’s start off with an odd number filter.</p>
+<pre><code>f1 = ((filter odd [1..]) !!)
+
+f2 x = ((filter odd [1..]) !! x)
+
+main = do
+    print $ f1 10000
+    print $ f1 10000
+    print $ f2 10000
+    print $ f2 10000
+Without optimization, we get a simple core generated. (I've removed unrelated I/O parts and cleaned it up.)
+f2_rbu
+  :: forall a_ase. GHC.Real.Integral a_ase =&gt; GHC.Types.Int -&gt; a_ase
+[GblId, Arity=2]
+f2_rbu =
+  \ (@ a_ase)
+    ($dIntegral_asf :: GHC.Real.Integral a_ase)
+    (eta_B1 :: GHC.Types.Int) -&gt;
+    GHC.List.!!
+      @ a_ase
+      (GHC.List.filter
+         @ a_ase
+         (GHC.Real.odd @ a_ase $dIntegral_asf)
+         (GHC.Enum.enumFrom
+            @ a_ase
+            (GHC.Real.$p2Integral @ a_ase $dIntegral_asf)
+            (GHC.Num.fromInteger
+               @ a_ase
+               (GHC.Real.$p1Real
+                  @ a_ase (GHC.Real.$p1Integral @ a_ase $dIntegral_asf))
+               (GHC.Integer.smallInteger 1))))
+      eta_B1
+
+f1_rbs :: GHC.Types.Int -&gt; GHC.Integer.Type.Integer
+[GblId]
+f1_rbs =
+  GHC.List.!!
+    @ GHC.Integer.Type.Integer
+    (GHC.List.filter
+       @ GHC.Integer.Type.Integer
+       (GHC.Real.odd
+          @ GHC.Integer.Type.Integer GHC.Real.$fIntegralInteger)
+       (GHC.Enum.enumFrom
+          @ GHC.Integer.Type.Integer
+          GHC.Num.$fEnumInteger
+          (GHC.Integer.smallInteger 1)))</code></pre>
+<p>f1_rbs corresponds to f1 and f2_rbu corresponds to f2 in the source code. You can see that f2_rbu has the form of _B1 -&gt; (!!) filter… eta_B1, but f1_rbs without a surrounding lambda instead (!!) filter…. Clearly, f2_rbu is the eta expansion of f1_rbs. We also know that the inside of a lamda is evaluated each time we call it. Therefore, calling f2_rbu multiple times would results in reconstruction of list. In f1_rbs case, the list is shared among different callings. Next we examine the optimized case with -O2 switched on.</p>
+<pre><code>Main.main6 =
+  \ (x_aAr :: GHC.Integer.Type.Integer)
+    (r_aAs :: [GHC.Integer.Type.Integer]) -&gt;
+    case GHC.Integer.remInteger x_aAr GHC.Real.even2 of _ {
+      GHC.Integer.Type.S# i_aCs -&gt;
+        case i_aCs of _ {
+          __DEFAULT -&gt; GHC.Types.: @ GHC.Integer.Type.Integer x_aAr r_aAs;
+          0 -&gt; r_aAs
+        };
+      GHC.Integer.Type.J# s_aCx d_aCy -&gt;
+        case {__pkg_ccall_GC integer-gmp integer_cmm_cmpIntegerIntzh GHC.Prim.Int#
+                                                        -&gt; GHC.Prim.ByteArray#
+                                                        -&gt; GHC.Prim.Int#
+                                                        -&gt; GHC.Prim.Int#}_aCw
+               s_aCx d_aCy 0
+        of _ {
+          __DEFAULT -&gt; GHC.Types.: @ GHC.Integer.Type.Integer x_aAr r_aAs;
+          0 -&gt; r_aAs
+        }
+    }
+
+Main.main5 = GHC.Integer.Type.S# 1
+
+Main.main4 =
+  GHC.Num.enumDeltaIntegerFB
+    @ [GHC.Integer.Type.Integer] Main.main6 Main.main5 Main.main5
+
+Main.main3 = GHC.List.!!_sub @ GHC.Integer.Type.Integer Main.main4 10000
+
+Main.main2 = GHC.Num.$w$cshowsPrec 0 Main.main3 (GHC.Types.[] @ GHC.Types.Char)
+
+
+
+
+Main.main10 =
+  \ (x_aAr :: GHC.Integer.Type.Integer)
+    (r_aAs :: [GHC.Integer.Type.Integer]) -&gt;
+    case GHC.Integer.remInteger x_aAr GHC.Real.even2 of _ {
+      GHC.Integer.Type.S# i_aCs -&gt;
+        case i_aCs of _ {
+          __DEFAULT -&gt; GHC.Types.: @ GHC.Integer.Type.Integer x_aAr r_aAs;
+          0 -&gt; r_aAs
+        };
+      GHC.Integer.Type.J# s_aCx d_aCy -&gt;
+        case {__pkg_ccall_GC integer-gmp integer_cmm_cmpIntegerIntzh GHC.Prim.Int#
+                                                        -&gt; GHC.Prim.ByteArray#
+                                                        -&gt; GHC.Prim.Int#
+                                                        -&gt; GHC.Prim.Int#}_aCw
+               s_aCx d_aCy 0
+        of _ {
+          __DEFAULT -&gt; GHC.Types.: @ GHC.Integer.Type.Integer x_aAr r_aAs;
+          0 -&gt; r_aAs
+        }
+    }
+
+Main.main9 =
+  GHC.Num.enumDeltaIntegerFB
+    @ [GHC.Integer.Type.Integer] Main.main10 Main.main5 Main.main5
+
+Main.main8 = GHC.List.!!_sub @ GHC.Integer.Type.Integer Main.main9 10000
+
+Main.main7 = GHC.Num.$w$cshowsPrec 0 Main.main8 (GHC.Types.[] @ GHC.Types.Char)
+
+Main.main1 =
+  \ (s_XYA :: GHC.Prim.State# GHC.Prim.RealWorld) -&gt;
+    case GHC.IO.Handle.Text.hPutStr2
+           GHC.IO.Handle.FD.stdout Main.main7 GHC.Bool.True s_XYA
+    of _ { (# new_s_aXy, _ #) -&gt;
+    case GHC.IO.Handle.Text.hPutStr2
+           GHC.IO.Handle.FD.stdout Main.main7 GHC.Bool.True new_s_aXy
+    of _ { (# new_s1_XYJ, _ #) -&gt;
+    case GHC.IO.Handle.Text.hPutStr2
+           GHC.IO.Handle.FD.stdout Main.main2 GHC.Bool.True new_s1_XYJ
+    of _ { (# new_s2_XYF, _ #) -&gt;
+    GHC.IO.Handle.Text.hPutStr2
+      GHC.IO.Handle.FD.stdout Main.main2 GHC.Bool.True new_s2_XYF
+    }
+    }
+    }</code></pre>
+<p>The optimized code is a little confusing. The optimized f1 part is definitions from Main.main2 to Main.main6, and optimized f2 part is from Main.main7 to Main.main10. Without too much insight you can observe that the content of Main.main6 and Main.main10 are almost the same. The surrounding lambda of f2 is optimized away. Now go back to the fibonacci program in the question.</p>
+<pre><code>fib = let fib' 0 = 0
+          fib' 1 = 1
+          fib' n = fib (n-1) + fib (n-2)
+      in (map fib' [0 ..] !!)
+
+fib2 x = let fib' 0 = 0
+             fib' 1 = 1
+             fib' n = fib2 (n-1) + fib2 (n-2)
+         in map fib' [0 ..] !! x
+
+main = do
+    print $ fib 100
+    print $ fib2 100</code></pre>
+<p>And this is unoptimized version.</p>
+<pre><code>(letrec {
+  fib_aoC [Occ=LoopBreaker]
+    :: GHC.Types.Int -&gt; GHC.Integer.Type.Integer
+  [LclId]
+  fib_aoC =
+    GHC.List.!!
+      @ GHC.Integer.Type.Integer
+      (GHC.Base.map
+         @ GHC.Types.Int
+         @ GHC.Integer.Type.Integer
+         (\ (ds_ds5 :: GHC.Types.Int) -&gt;
+            case ds_ds5 of wild_B1 { GHC.Types.I# ds1_ds6 -&gt;
+            case ds1_ds6 of _ {
+              __DEFAULT -&gt;
+                GHC.Num.+
+                  @ GHC.Integer.Type.Integer
+                  GHC.Num.$fNumInteger
+                  (fib_aoC
+                     (GHC.Num.-
+                        @ GHC.Types.Int GHC.Num.$fNumInt wild_B1 (GHC.Types.I# 1)))
+                  (fib_aoC
+                     (GHC.Num.-
+                        @ GHC.Types.Int GHC.Num.$fNumInt wild_B1 (GHC.Types.I# 2)));
+              0 -&gt; GHC.Integer.smallInteger 0;
+              1 -&gt; GHC.Integer.smallInteger 1
+            }
+            })
+         (GHC.Enum.enumFrom
+            @ GHC.Types.Int GHC.Enum.$fEnumInt (GHC.Types.I# 0))); } in
+fib_aoC (GHC.Types.I# 100))
+
+
+(letrec {
+  fib2_acd [Occ=LoopBreaker]
+    :: GHC.Types.Int -&gt; GHC.Integer.Type.Integer
+  [LclId, Arity=1]
+  fib2_acd =
+    \ (x_abA :: GHC.Types.Int) -&gt;
+      GHC.List.!!
+        @ GHC.Integer.Type.Integer
+        (GHC.Base.map
+           @ GHC.Types.Int
+           @ GHC.Integer.Type.Integer
+           (\ (ds_ds0 :: GHC.Types.Int) -&gt;
+              case ds_ds0 of wild_B1 { GHC.Types.I# ds1_ds1 -&gt;
+              case ds1_ds1 of _ {
+                __DEFAULT -&gt;
+                  GHC.Num.+
+                    @ GHC.Integer.Type.Integer
+                    GHC.Num.$fNumInteger
+                    (fib2_acd
+                       (GHC.Num.-
+                          @ GHC.Types.Int GHC.Num.$fNumInt wild_B1 (GHC.Types.I# 1)))
+                    (fib2_acd
+                       (GHC.Num.-
+                          @ GHC.Types.Int GHC.Num.$fNumInt wild_B1 (GHC.Types.I# 2)));
+                0 -&gt;
+                  GHC.Num.fromInteger
+                    @ GHC.Integer.Type.Integer
+                    GHC.Num.$fNumInteger
+                    (GHC.Integer.smallInteger 0);
+                1 -&gt;
+                  GHC.Num.fromInteger
+                    @ GHC.Integer.Type.Integer
+                    GHC.Num.$fNumInteger
+                    (GHC.Integer.smallInteger 1)
+              }
+              })
+           (GHC.Enum.enumFrom
+              @ GHC.Types.Int GHC.Enum.$fEnumInt (GHC.Types.I# 0)))
+        x_abA; } in
+fib2_acd (GHC.Types.I# 100))</code></pre>
+<p>You can see the pattern that one has lambda outside and another doesn’t. fib_aoC is (!!) (map (_ds5 -&gt; …) enumFrom…) and fib2_acd is _abA -&gt; (!!) (map (_ds0 -&gt; …) enumFrom…) x_abA). As for -O2 version. We can view the code in two groups:</p>
+<ul>
+<li>Main.main7, Main.main_sgo, go_rUQ, Main.amin6, Main.main5, which corresponds to fib.</li>
+<li>sgo_rUS, go1_rUW, a_rUV, Main.wfib2, Main.main3, which corresponds to fib2</li>
+</ul>
+<pre><code>Main.main7 = GHC.Integer.Type.S# 0
+
+Main.main_$sgo = GHC.Types.: @ GHC.Integer.Type.Integer Main.main7 Main.main6
+
+go_rUQ =
+  \ (x_avk :: GHC.Prim.Int#) -&gt;
+    GHC.Types.:
+      @ GHC.Integer.Type.Integer
+      (case x_avk of ds_Xsb {
+         __DEFAULT -&gt;
+           let {
+             n0_asK [Dmd=Just L] :: GHC.Prim.Int#
+             n0_asK = GHC.Prim.-# ds_Xsb 1 } in
+           case GHC.Prim.&lt;# n0_asK 0 of _ {
+             GHC.Bool.False -&gt;
+               let {
+                 n1_XtE [Dmd=Just L] :: GHC.Prim.Int#
+                 n1_XtE = GHC.Prim.-# ds_Xsb 2 } in
+               case GHC.Prim.&lt;# n1_XtE 0 of _ {
+                 GHC.Bool.False -&gt;
+                   GHC.Integer.plusInteger
+                     (GHC.List.!!_sub @ GHC.Integer.Type.Integer Main.main_$sgo n0_asK)
+                     (GHC.List.!!_sub @ GHC.Integer.Type.Integer Main.main_$sgo n1_XtE);
+                 GHC.Bool.True -&gt;
+                   GHC.List.!!1
+                   `cast` (CoUnsafe (forall a_asR. a_asR) GHC.Integer.Type.Integer
+                           :: (forall a_asR. a_asR) ~ GHC.Integer.Type.Integer)
+               };
+             GHC.Bool.True -&gt;
+               GHC.List.!!1
+               `cast` (CoUnsafe (forall a_asR. a_asR) GHC.Integer.Type.Integer
+                       :: (forall a_asR. a_asR) ~ GHC.Integer.Type.Integer)
+           };
+         0 -&gt; Main.main7;
+         1 -&gt; lvl_rUL
+       })
+      (case x_avk of wild_B1 {
+         __DEFAULT -&gt; go_rUQ (GHC.Prim.+# wild_B1 1);
+         2147483647 -&gt; GHC.Types.[] @ GHC.Integer.Type.Integer
+       })
+
+Main.main6 = go_rUQ 1
+
+Main.main5 = GHC.List.!!_sub @ GHC.Integer.Type.Integer Main.main_$sgo 100
+
+$sgo_rUS = GHC.Types.: @ GHC.Integer.Type.Integer Main.main7 a_rUV
+
+go1_rUW =
+  \ (x_avk :: GHC.Prim.Int#) -&gt;
+    GHC.Types.:
+      @ GHC.Integer.Type.Integer
+      (case x_avk of ds_Xs9 {
+         __DEFAULT -&gt;
+           GHC.Integer.plusInteger
+             (Main.$wfib2 (GHC.Prim.-# ds_Xs9 1))
+             (Main.$wfib2 (GHC.Prim.-# ds_Xs9 2));
+         0 -&gt; Main.main7;
+         1 -&gt; lvl_rUL
+       })
+      (case x_avk of wild_B1 {
+         __DEFAULT -&gt; go1_rUW (GHC.Prim.+# wild_B1 1);
+         2147483647 -&gt; GHC.Types.[] @ GHC.Integer.Type.Integer
+       })
+
+a_rUV = go1_rUW 1
+
+Main.$wfib2 =
+  \ (ww_sU0 :: GHC.Prim.Int#) -&gt;
+    case GHC.Prim.&lt;# ww_sU0 0 of _ {
+      GHC.Bool.False -&gt;
+        GHC.List.!!_sub @ GHC.Integer.Type.Integer $sgo_rUS ww_sU0;
+      GHC.Bool.True -&gt; GHC.List.!!1 @ GHC.Integer.Type.Integer
+    }
+end Rec }
+
+Main.main3 = Main.$wfib2 100
+
+Main.main2 = GHC.Num.$w$cshowsPrec 0 Main.main3 (GHC.Types.[] @ GHC.Types.Char)</code></pre>
+<p>Both definitions are dissected into the form sgo (indirectly) calls go_XXX, and inside go_XXX it calls back sgo. The lambda is optimized away, hence the performance is improved. The experiment setting is GHC 7.0.2 on ArchLinux, 32 bits. Here I merely try to view the problem from the core language, and I don’t intend to try the affect of type hint as mentioned in the original thread.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -200,164 +514,6 @@ main = do putStrLn $ show v</code></pre>
 
                 </article>
             
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2011-12-07-haskell-instance.html">Digging Deeper at Haskell Instance Definition</a></h1>
-    <div class="post-meta"><time datetime="2011-12-07 17:30">2011-12-07 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>If you try to compiler the following clip of code with ghc</p>
-<pre><code>class C a where
-    toString :: a -&gt; String
-
-instance C String where
-    toString = id
-
-main = do
-    putStrLn $ toString &quot;Hello World&quot;</code></pre>
-<p>The compiler will pop out the error message.</p>
-<pre><code>test01.hs:4:10:
-    Illegal instance declaration for `C String'
-    (All instance types must be of the form (T t1 ... tn)
-     where T is not a synonym.
-     Use -XTypeSynonymInstances if you want to disable this.)
-In the instance declaration for `C String'</code></pre>
-<p>What does it mean? Let’s try another run with much simpler type.</p>
-<pre><code>class C a where
-    toString :: a -&gt; String
-
-instance C Int where
-    toString = show
-
-instance C Double where
-    toString = show
-
-main = do
-    putStrLn $ toString (123::Int)
-    putStrLn $ toString (123.123::Double)</code></pre>
-<p>What? it works very well.</p>
-<p>Give another try. We replace String to [Char].</p>
-<pre><code>class C a where
-    toString :: a -&gt; String
-
-instance C [Char] where
-    toString = id
-
-main = do
-    putStrLn $ toString &quot;Hello World&quot;</code></pre>
-<p>But it still doesn’t work.</p>
-<pre><code>test03.hs:4:10:
-    Illegal instance declaration for `C [Char]'
-    (All instance types must be of the form (T a1 ... an)
-     where a1 ... an are *distinct type variables*,
-     and each type variable appears at most once in the instance head.
-     Use -XFlexibleInstances if you want to disable this.)
-
-In the instance declaration for `C [Char]'</code></pre>
-<p>Suprisingly, this does work.</p>
-<pre><code>class C a where
-    toString :: a -&gt; String
-
-instance Show a =&gt; C [a] where
-    toString = concat . (map show)
-
-main = do
-    putStrLn $ toString ([1,2,3,4]::[Int])</code></pre>
-<p>So the problem is not about list constructor []?</p>
-<p>Let’s go to a simple cure directly. That is to add {-# LANGUAGE FlexibleInstances #-}, i.e. use FlexibleInstances GHC extension.</p>
-<pre><code>{-# LANGUAGE FlexibleInstances #-}
-class C a where
-    toString :: a -&gt; String
-
-instance C Int where
-    toString = show
-
-instance C Double where
-    toString = show
-
-instance C [Char] where
-    toString = id
-
-instance C [Int] where
-    toString = concat . (map show)
-
-main = do
-    putStrLn $ toString (123::Int)
-    putStrLn $ toString &quot;Hello World&quot;
-    putStrLn $ toString ([1,2,3,4,5]::[Int])</code></pre>
-<p>That works for C [Char], but still doesn’t work for C String</p>
-<pre><code>{-# LANGUAGE FlexibleInstances #-}
-class C a where
-    toString :: a -&gt; String
-
-instance C String where
-    toString = id
-
-main = do
-    putStrLn $ toString &quot;Hello World&quot;
-test06.hs:5:10:
-    Illegal instance declaration for `C String'
-    (All instance types must be of the form (T t1 ... tn)
-     where T is not a synonym.
-     Use -XTypeSynonymInstances if you want to disable this.)</code></pre>
-<p>In the instance declaration for `C String’ What’s going on? Let’s check the Haskell 98 Report Sec. 4.3.2</p>
-<p>The type (T u1 … uk) must take the form of a type constructor T applied to simple type variables u1, … uk; furthermore, T must not be a type synonym, and the ui must all be distinct. This prohibits instance declarations such as:</p>
-<pre><code>instance C (a,a) where …
-instance C (Int,a) where …
-instance C [[a]] where …</code></pre>
-<p>So according to the report, C [a] is legal, since [a] = [] a where T = [] and u1 = a. But String = [Char] = [] Char, where T = [] and Char is not a type variable. As to why the specific type is invalid. Suppose we have</p>
-<pre><code>instance C [Char] where ... instance C [Int] where ...</code></pre>
-<p>A given constraint of C [a] for some type variable a, we cannot decide which instance declaration to use unless we know about a. And in Haskell 98 the comittee consider to avoid that. For detailed explanation, go ahead to read SPJ’s paper Sec.4.5</p>
-<p>The result is as expected if we try Type synonym, as the standard said the Type synonym is forbidden.</p>
-<pre><code>type Identifier = String
-
-class C a where
-    toString :: a -&gt; String
-
-instance C Identifier where
-    toString = show
-
-main = do
-    putStrLn $ toString (&quot;Hello World&quot;::Identifier)</code></pre>
-<p>Flexible Instances GHC extension is to give us more flexible instance defition form, but I didn’t check how the issue above was resolved.</p>
-<p>Excerpt from Flexible Instances GHC extension &gt; GHC 6.5 &gt; … &gt; &gt; This rule allows instances accepted by the previous rule and more, including &gt; &gt; instance C a &gt; &gt; instance Show (s a) =&gt; Show (Sized s a) &gt; &gt; instance (C1 a, C2 b) =&gt; C a b &gt; &gt; instance C1 Int a =&gt; C2 Bool [a] &gt; &gt; instance C1 Int a =&gt; C2 [a] b &gt; &gt; instance C a a =&gt; C [a] [a]</p>
-<p>To resolve the issue and at the same time conforming Haskell 98, This link listed two methods.</p>
-<p>One is to use newtype</p>
-<pre><code>class C a where
-    toString :: a -&gt; String
-
-newtype Identifier = Identifier String deriving (Show)
-
-instance C Identifier where
-    toString = show
-
-main = do
-    putStrLn $ toString (Identifier &quot;Hello&quot;)</code></pre>
-<p>Another way is to define another listToString</p>
-<pre><code>class C a where
-    toString :: a -&gt; String
-    listToString :: [a] -&gt; String
-
-instance C Char where
-    toString = show
-    listToString = id
-
-instance C a =&gt; C [a] where
-    toString = listToString
-
-main = do
-    putStrLn $ toString (&quot;Hello&quot;::[Char])</code></pre>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
         </main>
 
         <div class="pure-g">
@@ -382,7 +538,7 @@ main = do
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 54 of 56</div>
+            <div class="page-number is-center">Page 54 of 57</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>
