@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1581511176.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1581992390.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -53,14 +53,63 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2016-09-12-hinative.html">HiNative</a></h1>
+    <h1 class="post-title is-center"><a href="../posts/2016-09-12-playing-with-bucklescript.html">Playing with Bucklescript</a></h1>
     <div class="post-meta"><time datetime="2016-09-12 17:30">2016-09-12 17:30</time> </span>
     <div class="slot-content">
       <article>
-        <p><img src="https://cdn-images-1.medium.com/max/1800/1*TTu0uBVCnM9Oihtn61k3zQ.jpeg" /></p>
-<p>新しい言語を学んでいる人は色んな質問が持っていたに違いない。問題が早い答えれば早い答えほど多い進歩を遂げてきた。しかし、大部分の学習者は塾に行くて先生に質問をした。あの言語を喋るの友たちあれば、友たちから教えてくれた。何にでも、長所と短所の両方があります。先ずは、誰か外人の友たちがあるわけじゃないです。たとえ外人の友たちあるても、それぞれな質問を毎日すれば無理です。塾で先生を質問するついに、最も面倒は求めに応じる時間は長いです。言語交換も同じです。</p>
-<p><img src="https://cdn-images-1.medium.com/max/1800/1*_zQmAVu5CInG_a7REyRq8A.jpeg" /></p>
-<p>HiNativeは、面白い作品がLang8を作られて、有名なPenPalのウェブサイト同じの会社です。このアプリ使うれば、質問がコミュニテイにするとできます。質問を入力で書くの形ならいろんです。写真など声などテキストなど、質問によるです。外語を含む看板を見たら、写真は一番良いの形です。喋ることの程度を評価したら、声の形が良いです。私最も好きな特色は、本格的な人々が質問を答えだから、生活の会話について、誰にもHiNativeより良いです。本国人はネイティブの分を教えてくれた。応じる時間も短くです、私の体験は平均的時間は一時間ぐらい答えを受けました。</p>
+        <p>As of the time of 2016, most of the people agrees that Javascript is truly a language could be run anywhere. The pending problem to be solved is how to manage large Javascript projects. A few of industrial strength projects like Angularjs made the leap and turned to what Microsoft has proposed: Typescript. It’s quite obvious that it would be type-safe and easier to refactor by introducing a type system. Also, it is an optional typing system and therefore it works non-instrusively to your existing projects. You can gradually introduce Typescript’s type declaration file to get you the type-safe. Microsoft also has invested a lot on Typescript’s toolchain to make it work in Visual Studio Code and IDE. For the case that you need a production-ready and hiring-easy toolchain, Typescript is basically a no-brainer choice. Even so, I am still quite unsatisfied with all of the gotchas in Typescript inherited from Javascript in order to be 100% back-compatible. For the use cases that allows me to pick my language, I am still inclined to go for static-typed languages compiled to Javascript, with good Javascript interoperability.</p>
+<p>There are a few options on the table that looks mature enough for use.</p>
+<ol type="1">
+<li>Ghcjs: Althouh officially it is still not 1.0, it seems to be good to use for some middle-size project. However, the downside is also obvious. It is the monstrous size Javascript with all of the Ghcjs runtime. a few lines of code could generate a few MB of target file. Maybe it is OK for the project where you rarely need to upgrade, then you don’t need to download the target Javascript very often. A famous use case is Plow Technology using Ghcjs for its dashboard, where I think it is a fair use case. The other downside is it is hard for Javascript world to call Haskell world, by the hindrance of the Generics and runtime. The good is that you can code in an extremely expressive static typed language with all of its ecosystem on Hackage.</li>
+<li>Purescript: A Haskell-like language with is strict-by-default and almost everything in Haskell98 are included. It’s quite well-developed given that it is purely work from community without the support of companies. Completely new language and with strict semantic means it cannot leverage the ecosystem of Haskell and it has to do everything to be battery included. Since it’s release it has grown to the size that is usable and it’s interoperability with Javascript looks sound. Also the compiled Javascript is readable (though interleaved with the magic word of Monad in between). It worths considering if the project members all know Haskell.</li>
+<li>Elm: The posterchild of Prezi and an experimentation on the feasibility of FRP. In the latest version it was overthrown and FRP interface was abandoned and turned to traditional Model-View-Controller. This is a big downer since it more-or-less showing you would be better not to rely on this project since it might introducing breaking changes and you are screwed. Apart from that it looks quite nice, The language is Haskell-like, but not only a language, it also comes with its infrastructure to make the composition of the program easier, Reactjs was inspired a lot from Elm, if you know Reactjs you can find a lot of common in their design.</li>
+</ol>
+<p>Here comes today’s main character: Bucklescript. I read the 1.0 release news from Chinese quora: Zhihu. The creator of Bucklescript: Bob Zhang post a brief introduction of the language and target. I was intrigued by its compiled result. It looks super readable even more than Purescript, but at the same time support almost all of the OCaml ecosystem libararies to compiled to Javascript. It is derived from js_of_ocaml but heavily inspired by Typescript. It made me really would like to pick-up OCaml and play with it by a few toy example programs.</p>
+<p>Due to a recent requirement I really need a Slack bot and I think it might be a good use case to test its interoperability with Javascript. What I use for Slack is Slack’s official nodejs library. Bascially you have to require the library and new an client object and using “on” method to listen on various events. And the events are defined as different attributes of the object.</p>
+<p>Here is the toy program</p>
+<pre><code>    type rtmclient 
+    external create_rtmclient: string -&gt; rtmclient = “RtmClient” [@@bs.module “
+    ”, “RtmClient”][@@bs.new] 
+    let client = create_rtmclient “ABCDEFG”
+    external start_client: rtmclient -&gt; unit = “start” [@@bs.send]
+
+    type rtmevent
+    external message: rtmevent = “RtmClient.RTM_EVENTS.MESSAGE” [@@bs.val]
+    external channel_created: rtmevent = “RtmClient.RTM_EVENTS.CHANNEL_CREATED” [@@bs.val]
+    external on: rtmclient -&gt; rtmevent -&gt; (string -&gt; unit [
+    ]) -&gt; unit = “” [@@bs.send]
+
+    let handler: string -&gt; unit [
+    ] = fun [
+    ] s -&gt; Js.log(s)
+    let () = on client channel_created handler 
+    let () = on client message handler 
+    let () = start_client client</code></pre>
+<p>And its compiled javascript</p>
+<pre><code>    // Generated by BUCKLESCRIPT VERSION 1.0.1 , PLEASE EDIT WITH CARE
+    ‘use strict’;
+
+    var RtmClient = require(“
+    ”);
+
+    var client = new RtmClient.RtmClient(“ABCDEFG”);
+
+    function handler(s) {
+     console.log(s);
+     return /* () */0;
+    }
+
+    client.on(RtmClient.RTM_EVENTS.CHANNEL_CREATED, handler);
+
+    client.on(RtmClient.RTM_EVENTS.MESSAGE, handler);
+
+    client.start();
+
+    exports.client = client;
+    exports.handler = handler;
+    /* client Not a pure module */</code></pre>
+<p>To be honest it looks nice for the compiled result, even you claimed that it is hand-written I think most of the people would believe you. Just that the document is still young and it cost me some time to figure out how to map the Javascript attribute into the OCaml world. Also, learning the magic of “<span class="citation" data-cites="bs">@bs</span>” attribute, especially the higher order use case took me some time to figure it out. As long as you mark the function with “<span class="citation" data-cites="bs">@bs</span>” then it is no longer the same type as the normal function, therefore you can not simply pass a lambda function to the Javascript world callback, you must mark it with “<span class="citation" data-cites="bs">@bs</span>”. And I still cannot get the hang of bringing values defined in Javascript world into OCaml’s polymorphic variants, I tried “<span class="citation" data-cites="bs.as">@bs.as</span>” but it didn’t work at all. Not sure if I missed something in the syntax.</p>
+<p>Overall, I liked the language, not sure if it is officially supported by Bloomberg or just Bob’s side project derived from work. It also gave me a chance to improve my OCaml skill, which is a pending item in my Todo list. Now it is time to cross it off.</p>
 
       </article>
     </div>
@@ -74,107 +123,14 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2016-07-26-hacking-on-swift-compiler-ii.html">Hacking on Swift Compiler (Part 2)</a></h1>
-    <div class="post-meta"><time datetime="2016-07-26 17:30">2016-07-26 17:30</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2016-09-12-hinative.html">HiNative</a></h1>
+    <div class="post-meta"><time datetime="2016-09-12 17:30">2016-09-12 17:30</time> </span>
     <div class="slot-content">
       <article>
-        <p>Nothing works better than actually getting a concrete task and work on it. Part 1 is only a brief overlook on the motivation and what has been provided when the Swift is compiled with debug flag on. In Part 2, I find a ticket in Kira that labeled as starter bug and attempt to implement it.</p>
-<p>This ticket is about the ambiguity when it comes to tuple as the parameter. It would cause some surprise when the tuple is implicitly expanded and bound with parameter variables. And in the Swift 3, the committee accepted the proposal and decided to impotent extra parenthesis to disambiguate the cases.</p>
-<p>To get a clue on what’s happening behind the scene, I wrote a snippet source file and use lldb to run swift compiler step by step. Initially I set the breakpoint at typeCheckDecl method and expect it to stop there. However, the program just run to finish when I pressed process launch.</p>
-<pre><code>$ lldb - swift test.swift
-(lldb) target create &quot;swift&quot;
-Current executable set to 'swift' (x86_64).
-(lldb) settings set - target.run-args &quot;test.swift&quot;
-(lldb) b typeCheckDecl
-Breakpoint 1: where = swift`swift::TypeChecker::typeCheckDecl(swift::Decl*, bool) + 38 at TypeCheckDecl.cpp:6084, address = 0x00000001012ae1e6
-(lldb) process launch
-Process 43688 launched: '/Users/mno2/Develop/grabtaxi/build/Ninja-ReleaseAssert+swift-DebugAssert/swift-macosx-x86_64/bin/swift' (x86_64)
-Process 43688 stopped
-* thread #1: tid = 0x94e653, 0x00007fff5fc01000 dyld`_dyld_start, stop reason = exec
- frame #0: 0x00007fff5fc01000 dyld`_dyld_start
-dyld`_dyld_start:
--&gt; 0x7fff5fc01000 &lt;+0&gt;: popq %rdi
- 0x7fff5fc01001 &lt;+1&gt;: pushq $0x0
- 0x7fff5fc01003 &lt;+3&gt;: movq %rsp, %rbp
- 0x7fff5fc01006 &lt;+6&gt;: andq $-0x10, %rsp
-(lldb)</code></pre>
-<p>To figure out why, I set the breakpoint at the obvious entrance module of the whole compiler, which is Driver class. Running step by step through it. I began to identify the keyword like buildCompilation and task-&gt;execute, so it looks like when it runs without any flags specified, the default mode is to build up the tasks to be run in another processes so that the compilation could be parallelized.</p>
-<p>However, this hinders lldb to trace the actual process doing the typechecking heavylifting since lldb doesn’t support follow-fork-mode like gdb does. To figure out what is actually run I need to take a peek what’s inside the Job. I set a breakpoint at addJob, and used the handy dump() method as specified in the doc. Then you can see everything that how it should be run with the command line.</p>
-<pre><code>(lldb) n
-Process 5404 stopped
-* thread #1: tid = 0x2fe32, 0x00000001000274e0 swiftc`swift::driver::Compilation::addJob(this=0x000000010770cd40, J=&lt;unavailable&gt;) + 64 at Compilation.cpp:94, queue = 'com.apple.main-thread', stop reason = step over
- frame #0: 0x00000001000274e0 swiftc`swift::driver::Compilation::addJob(this=0x000000010770cd40, J=&lt;unavailable&gt;) + 64 at Compilation.cpp:94
- 91 Job *Compilation::addJob(std::unique_ptr&lt;Job&gt; J) {
- 92 Job *result = J.get();
- 93 Jobs.emplace_back(std::move(J));
--&gt; 94 return result;
- 95 }
- 96
- 97 static const Job *findUnfinishedJob(ArrayRef&lt;const Job *&gt; JL,
-(lldb) po result-&gt;dump()
-/Users/Paul/Develop/swift/swiftc/build/Ninja-ReleaseAssert+swift-DebugAssert/swift-macosx-x86_64/bin/swift -frontend -c -primary-file test.swift -target x86_64-apple-macosx10.9 -enable-objc-interop -color-diagnostics -module-name test -o /var/folders/l8/mhy9c9jj72l56gdybs_8l9gc0000gn/T/test-ff159c.o</code></pre>
-<p>Then I relaunched the lldb with every flags specified.</p>
-<pre><code>lldb - /Users/Paul/Develop/swift/swiftc/build/Ninja-ReleaseAssert+swift-DebugAssert/swift-macosx-x86_64/bin/swift -frontend -c -primary-file test.swift -target x86_64-apple-macosx10.9 -enable-objc-interop -color-diagnostics -module-name test -o /var/folders/l8/mhy9c9jj72l56gdybs_8l9gc0000gn/T/test-ff159c.o</code></pre>
-<p>then tried to break at typeCheckDecl as well. This time it succeeds.</p>
-<pre><code>(lldb) b typeCheckDecl
-Breakpoint 3: where = swift`swift::TypeChecker::typeCheckDecl(swift::Decl*, bool) + 38 at TypeCheckDecl.cpp:6094, address = 0x00000001012ca9f6
-(lldb) run
-Process 5446 launched: '/Users/Paul/Develop/swift/swiftc/build/Ninja-ReleaseAssert+swift-DebugAssert/swift-macosx-x86_64/bin/swift' (x86_64)
-Process 5446 stopped
-* thread #1: tid = 0x30432, 0x00000001012ca9f6 swift`swift::TypeChecker::typeCheckDecl(this=0x00007fff5fbf6470, D=0x000000010782be00, isFirstPass=true) + 38 at TypeCheckDecl.cpp:6094, queue = 'com.apple.main-thread', stop reason = breakpoint 3.1
- frame #0: 0x00000001012ca9f6 swift`swift::TypeChecker::typeCheckDecl(this=0x00007fff5fbf6470, D=0x000000010782be00, isFirstPass=true) + 38 at TypeCheckDecl.cpp:6094
- 6091 }
- 6092
- 6093 void TypeChecker::typeCheckDecl(Decl *D, bool isFirstPass) {
--&gt; 6094 PrettyStackTraceDecl StackTrace(&quot;type-checking&quot;, D);
- 6095 checkForForbiddenPrefix(D);
- 6096 bool isSecondPass =
- 6097 !isFirstPass &amp;&amp; D-&gt;getDeclContext()-&gt;isModuleScopeContext();</code></pre>
-<p>Since the testing snippet is like the following</p>
-<pre><code>$ cat test.swift
-func main() {
-let a: (Int, Int) -&gt; () = { (x, y) in x+y }
-}
-main()</code></pre>
-<p>Under the decl, it should match the pattern-binding according to the swift language reference, therefore I set breakpoint on the typeCheckPatternBinding as well</p>
-<pre><code>(lldb) b typeCheckPatternBinding
-Breakpoint 4: where = swift`swift::TypeChecker::typeCheckPatternBinding(swift::PatternBindingDecl*, unsigned int) + 23 at TypeCheckConstraints.cpp:1761, address = 0x00000001012a8a87
-(lldb) run
-Process 6331 stopped
-* thread #1: tid = 0x63b55, 0x00000001012a8a87 swift`swift::TypeChecker::typeCheckPatternBinding(this=0x00007fff5fbf6470, PBD=0x0000000108895410, patternNumber=0) + 23 at TypeCheckConstraints.cpp:1761, queue = 'com.apple.main-thread', stop reason = breakpoint 4.1
- frame #0: 0x00000001012a8a87 swift`swift::TypeChecker::typeCheckPatternBinding(this=0x00007fff5fbf6470, PBD=0x0000000108895410, patternNumber=0) + 23 at TypeCheckConstraints.cpp:1761
- 1758 bool TypeChecker::typeCheckPatternBinding(PatternBindingDecl *PBD,
- 1759 unsigned patternNumber) {
- 1760
--&gt; 1761 Pattern *pattern = PBD-&gt;getPattern(patternNumber);
- 1762 Expr *init = PBD-&gt;getInit(patternNumber);
- 1763
- 1764 if (!init) {</code></pre>
-<p>And voila, we got pattern and initializer expression. We can also apply dump method on them to have a peek into what they are.</p>
-<pre><code>1761 Pattern *pattern = PBD-&gt;getPattern(patternNumber);
--&gt; 1762 Expr *init = PBD-&gt;getInit(patternNumber);
- 1763
- 1764 if (!init) {
- 1765 PBD-&gt;setInvalid();(lldb) po pattern-&gt;dump()
-(pattern_typed type='(Int, Int) -&gt; ()'
- (pattern_named type='(Int, Int) -&gt; ()' 'a')
- (type_function
- (type_tuple
- (type_ident
- (component id='Int' bind=Swift.(file).Int))
- (type_ident
- (component id='Int' bind=Swift.(file).Int)))
- (type_tuple)))
-(lldb) po init-&gt;dump()
-(closure_expr type='&lt;null&gt;' discriminator=0 single-expression
- (parameter_list
- (parameter &quot;x&quot; type=&lt;null type&gt;)
- (parameter &quot;y&quot; type=&lt;null type&gt;))
- (sequence_expr type='&lt;null&gt;'
- (declref_expr type='&lt;null&gt;' decl=test.(file).func decl.explicit closure discriminator=0.x@test.swift:2:31 specialized=yes)
- (unresolved_decl_ref_expr type='&lt;null&gt;' name=+ specialized=no)
- (declref_expr type='&lt;null&gt;' decl=test.(file).func decl.explicit closure discriminator=0.y@test.swift:2:34 specialized=yes)))</code></pre>
-<p>so I’ve zoomed down to the place where we probably need to make the change. We can add some hacks on it to make the ConstraintSystem to derive to different solution I think. I would write Part 3 for my finding afterward.</p>
+        <p><img src="https://cdn-images-1.medium.com/max/1800/1*TTu0uBVCnM9Oihtn61k3zQ.jpeg" /></p>
+<p>新しい言語を学んでいる人は色んな質問が持っていたに違いない。問題が早い答えれば早い答えほど多い進歩を遂げてきた。しかし、大部分の学習者は塾に行くて先生に質問をした。あの言語を喋るの友たちあれば、友たちから教えてくれた。何にでも、長所と短所の両方があります。先ずは、誰か外人の友たちがあるわけじゃないです。たとえ外人の友たちあるても、それぞれな質問を毎日すれば無理です。塾で先生を質問するついに、最も面倒は求めに応じる時間は長いです。言語交換も同じです。</p>
+<p><img src="https://cdn-images-1.medium.com/max/1800/1*_zQmAVu5CInG_a7REyRq8A.jpeg" /></p>
+<p>HiNativeは、面白い作品がLang8を作られて、有名なPenPalのウェブサイト同じの会社です。このアプリ使うれば、質問がコミュニテイにするとできます。質問を入力で書くの形ならいろんです。写真など声などテキストなど、質問によるです。外語を含む看板を見たら、写真は一番良いの形です。喋ることの程度を評価したら、声の形が良いです。私最も好きな特色は、本格的な人々が質問を答えだから、生活の会話について、誰にもHiNativeより良いです。本国人はネイティブの分を教えてくれた。応じる時間も短くです、私の体験は平均的時間は一時間ぐらい答えを受けました。</p>
 
       </article>
     </div>

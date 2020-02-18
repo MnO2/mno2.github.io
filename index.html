@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="./stylesheets/customize-1581511176.css">
+  <link rel="stylesheet" href="./stylesheets/customize-1581992390.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -53,6 +53,28 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="./posts/2020-02-17-new-start-in-toronto.html">New Start in Toronto</a></h1>
+    <div class="post-meta"><time datetime="2020-02-17 21:13">2020-02-17 21:13</time> </span>
+    <div class="slot-content">
+      <article>
+        <p><img src="./images/2020-02-17/IMG_4519.jpeg" /><br />
+<img src="./images/2020-02-17/IMG_4528.jpeg" /><br />
+<img src="./images/2020-02-17/IMG_4537.jpeg" /><br />
+<img src="./images/2020-02-17/IMG_4552.jpeg" /><br />
+<img src="./images/2020-02-17/IMG_4592.jpeg" /></p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
     <h1 class="post-title is-center"><a href="./posts/2020-01-01-the-end-of-2019.html">The End of 2019</a></h1>
     <div class="post-meta"><time datetime="2020-01-01 00:23">2020-01-01 00:23</time> </span>
     <div class="slot-content">
@@ -73,125 +95,6 @@
 </ul>
 <p>I’ve learned to like Audiobooks and I would say it really help a lot on your reading efficiency since it would make you effectively use your time on the road or while you are jogging. This easily adds another hour or two on each of the day. It could also let your eyes to rest, especially for a software engineer where you already use your eyes a lot. I can simply borrow the Audiobook from Singapore library and finish it in one week or two (The deadline of borrowing a book also creates urgency so that you feel like finishing it).</p>
 <p>最後、2020年で日本語が上手になりたいです。練習のため、このブログでもとも日本語の文を書きます。真剣に日本語を勉強したい動機は日本の株式の情報収集です。決算報告の日本語分かったら、それが私の競争上の優位性です。後、勉強の仕方を教えます。</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="./posts/2019-12-29-linux-materials-in-the-past-few-weeks.html">Linux materials I read in the past few weeks</a></h1>
-    <div class="post-meta"><time datetime="2019-12-29 22:14">2019-12-29 22:14</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>I’ve been watching videos and books to get myself familiar with eBPF tooling, more toward Linux network stack and VFS. This post serves as a note on what I’ve learned.</p>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/bj3qdEDbCD4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-</iframe>
-<p>Brendan Gregg has listed the command line tools that are useful for analyzing a Linux instance if he has to ssh into the instance. They could be preliminary analysis to quickly get a feel on what’s going on on a specific instance.</p>
-<ol type="1">
-<li>uptime</li>
-<li>dmesg -T | tail</li>
-<li>vmstat 1</li>
-<li>mpstat -P ALL 1</li>
-<li>pidstat 1</li>
-<li>iostat -xz 1</li>
-<li>free -m</li>
-<li>sar -n DEV 1</li>
-<li>sar -n TCP,ETCP 1</li>
-<li>top</li>
-</ol>
-<p>To dig deeper into the detail, these eBPF-based tooling would be helpful.</p>
-<ol type="1">
-<li>execsnoop</li>
-<li>opensnoop</li>
-<li>ext4slower</li>
-<li>biolatency</li>
-<li>biosnoop</li>
-<li>cachestat</li>
-<li>tcpconnect</li>
-<li>tcpaccept</li>
-<li>tcpretrans</li>
-<li>gethostlatency</li>
-<li>runqlat</li>
-<li>profile</li>
-</ol>
-<p>When the information you are trying to get are not there, and <code>strace</code> is not enough. The following tools could be helpful to peek into the critical paths in the kernel modules.</p>
-<ol type="1">
-<li>trace</li>
-<li>argdist</li>
-</ol>
-<p>A nice book to read is a <a href="https://www.amazon.com/Performance-Tools-Addison-Wesley-Professional-Computing-ebook-dp-B081ZDXNL3/dp/B081ZDXNL3">new book</a> authored by Brendan.</p>
-<p>While studying for the SRE materials, I also found Cloudflare has many good blog posts that I could learn from.</p>
-<p>A blog post on how to optimize for <a href="https://blog.cloudflare.com/http-2-prioritization-with-nginx/">http2</a> stack gives really good insight on how the Linux network stack works.</p>
-<pre><code>net.core.default_qdisc = fq
-net.ipv4.tcp_congestion_control = bbr
-net.ipv4.tcp_notsent_lowat = 16384</code></pre>
-<p>Their interview questions also makes you start to question yourself if you really know the modern TCP/IP stack.</p>
-<pre><code>Archaeology
-
-    What is the lowest TCP port number?
-
-    The TCP frame has an URG pointer field, when is it used?
-
-    Can the RST packet have a payload?
-
-    When is the &quot;flow&quot; field in IPv6 used?
-
-    What does the IP_FREEBIND socket option do?
-
-Forgotten Quirks
-
-    What does the PSH flag actually do?
-
-    The TCP timestamp is implicated in SYN cookies. How?
-
-    Can a &quot;UDP&quot; packet have a checksum field set to zero?
-
-    How does TCP simultaneous open work? Does it actually work?
-
-Fragmentation and Congestion
-
-    What is a stupid window syndrome?
-
-    What are the CWE and ECE flags in TCP header?
-
-    What is the IP ID field and what does it have to do with DF bit? Why do some packets have a non-zero IP ID and a DF set?
-
-Fresh Ideas
-
-    Can a SYN packet have a payload? (hint: new RFC proposals)
-
-    Can a SYN+ACK packet have a payload?
-
-ICMP Path MTU
-
-    ICMP packet-too-big messages are returned by routers and contain a part of the original packet in the payload. What is the minimal length of this payload that is accepted by Linux?
-
-    When an ICMP packet-too-big message is returned by an intermediate router it will have the source IP of that router. In practice though, we often see a source IP of the ICMP message to be identical to the destination IP of the original packet. Why could that happen?
-
-Linux Configuration
-
-    Linux has a &quot;tcp_no_metrics_save&quot; sysctl setting. What does it save and for how long?
-
-    Linux uses two queues to handle incoming TCP connections: the SYN queue and the accept queue. What is the length of the SYN queue?
-
-    What happens if the SYN queue grows too large and overflows?
-
-Touching the router
-
-    What are BGP bogons, and why are they less of a problem now?
-
-    TCP has an extension which adds MD5 checksums to packets. When is it useful?
-
-And finally:
-
-    What are the differences in checksumming algorithms in IPv4 and IPv6?</code></pre>
 
       </article>
     </div>

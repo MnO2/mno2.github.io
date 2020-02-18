@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1581511176.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1581992390.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,33 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2015-02-20-korean-keyboard.html">Korean Keyboard Layout</a></h1>
+    <div class="post-meta"><time datetime="2015-02-20 17:30">2015-02-20 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>Since the last article talking about the IPA, it is time to target a specific language. Wikipedia is a good resource of phonology chart, like you could find IPA for Korean and Korean Phonology article, which would give you a brief of what this language’s phonetic structure is. Once you could pronounce then you would gradually learn it.</p>
+<p>Another thing is typing alphabet out on the computer. Korean has different keyboard kayout. Like the traditional Set-2 and Set-3 layout. They are drafted when the PC was getting more wide spread. Basically they are different ways of mapping Han-gul charaters onto the keyboard buttons. If you are going to adopt them, you have to memorize the keyboard layout without pegging into any of your previous experience. I would suggest to use another keyboard layout: HNC Romaja, Which puts the Han-gul into corresponding roman alphabet button, so when you hit ‘a’, it shows ‘ㅏ’. Much like you would type hiragana in Japanese.</p>
+<p>You could set the keyboard layout in Mac’s Settings -&gt; Keyboard -&gt; Input Method -&gt; Korean -&gt; HNC Romaja</p>
+<p><img src="../images/legacy/0*E8N_vIczJHa09YUf.jpg" /></p>
+<p>Here is a few examples with han-gul and its typing sequence.</p>
+<pre><code>안 녕 하 세 요 xan niex ha sei xyo
+안 녕 히 계 세 요 xan niex hi gyei sei xyo
+감 사 합 니 다 gam sa ham ni da</code></pre>
+<p>And internet slang</p>
+<pre><code>ㅋ ㅋ ㅋ k k k</code></pre>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -75,50 +102,6 @@
 <li>Launch Settings -&gt; Keyboard -&gt; ‘+’ -&gt; Others, to choose the ‘IPA Unicode 6.2’.</li>
 <li>Ctrl + Command + Space to switch to IPA input method And enjoy!</li>
 </ol>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-02-17-breaking-loop-haskell.html">Day of week in Japanese</a></h1>
-    <div class="post-meta"><time datetime="2015-05-31 17:30">2015-05-31 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>Solving online judge’s porblems, you would definitely keep dealing with the pattern of breaking a infinite loop on reading a specific input. For example, a variable “n” signifying the size of the input, but when it is specified as “0”, it represents the end of the input. Haskell’s IO Monad, however, doesn’t grant you the ability to “exit” or “break”. And there are various ways to do this.</p>
-<p>First one is using MaybeT to stack on the IO Monad. Since it follows the monoid law, and its mzero denotes the “exit”. It is easy to understand just a little bit inconvenient. You have to lift other IO action into the Monad stack.</p>
-<pre><code>{-# LANGUAGE OverloadedStrings #-}
-import Control.Monad
-import Control.Monad.Trans
-import Control.Monad.Trans.Maybe
-import qualified Data.ByteString.Char8 as B
-
-main = runMaybeT $ forever $ do
-  s &lt;- lift B.getLine
-  when (s == “0”) $ mzero
-  lift $ print s</code></pre>
-<p>One other way it to use the notorious Continuation Monad. Or more correctly, ContT to transform the IO Monad into ContT r IO. Obviously it is much more complicated than the MaybeT solution. You have to get your head around the callCC and call the passed-in exit action when you would like to jump out the loop.</p>
-<pre><code>{-# LANGUAGE OverloadedStrings #-}
-import Control.Monad
-import Control.Monad.Trans
-import Control.Monad.Trans.Cont
-import qualified Data.ByteString.Char8 as B
-
-
-main :: IO ()
-main = flip runContT (\_ -&gt; return ()) $ do
-           callCC $ \exit -&gt; forever $ do
-                                      s &lt;- lift B.getLine
-                                      when (s == &quot;0&quot;) $ exit ()
-                                      lift $ print s</code></pre>
-<p>For online judge problem I would most likely use the first one. callCC style is more like to exploring the possiblities.</p>
 
       </article>
     </div>
