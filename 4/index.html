@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1581992390.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1582509178.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,290 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2019-10-27-%E6%96%B0%E5%8A%A0%E5%9D%A1%E4%BD%8F%E5%AE%85%E6%88%BF%E5%9C%B0%E7%94%A2%E7%9A%84%E7%B2%97%E7%95%A5%E7%A0%94%E7%A9%B6.html">新加坡住宅房地產的粗略研究</a></h1>
+    <div class="post-meta"><time datetime="2019-10-27 20:16">2019-10-27 20:16</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>由於最近被詢問這個問題，所以花了一點時間研究一下，大致是用三個樣本來粗估計算對於外國人能買的 Condomium 的 Cap Rate，算是當作只賭出租計算而不賭增值的保守估計。</p>
+<p>首先我定義我的 Cap Rate After Tax 如下</p>
+<pre><code>(Net Operating Income - Tax) / Current Market Value</code></pre>
+<p>我把稅務還有維護費用成本加進來，但沒有算進折舊，就股票來比較的話比較像是 NOPAT 吧。Top Line 的部分假設沒有任何一個閒置的月份，是最理想的情況。</p>
+<p>挑的三個樣本有</p>
+<ul>
+<li>Rosalia Park</li>
+<li>Kovan Regency</li>
+<li>Casa Cambio</li>
+</ul>
+<p>他們大概都是位在離市中心搭地鐵 30-40 分鐘的地方，在新加坡東北邊，屬於比較早期發展的區域。周邊生活機能還算不錯，有大的 shopping mall 也有 hawker Center。硬是要類比台北的話，可能有點像新店吧。這邊都用公開能夠找到的資料，Property Guru 有點像是信義房屋或是 Redfin。</p>
+<h2 id="rosalia-park">Rosalia Park</h2>
+<ul>
+<li><a href="https://www.propertyguru.com.sg/listing/21756729/for-sale-rosalia-park">For Sale</a></li>
+<li><a href="https://www.propertyguru.com.sg/listing/22056526/for-rent-rosalia-park">For Rent</a></li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Item</th>
+<th style="text-align: left;">Price</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Rent Income</td>
+<td style="text-align: left;">33600</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Property Tax</td>
+<td style="text-align: left;">(3423)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cando Fee + Utility</td>
+<td style="text-align: left;">(3600)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Maintenance</td>
+<td style="text-align: left;">(1000)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Home Insurance</td>
+<td style="text-align: left;">(200)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Calculation</th>
+<th style="text-align: left;">Rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Rental Yield</td>
+<td style="text-align: left;">1.816%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cap Rate</td>
+<td style="text-align: left;">1.371%</td>
+</tr>
+</tbody>
+</table>
+<p>網站上寫了 Rental Yield Estimated: 2.37% - 2.71%，但自己計算是遠低於那個。我猜網站是照 2016 年的交易價格算的。那時候的成交價是 1.3M SGD。</p>
+<p>1.8% 的 Rental Yield 有夠爛。US 10 year Treasury 都有 1.7% 左右，而且幾乎無風險。當然房子的好處是會隨通膨而漲價。估計如果自己改裝 layout 成出租隔間的話，總租金可以收到 4000 SGD。那 Cap Rate 可以到 2.15%，這樣會比較好一些，不過自己管理的時間成本也高了很多。</p>
+<h2 id="kovan-regency">Kovan Regency</h2>
+<ul>
+<li><a href="https://www.propertyguru.com.sg/listing/22047260/for-sale-kovan-regency">For Sale</a></li>
+<li><a href="https://www.propertyguru.com.sg/listing/19601048/for-rent-kovan-regency">For Rent</a></li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Item</th>
+<th style="text-align: left;">Price</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Rent Income</td>
+<td style="text-align: left;">43200</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Property Tax.</td>
+<td style="text-align: left;">(4584)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cando Fee + Utility</td>
+<td style="text-align: left;">(3600)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Maintenance</td>
+<td style="text-align: left;">(1000)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Home Insurance</td>
+<td style="text-align: left;">(200)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Calculation</th>
+<th style="text-align: left;">Rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Rental Yield</td>
+<td style="text-align: left;">2.618%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cap Rate</td>
+<td style="text-align: left;">2.05%</td>
+</tr>
+</tbody>
+</table>
+<p>網站上的 Rental Yield Estimated 是 2.5% - 3.17%，還是高估不過比較接近了。</p>
+<h2 id="casa-cambio">Casa Cambio</h2>
+<p>這一棟比較小戶型，比較類似 Studio</p>
+<ul>
+<li><a href="https://www.propertyguru.com.sg/listing/21981592/for-rent-casa-cambio">For Rent</a></li>
+<li><a href="https://www.propertyguru.com.sg/listing/20771858/for-sale-casa-cambio">For Sale</a></li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Item</th>
+<th style="text-align: left;">Price</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Rent Income</td>
+<td style="text-align: left;">30600</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Property Tax.</td>
+<td style="text-align: left;">(3072)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cando Fee + Utility</td>
+<td style="text-align: left;">(2400)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Maintenance</td>
+<td style="text-align: left;">(1000)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Home Insurance</td>
+<td style="text-align: left;">(200)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Calculation</th>
+<th style="text-align: left;">Rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Rental Yield</td>
+<td style="text-align: left;">2.49%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cap Rate</td>
+<td style="text-align: left;">1.945%</td>
+</tr>
+</tbody>
+</table>
+<p>所以稍微小的戶型也並沒有比較好。</p>
+<h2 id="其他一些市場的細節">其他一些市場的細節</h2>
+<ol type="1">
+<li>交易買家需要付印花稅，是累進稅率，不過對於外國人大概 2.8-3%</li>
+<li>對於外國人很多要付額外的印花稅來防止炒房，大概是另外 20%，美國人不用。</li>
+<li>根據 PR 跟 Citizen，第一套房或第二套房不同，付的額外印花稅從 0-15% 不等</li>
+<li>每年 Property Tax 是用假設你出租的收入來算，假如你真的出租的話又是另一套稅率，會比較高一些。</li>
+</ol>
+<p>可以參考這兩篇</p>
+<ul>
+<li><a href="https://www.propertyguru.com.sg/property-guides/step-by-step-guide-for-buying-property-in-singapore-as-a-foreigner-12304">Step-by-step guide for buying property in Singapore as a foreigner</a></li>
+<li><a href="https://blog.moneysmart.sg/property/investing-singapore-property/">Investing in Property in Singapore – Singapore Property Tax &amp; Buying Guide</a></li>
+</ul>
+<p>而 Tax 的部分比較複雜</p>
+<ul>
+<li><a href="https://www.iras.gov.sg/IRASHome/Property/Property-owners/Learning-the-basics/About-Annual-Value/">IRAS 的 Property Tax 官方資料</a></li>
+<li><a href="https://www.iras.gov.sg/IRASHome/Other-Taxes/Stamp-Duty-for-Property/Working-out-your-Stamp-Duty/Buying-or-Acquiring-Property/What-is-the-Duty-that-I-Need-to-Pay-as-a-Buyer-or-Transferee-of-Residential-Property/Buyer-s-Stamp-Duty--BSD-/">IRAS 的 Stamp Duty 官方資料</a></li>
+<li><a href="https://www.iras.gov.sg/IRASHome/Other-Taxes/Stamp-Duty-for-Property/Working-out-your-Stamp-Duty/Buying-or-Acquiring-Property/What-is-the-Duty-that-I-Need-to-Pay-as-a-Buyer-or-Transferee-of-Residential-Property/Additional-Buyer-s-Stamp-Duty--ABSD-/">IRAS 的 Additional Buyer Stamp Duty 官方資料</a></li>
+<li><a href="https://www.sgmoneymatters.com/property-tax-singapore/">How to calculate your property tax in Singapore</a></li>
+</ul>
+<p>而 Condo 的話有區分是 Free-hold，租期 99 年或 999 年，細節可以看這兩篇</p>
+<ul>
+<li><a href="https://www.propertyguru.com.sg/property-guides/what-are-the-options-for-a-leasehold-property-owners-when-their-99-years-tenure-is-about-to-end-10106">What are the Options for a Leasehold Property Owners when their 99 years Tenure is about to End?</a></li>
+<li><a href="https://www.99.co/blog/singapore/freehold-vs-leasehold-condos/">Freehold vs leasehold condos – Which is the best choice? There are pros and cons to buying a freehold vs a leasehold condo</a></li>
+</ul>
+<h2 id="總體資料">總體資料</h2>
+<p>政府每一季會發<a href="https://www.ura.gov.sg/Corporate/Media-Room/Media-Releases/pr19-32">報告</a>。根據政府編制的房地產指數，過去 Private properties 的走勢<a href="https://data.gov.sg/dataset/private-residential-property-price-index-by-type-of-property">如這裡</a>，從前面的低點又回來一些。不過要注意一個細節，他的所謂 private properties 包含了 shop, office, user factory and warehouse。我沒有找到只包含住宅的指數。如果是 HDB 的話，走勢可以從<a href="https://data.gov.sg/dataset/hdb-resale-price-index">這裡</a>看到，可以看出來是不斷走低的。</p>
+<p>另外 HDB也有公布租金價格中位數跟價格中位數。我擷取了其中一個地區。簡單計算一下 Rental Yield 高了很多，可以到 7.5%，HDB 的話還不用付 Condo Fee，所以粗估 Cap Rate 可能有 7%</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Time</th>
+<th style="text-align: left;">Location</th>
+<th>Type</th>
+<th style="text-align: left;">Price</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">2019-Q2</td>
+<td style="text-align: left;">ANG MO KIO</td>
+<td>3RM</td>
+<td style="text-align: left;">1700</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2019-Q2</td>
+<td style="text-align: left;">ANG MO KIO</td>
+<td>4RM</td>
+<td style="text-align: left;">2100</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2019-Q2</td>
+<td style="text-align: left;">ANG MO KIO</td>
+<td>5RM</td>
+<td style="text-align: left;">2300</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Time</th>
+<th style="text-align: left;">Location</th>
+<th>Type</th>
+<th style="text-align: left;">Price</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">2019-Q2</td>
+<td style="text-align: left;">ANG MO KIO</td>
+<td>3RM</td>
+<td style="text-align: left;">272000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2019-Q2</td>
+<td style="text-align: left;">ANG MO KIO</td>
+<td>4RM</td>
+<td style="text-align: left;">412500</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2019-Q2</td>
+<td style="text-align: left;">ANG MO KIO</td>
+<td>5RM</td>
+<td style="text-align: left;">680000</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><a href="https://data.gov.sg/dataset/median-resale-prices-for-registered-applications-by-town-and-flat-type">HDB 的 resale price</a></li>
+<li><a href="https://data.gov.sg/dataset/median-rent-by-town-and-flat-type">HDB 的租金</a></li>
+</ul>
+<p>不過 HDB 並不是一個自由的市場，要出租的規定也很多。一手的只有公民可以買。要買二手的話至少也要 PR，對於沒有結婚的 PR 還只能買其中一種比較貴的，結婚的話才能買其他種。對於收入超過一定的也沒辦法買 HDB，所以新加坡年輕人結婚的話也早，因為要買租屋的話等到收入高了就只能買 Condo。</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -91,39 +375,6 @@
 
                 </article>
             
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2019-10-19-kelly-criterion-%E8%88%87-portfolio-management-%E7%9A%84%E6%80%9D%E8%80%83.html">Kelly Criterion 與 Portfolio Management 的思考</a></h1>
-    <div class="post-meta"><time datetime="2019-10-19 15:19">2019-10-19 15:19</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>最近一直對 Portfolio Management 方面還有看事情角度有蠻多疑問，看了一些投資機構的文章以及去爬知名投資人的寫作，最終的結論還是要看每個人的個性。不過從一些從 Kelly Criterion 角度出發的<a href="https://intrinsicinvesting.com/2019/09/03/position-sizing-why-conviction-matters/">文章</a>還是多少有些幫助的。這篇把看過的一些東西記錄下來。</p>
-<p>Kelly Criterion 是被 Monish Pabrai 寫進書裡才比較出名，很多知名投資人都有用。最初也是 Ed Thorp，一個戰勝賭場的 MIT 教授發揚光大的。主要是用在賭場中，但他用在投資裡面有缺陷，主要因為</p>
-<ol type="1">
-<li>投資許多情況下機率的事件分佈無法衡量</li>
-<li>回報也是未知數，並不見得是贏了是固定的倍數</li>
-</ol>
-<p>所以現實中多辦用到 1/4 Kelly 就已經很多了。甚至有變形，使用最多願意輸的錢 * Kelly 算出來的比例。</p>
-<p>而減小 Kelly 的倍數而不要下過大的賭注是因為整個市場（不只股市）有厚尾跟黑天鵝的特性。有一些投資人就是專門做黑天鵝的，像是 Anti-Fragile 的作者 Nassim Taleb 他之前就有一個基金是做 Options 來賭黑天鵝，他也是這麼發家的。另一個算是做黑天鵝的是索羅斯，而且他又是賭特別難以捉摸的總體經濟部分，他也有對於世界運作的一套反身性哲學。他們的系統都太難學了，運作的方式也是要大資金一般人根本沒辦法複製。</p>
-<p>有一個容易忽略掉的一點就是漏看了細節。儘管巴菲特跟他風格的投資人如果是非常確定的時候會下大注，但一個關鍵點就是他們下大注常常其實也是為了拿到董事會的席位，獲得內線跟投票權，甚至是決定權。這樣其實是更安全的，因為你找到機會後可以然公司照你的方向改變，而不是希望公司的管理層聽你的建議而已。這是我這次在一篇一篇看巴菲特早年合夥人時代的信發現的。他的 Sanborn Map Corp. 就是這樣操作。而對於資金量沒有辦法買到董事席位的投資人，就算你是搭其他 Activist Investor 的順風車，你也應該要不要賭過大的部位因為你沒有董事會投票權，你的生存是操在別人手上。並且加入一些技術分析的手段來保障不可知的情況，像是別人有內線在市場上倒貨。我以前對技術分析覺得不合時宜，因為</p>
-<ol type="1">
-<li>現在都是機器人量化了，技術指標那些在北美市場早就被套利完了，幾乎是不太可能有用</li>
-<li>對於流動性股票強的股票也因為關注過多，資訊很快就會反應。不做毫秒級根本沒有意義。但那些 high frequency trading 的機構都已經做完了。</li>
-</ol>
-<p>這次看到 Michael Burry 早年在 MSN 的文章，我還蠻驚訝他居然會用簡單的技術分析當作進入點還有加入停損。他說是因為 practical reasons，主要是避免 fundamental 分析的缺陷還有自己可能的錯誤，在他用了簡單的 trading 規則加上停損規則之後，他的 portfolio 沒有因為單一部位爆炸而爆炸過。所以可以推測在超早期他曾經也因為單一部位爆炸而讓整個 portfolio 炸過。只有對於像是 Asset play 還有雪球股他說不會停損。對於他的說法我覺得很合理。</p>
-<p>而 Monish Pabrai 的作法就是儘管再看好也只會下 10%，不過我之前看到他 AER 的部位都 40% 了，但那應該是漲上去的結果，另一方面也是他並不是所有部位都在美國，我們並不知道他美國以外部位的大小。所以他的做法其實比較像是最多願意輸的錢 * Kelly 算出來的比例。</p>
-<p>有想到更多的話再更新..</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
         </main>
 
         <div class="pure-g">
@@ -148,7 +399,7 @@
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 4 of 57</div>
+            <div class="page-number is-center">Page 4 of 58</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>

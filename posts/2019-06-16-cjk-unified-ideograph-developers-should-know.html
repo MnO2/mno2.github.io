@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1581992390.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1582509178.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -55,7 +55,7 @@
                   <div class="slot-content">
                     <article>
                       <p>I have been working on <a href="https://github.com/messense/jieba-rs">jieba-rs</a> these few weeks and traced the code from the original python <a href="https://github.com/fxsjy/jieba">implementation</a>. I found a wrong assumption in the code that is by assuming the unicode scalar only ranges from U+4E00 to U+9FD5</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb1-1" title="1">re_han_default <span class="op">=</span> re.<span class="bu">compile</span>(<span class="st">&quot;([</span><span class="ch">\u4E00</span><span class="st">-</span><span class="ch">\u9FD5</span><span class="st">a-zA-Z0-9+#&amp;\._%\-]+)&quot;</span>, re.U)</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a>re_han_default <span class="op">=</span> re.<span class="bu">compile</span>(<span class="st">&quot;([</span><span class="ch">\u4E00</span><span class="st">-</span><span class="ch">\u9FD5</span><span class="st">a-zA-Z0-9+#&amp;\._%\-]+)&quot;</span>, re.U)</span></code></pre></div>
 <p>The same kind of mistakes have been made on Chinese websites, where developers don’t even bother to put minimum effort to understand what the unicode standard is, and therefore only assumes that the unicode range only from the BMP. They don’t know as of Unicode 12.0, it has defined a total of 87887 CJK Unifided Ideograph. And there are charaters defined in Extension A to Extension F, and the upcoming planned Extension G. What falls in the BMP was mainly the result of <a href="https://en.wikipedia.org/wiki/Han_unification">Han Unification</a></p>
 <p>To correctly defined the range of the unicode for CJK as the time of Unicode 12, you have to define at least the following ranges.</p>
 <ul>
@@ -70,14 +70,14 @@
 <li>U+2F800…U+2FA1F (Compatibility Supplement)</li>
 </ul>
 <p>It would cover the test cases like so that you would have your logic built on the correct foundation.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode rust"><code class="sourceCode rust"><a class="sourceLine" id="cb2-1" title="1">   <span class="kw">let</span> <span class="kw">mut</span> jieba = <span class="pp">Jieba::</span>new();</a>
-<a class="sourceLine" id="cb2-2" title="2"></a>
-<a class="sourceLine" id="cb2-3" title="3">    <span class="co">//add fake word into dictionary</span></a>
-<a class="sourceLine" id="cb2-4" title="4">    jieba.add_word(<span class="st">&quot;䶴䶵𦡦&quot;</span>, <span class="cn">Some</span>(<span class="dv">1000</span>), <span class="cn">None</span>);</a>
-<a class="sourceLine" id="cb2-5" title="5">    jieba.add_word(<span class="st">&quot;讥䶯䶰䶱䶲䶳&quot;</span>, <span class="cn">Some</span>(<span class="dv">1000</span>), <span class="cn">None</span>);</a>
-<a class="sourceLine" id="cb2-6" title="6"></a>
-<a class="sourceLine" id="cb2-7" title="7">    <span class="kw">let</span> words = jieba.cut(<span class="st">&quot;讥䶯䶰䶱䶲䶳䶴䶵𦡦&quot;</span>, <span class="cn">false</span>);</a>
-<a class="sourceLine" id="cb2-8" title="8">    <span class="pp">assert_eq!</span>(words, <span class="pp">vec!</span><span class="op">[</span><span class="st">&quot;讥䶯䶰䶱䶲䶳&quot;</span>, <span class="st">&quot;䶴䶵𦡦&quot;</span><span class="op">]</span>);</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1"></a>   <span class="kw">let</span> <span class="kw">mut</span> jieba = <span class="pp">Jieba::</span>new();</span>
+<span id="cb2-2"><a href="#cb2-2"></a></span>
+<span id="cb2-3"><a href="#cb2-3"></a>    <span class="co">//add fake word into dictionary</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a>    jieba.add_word(<span class="st">&quot;䶴䶵𦡦&quot;</span>, <span class="cn">Some</span>(<span class="dv">1000</span>), <span class="cn">None</span>);</span>
+<span id="cb2-5"><a href="#cb2-5"></a>    jieba.add_word(<span class="st">&quot;讥䶯䶰䶱䶲䶳&quot;</span>, <span class="cn">Some</span>(<span class="dv">1000</span>), <span class="cn">None</span>);</span>
+<span id="cb2-6"><a href="#cb2-6"></a></span>
+<span id="cb2-7"><a href="#cb2-7"></a>    <span class="kw">let</span> words = jieba.cut(<span class="st">&quot;讥䶯䶰䶱䶲䶳䶴䶵𦡦&quot;</span>, <span class="cn">false</span>);</span>
+<span id="cb2-8"><a href="#cb2-8"></a>    <span class="pp">assert_eq!</span>(words, <span class="pp">vec!</span><span class="op">[</span><span class="st">&quot;讥䶯䶰䶱䶲䶳&quot;</span>, <span class="st">&quot;䶴䶵𦡦&quot;</span><span class="op">]</span>);</span></code></pre></div>
 
                     </article>
                   </div>

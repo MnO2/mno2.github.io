@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1581992390.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1582509178.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,164 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2011-12-07-haskell-instance.html">Digging Deeper at Haskell Instance Definition</a></h1>
+    <div class="post-meta"><time datetime="2011-12-07 17:30">2011-12-07 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>If you try to compiler the following clip of code with ghc</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+instance C String where
+    toString = id
+
+main = do
+    putStrLn $ toString &quot;Hello World&quot;</code></pre>
+<p>The compiler will pop out the error message.</p>
+<pre><code>test01.hs:4:10:
+    Illegal instance declaration for `C String'
+    (All instance types must be of the form (T t1 ... tn)
+     where T is not a synonym.
+     Use -XTypeSynonymInstances if you want to disable this.)
+In the instance declaration for `C String'</code></pre>
+<p>What does it mean? Let’s try another run with much simpler type.</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+instance C Int where
+    toString = show
+
+instance C Double where
+    toString = show
+
+main = do
+    putStrLn $ toString (123::Int)
+    putStrLn $ toString (123.123::Double)</code></pre>
+<p>What? it works very well.</p>
+<p>Give another try. We replace String to [Char].</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+instance C [Char] where
+    toString = id
+
+main = do
+    putStrLn $ toString &quot;Hello World&quot;</code></pre>
+<p>But it still doesn’t work.</p>
+<pre><code>test03.hs:4:10:
+    Illegal instance declaration for `C [Char]'
+    (All instance types must be of the form (T a1 ... an)
+     where a1 ... an are *distinct type variables*,
+     and each type variable appears at most once in the instance head.
+     Use -XFlexibleInstances if you want to disable this.)
+
+In the instance declaration for `C [Char]'</code></pre>
+<p>Suprisingly, this does work.</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+instance Show a =&gt; C [a] where
+    toString = concat . (map show)
+
+main = do
+    putStrLn $ toString ([1,2,3,4]::[Int])</code></pre>
+<p>So the problem is not about list constructor []?</p>
+<p>Let’s go to a simple cure directly. That is to add {-# LANGUAGE FlexibleInstances #-}, i.e. use FlexibleInstances GHC extension.</p>
+<pre><code>{-# LANGUAGE FlexibleInstances #-}
+class C a where
+    toString :: a -&gt; String
+
+instance C Int where
+    toString = show
+
+instance C Double where
+    toString = show
+
+instance C [Char] where
+    toString = id
+
+instance C [Int] where
+    toString = concat . (map show)
+
+main = do
+    putStrLn $ toString (123::Int)
+    putStrLn $ toString &quot;Hello World&quot;
+    putStrLn $ toString ([1,2,3,4,5]::[Int])</code></pre>
+<p>That works for C [Char], but still doesn’t work for C String</p>
+<pre><code>{-# LANGUAGE FlexibleInstances #-}
+class C a where
+    toString :: a -&gt; String
+
+instance C String where
+    toString = id
+
+main = do
+    putStrLn $ toString &quot;Hello World&quot;
+test06.hs:5:10:
+    Illegal instance declaration for `C String'
+    (All instance types must be of the form (T t1 ... tn)
+     where T is not a synonym.
+     Use -XTypeSynonymInstances if you want to disable this.)</code></pre>
+<p>In the instance declaration for `C String’ What’s going on? Let’s check the Haskell 98 Report Sec. 4.3.2</p>
+<p>The type (T u1 … uk) must take the form of a type constructor T applied to simple type variables u1, … uk; furthermore, T must not be a type synonym, and the ui must all be distinct. This prohibits instance declarations such as:</p>
+<pre><code>instance C (a,a) where …
+instance C (Int,a) where …
+instance C [[a]] where …</code></pre>
+<p>So according to the report, C [a] is legal, since [a] = [] a where T = [] and u1 = a. But String = [Char] = [] Char, where T = [] and Char is not a type variable. As to why the specific type is invalid. Suppose we have</p>
+<pre><code>instance C [Char] where ... instance C [Int] where ...</code></pre>
+<p>A given constraint of C [a] for some type variable a, we cannot decide which instance declaration to use unless we know about a. And in Haskell 98 the comittee consider to avoid that. For detailed explanation, go ahead to read SPJ’s paper Sec.4.5</p>
+<p>The result is as expected if we try Type synonym, as the standard said the Type synonym is forbidden.</p>
+<pre><code>type Identifier = String
+
+class C a where
+    toString :: a -&gt; String
+
+instance C Identifier where
+    toString = show
+
+main = do
+    putStrLn $ toString (&quot;Hello World&quot;::Identifier)</code></pre>
+<p>Flexible Instances GHC extension is to give us more flexible instance defition form, but I didn’t check how the issue above was resolved.</p>
+<p>Excerpt from Flexible Instances GHC extension &gt; GHC 6.5 &gt; … &gt; &gt; This rule allows instances accepted by the previous rule and more, including &gt; &gt; instance C a &gt; &gt; instance Show (s a) =&gt; Show (Sized s a) &gt; &gt; instance (C1 a, C2 b) =&gt; C a b &gt; &gt; instance C1 Int a =&gt; C2 Bool [a] &gt; &gt; instance C1 Int a =&gt; C2 [a] b &gt; &gt; instance C a a =&gt; C [a] [a]</p>
+<p>To resolve the issue and at the same time conforming Haskell 98, This link listed two methods.</p>
+<p>One is to use newtype</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+
+newtype Identifier = Identifier String deriving (Show)
+
+instance C Identifier where
+    toString = show
+
+main = do
+    putStrLn $ toString (Identifier &quot;Hello&quot;)</code></pre>
+<p>Another way is to define another listToString</p>
+<pre><code>class C a where
+    toString :: a -&gt; String
+    listToString :: [a] -&gt; String
+
+instance C Char where
+    toString = show
+    listToString = id
+
+instance C a =&gt; C [a] where
+    toString = listToString
+
+main = do
+    putStrLn $ toString (&quot;Hello&quot;::[Char])</code></pre>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -301,404 +459,6 @@ m2 n    = ((filter odd [1..]) !! n)</code></pre>
 
                 </article>
             
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2011-11-19-iteratee.html">Yet Another Guide to Understand Iteratee for Haskell Programmers</a></h1>
-    <div class="post-meta"><time datetime="2011-11-19 17:30">2011-11-19 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>The concept of iteratee is currently one of topics not much material cover it. Its rising resulted from its elegancy to overcome the disadvantage of lazy IO, to which most people blame for the lack of control on resource. Although it is generally categorized as an advanced topic, I don’t think it is too difficult to get the hang of it. It is an advanced topic because in most case lazy IO can just satisfy your needs, you only need it when you run into pretty tough/big problems.</p>
-<p>I am not going to elaborate the design of iteratee, since there are already great introductions on the web. I will just recommend a reading priority to reduce the extra difficulties ahead. Here I list three of them from richly stressing in the context to direct implementation</p>
-<ol type="1">
-<li>Yesod Book</li>
-<li>Oleg Kiselyov’s talk</li>
-<li>John Milllikin’s tutorial</li>
-</ol>
-<p>I believe following this order can ease the loading of your brain. The introduction provided by Yesod Book adress the problem from the benefit of the inverse of control, without jamming you too much about the problems of lazy IO. About lazy IO and the spirit of iteratee, Oleg’s slide give an excellent and clear explanation. It doesn’t require you a lot of background knowlege, very easy to read. And John’s tutorial can be directly correspond to concrete package on hackage, that is enumerator. That would facilitate doing experiment by yourself.</p>
-<p>I will illustrate an example about the usage of iteratee, with accompanying testcase demonstrating the problem of lazy IO. This example is a modification from Kazu Yamamoto’s tutorial. I replace the enumerator package with the iteratee package. And instead of finding filenames matching given pattern, this example traverse the directories and print the first line of enumerated files (in ByteString.) The design of the example is intended to exhaust the limited resource, file descriptors, of naive implementation.</p>
-<p>Print all the first lines of files in a directory Let’s look at the naive implementation first. Since the ByteString is used in the iteratee implementation, to be parallel, it imports Data.ByteString.Lazy.Char8. It also uses readFile intentionally to be an lazy IO program. Otherwise not much to address.</p>
-<pre><code>import Control.Monad
-import Control.Monad.IO.Class
-import Control.Applicative
-import System.Environment
-import System.Directory
-import System.FilePath
-import qualified Data.List as L
-import qualified Data.ByteString.Lazy.Char8 as B
-
-
-getValidContents :: FilePath -&gt; IO [String]
-getValidContents path =
-    filter (`notElem` [&quot;.&quot;, &quot;..&quot;, &quot;.git&quot;, &quot;.svn&quot;])
-    &lt;$&gt; getDirectoryContents path
-
-
-isSearchableDir :: FilePath -&gt; IO Bool
-isSearchableDir dir =
-    (&amp;&amp;) &lt;$&gt; doesDirectoryExist dir
-         &lt;*&gt; (searchable &lt;$&gt; getPermissions dir)
-
-
-getRecursiveContents :: FilePath -&gt; IO [FilePath]
-getRecursiveContents dir = do
-    cnts &lt;- map (dir &lt;/&gt;) &lt;$&gt; getValidContents dir
-    cnts' &lt;- forM cnts $ \path -&gt; do
-        isDirectory &lt;- isSearchableDir path
-        if isDirectory
-            then getRecursiveContents path
-            else return [path]
-    return . concat $ cnts'
-
-
-firstLine :: FilePath -&gt; IO B.ByteString
-firstLine file = do
-    b &lt;- B.readFile file
-    return $ head . B.lines $ b
-
-
-allFirstLines :: FilePath -&gt; IO ()
-allFirstLines dir = do
-    filepaths &lt;- getRecursiveContents dir
-    l &lt;- mapM firstLine $ filepaths
-    mapM_ B.putStrLn l
-
-
-main = do
-    dir:_ &lt;- getArgs
-    allFirstLines dir</code></pre>
-<p>Next we look at the iteratee implementation. I re-implement enumDir function from Kazy’s tutorial with iteratee package. It may be a personal taste, an implementation with enumerator would be beginner friendly than an implementation with iteratee in my opinion. I also implement an enumeratee to adapt an enumerator of filepaths to an enumerator of bytestrings: firstLineE. In firstLineE I adopt enumerator and enumeratee provided by the iteratee package to reduce the work.</p>
-<pre><code>import Control.Monad
-import Control.Monad.IO.Class
-import Control.Applicative
-import System.Environment
-import System.Directory
-import System.FilePath
-import qualified Data.List as L
-import qualified Data.ByteString as B
-import qualified Data.Iteratee as I
-import Data.Iteratee.Iteratee
-import qualified Data.Iteratee.Char as EC
-import qualified Data.Iteratee.IO.Fd as EIO
-import qualified Data.Iteratee.ListLike as EL
-
-
-getValidContents :: FilePath -&gt; IO [String]
-getValidContents path =
-    filter (`notElem` [&quot;.&quot;, &quot;..&quot;, &quot;.git&quot;, &quot;.svn&quot;])
-    &lt;$&gt; getDirectoryContents path
-
-
-isSearchableDir :: FilePath -&gt; IO Bool
-isSearchableDir dir =
-    (&amp;&amp;) &lt;$&gt; doesDirectoryExist dir
-         &lt;*&gt; (searchable &lt;$&gt; getPermissions dir)
-
-
-getRecursiveContents :: FilePath -&gt; IO [FilePath]
-getRecursiveContents dir = do
-    cnts &lt;- map (dir &lt;/&gt;) &lt;$&gt; getValidContents dir
-    cnts' &lt;- forM cnts $ \path -&gt; do
-        isDirectory &lt;- isSearchableDir path
-        if isDirectory
-            then getRecursiveContents path
-            else return [path]
-    return . concat $ cnts'
-
-
-printI :: Iteratee [B.ByteString] IO ()
-printI = do
-    mx &lt;- EL.tryHead
-    case mx of
-         Nothing -&gt; return ()
-         Just l -&gt; do
-             liftIO . B.putStrLn $ l
-             printI
-
-
-firstLineE :: Enumeratee [FilePath] [B.ByteString] IO ()
-firstLineE = mapChunksM $ \filenames -&gt; do
-    forM filenames $ \filename -&gt; do
-        i &lt;- EIO.enumFile 1024 filename $ joinI $ ((mapChunks B.pack) &gt;&lt;&gt; EC.enumLinesBS) EL.head
-        result &lt;- run i
-        return result
-
-
-enumDir :: FilePath -&gt; Enumerator [FilePath] IO b
-enumDir dir iter = runIter iter idoneM onCont
-    where
-        onCont k Nothing = do
-            (files, dirs) &lt;- liftIO getFilesDirs
-            if null dirs
-                then return $ k (Chunk files)
-                else walk dirs $ k (Chunk files)
-        walk dirs = foldr1 (&gt;&gt;&gt;) $ map enumDir dirs
-        getFilesDirs = do
-            cnts &lt;- map (dir &lt;/&gt;) &lt;$&gt; getValidContents dir
-            (,) &lt;$&gt; filterM doesFileExist cnts
-                &lt;*&gt; filterM isSearchableDir cnts
-
-
-allFirstLines :: FilePath -&gt; IO ()
-allFirstLines dir = do
-    i' &lt;- enumDir dir $ joinI $ firstLineE printI
-    run i'
-
-
-main = do
-    dir:_ &lt;- getArgs
-    allFirstLines dir</code></pre>
-<p>To test the effect of different implementation, I prepare three test cases.</p>
-<pre><code>#!/usr/bin/bash
-
-LOGDIR=log
-mkdir -p $LOGDIR
-
-ulimit -aS &gt; $LOGDIR/ulimit_stat.log
-
-if [[ ! -d test01 ]]; then
-    mkdir -p test01
-    cd test01
-    for f in $(seq 1 500)
-    do
-        echo $RANDOM &gt; $f
-    done
-    cd ..
-fi
-
-./allfirstlines_naive test01/ +RTS -sstderr -RTS 2&gt; $LOGDIR/allfirstlines_naive_test01.log 1&gt;/dev/null
-./allfirstlines_iteratee test01/ +RTS -sstderr -RTS 2&gt; $LOGDIR/allfirstlines_iteratee_test01.log 1&gt;/dev/null
-
-if [[ ! -d test02 ]]; then
-    mkdir -p test02
-    cd test02
-    for f in $(seq 1 2048)
-    do
-        echo $RANDOM &gt; $f
-    done
-    cd ..
-fi
-
-./allfirstlines_naive test02/ +RTS -sstderr -RTS 2&gt; $LOGDIR/allfirstlines_naive_test02.log 1&gt;/dev/null
-./allfirstlines_iteratee test02/ +RTS -sstderr -RTS 2&gt; $LOGDIR/allfirstlines_iteratee_test02.log 1&gt;/dev/null
-
-
-if [[ ! -d test03 ]]; then
-    mkdir -p test03
-    ./gen_nuclear_test test03
-fi
-
-./allfirstlines_naive test03/ +RTS -sstderr -RTS 2&gt; $LOGDIR/allfirstlines_naive_test03.log 1&gt;/dev/null
-./allfirstlines_iteratee test03/ +RTS -sstderr -RTS 2&gt; $LOGDIR/allfirstlines_iteratee_test03.log 1&gt;/dev/null</code></pre>
-<p>The first test case is the most easy one, a directory containing 500 files, and the second one is a directory containing more than 2000 files, that would possibly exhaust file descriptors. The third one add another layer of complication, with directory hierarchy containing a total of more than 2000 files, The third one is generated with a haskell script as follows:</p>
-<pre><code>import Control.Monad
-import System.Directory
-import System.Environment
-
-layer :: Int -&gt; IO ()
-layer depth = do
-    if (depth &lt;= 0)
-        then do mapM_ (flip writeFile &quot;b!&quot;) (map show [1..2])
-                return ()
-        else do createDirectory &quot;0&quot;
-                setCurrentDirectory &quot;0&quot;
-                layer $ depth-1
-                setCurrentDirectory &quot;..&quot;
-
-                createDirectory &quot;1&quot;
-                setCurrentDirectory &quot;1&quot;
-                layer $ depth-1
-                setCurrentDirectory &quot;..&quot;
-
-
-main = do
-    (dir:_) &lt;- getArgs
-    setCurrentDirectory dir
-    putStrLn &quot;creating ...&quot; &gt;&gt; layer 10 &gt;&gt; putStrLn &quot;done!&quot;
-For convenience, I write a simple Makefile to make the test command be reduced to make test, and the clean command to make clean (Note that I use ghc 7.0.2, you have to compile with -rtsopts to enable most runtime flags.)
-
-.PHONY: clean test
-
-test: allfirstlines_iteratee allfirstlines_naive gen_nuclear_test
-        bash run_test.sh
-
-allfirstlines_naive: allfirstlines_naive.hs
-        ghc --make -rtsopts -O2 $@
-
-allfirstlines_iteratee: allfirstlines_iteratee.hs
-        ghc --make -rtsopts -O2 $@
-
-gen_nuclear_test: gen_nuclear_test.hs
-        ghc --make -O2 $@
-
-clean:
-        rm -f *.o *.hi
-        rm -rf test01/ test02/ test03/
-And my ulimit -aS is as follows to see the allowed number of open files for a process.
-
-core file size          (blocks, -c) 0
-data seg size           (kbytes, -d) unlimited
-scheduling priority             (-e) 20
-file size               (blocks, -f) unlimited
-pending signals                 (-i) 401408
-max locked memory       (kbytes, -l) 32
-max memory size         (kbytes, -m) unlimited
-open files                      (-n) 1024
-pipe size            (512 bytes, -p) 8
-POSIX message queues     (bytes, -q) 819200
-real-time priority              (-r) 0
-stack size              (kbytes, -s) 10240
-cpu time               (seconds, -t) unlimited
-max user processes              (-u) unlimited
-virtual memory          (kbytes, -v) unlimited
-file locks                      (-x) unlimited</code></pre>
-<p>The naive result for test case 1. We can see it is inefficient for the garbage collection time taking 21.3% of time.</p>
-<pre><code>./allfirstlines_naive test01/ +RTS -sstderr 
-      30,731,840 bytes allocated in the heap
-       1,160,436 bytes copied during GC
-       8,165,024 bytes maximum residency (4 sample(s))
-       2,214,040 bytes maximum slop
-              12 MB total memory in use (0 MB lost due to fragmentation)
-
-  Generation 0:    51 collections,     0 parallel,  0.00s,  0.00s elapsed
-  Generation 1:     4 collections,     0 parallel,  0.00s,  0.00s elapsed
-
-  INIT  time    0.00s  (  0.00s elapsed)
-  MUT   time    0.02s  (  0.02s elapsed)
-  GC    time    0.01s  (  0.01s elapsed)
-  EXIT  time    0.00s  (  0.00s elapsed)
-  Total time    0.02s  (  0.02s elapsed)
-
-  %GC time      21.3%  (21.9% elapsed)
-
-  Alloc rate    1,656,435,077 bytes per MUT second
-
-  Productivity  74.1% of total user, 76.2% of total elapsed</code></pre>
-<p>The iteratee benchmark for test case 1. The garbage collection time is reduced to 6.6%. It is still high because we use naive approach to enumerate files in a specific layer of directory.</p>
-<pre><code>./allfirstlines_iteratee test01/ +RTS -sstderr 
-       3,222,812 bytes allocated in the heap
-         268,504 bytes copied during GC
-         266,296 bytes maximum residency (1 sample(s))
-          16,348 bytes maximum slop
-               1 MB total memory in use (0 MB lost due to fragmentation)
-
-  Generation 0:     5 collections,     0 parallel,  0.00s,  0.00s elapsed
-  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
-
-  INIT  time    0.00s  (  0.00s elapsed)
-  MUT   time    0.01s  (  0.01s elapsed)
-  GC    time    0.00s  (  0.00s elapsed)
-  EXIT  time    0.00s  (  0.00s elapsed)
-  Total time    0.02s  (  0.01s elapsed)
-
-  %GC time       6.6%  (7.0% elapsed)
-
-  Alloc rate    221,758,205 bytes per MUT second
-
-  Productivity  86.3% of total user, 91.9% of total elapsed</code></pre>
-<p>test case 2 results for naive implementation. The resource is exhausted, as expected</p>
-<pre><code>./allfirstlines_naive test02/ +RTS -sstderr 
-allfirstlines_naive: test02/1752: openFile: resource exhausted (Too many open files)
-      25,549,600 bytes allocated in the heap
-       3,387,656 bytes copied during GC
-      16,887,092 bytes maximum residency (5 sample(s))
-       4,258,052 bytes maximum slop
-              22 MB total memory in use (0 MB lost due to fragmentation)
-
-  Generation 0:    40 collections,     0 parallel,  0.00s,  0.00s elapsed
-  Generation 1:     5 collections,     0 parallel,  0.01s,  0.01s elapsed
-
-  INIT  time    0.00s  (  0.00s elapsed)
-  MUT   time    0.05s  (  0.05s elapsed)
-  GC    time    0.01s  (  0.01s elapsed)
-  EXIT  time    0.00s  (  0.00s elapsed)
-  Total time    0.06s  (  0.06s elapsed)
-
-  %GC time      18.5%  (18.7% elapsed)
-
-  Alloc rate    548,298,210 bytes per MUT second
-
-  Productivity  79.9% of total user, 80.9% of total elapsed</code></pre>
-<p>test case 2 for iteratee implemetation. It completes without error, but with a high percentage of GC time. As previously stated, it is because we use a naive approach to enumerate files at a specific layer.</p>
-<pre><code>./allfirstlines_iteratee test02/ +RTS -sstderr 
-      13,091,456 bytes allocated in the heap
-       2,215,796 bytes copied during GC
-       1,590,196 bytes maximum residency (2 sample(s))
-          38,256 bytes maximum slop
-               3 MB total memory in use (0 MB lost due to fragmentation)
-
-  Generation 0:    21 collections,     0 parallel,  0.00s,  0.00s elapsed
-  Generation 1:     2 collections,     0 parallel,  0.00s,  0.00s elapsed
-
-  INIT  time    0.00s  (  0.00s elapsed)
-  MUT   time    0.06s  (  0.06s elapsed)
-  GC    time    0.01s  (  0.01s elapsed)
-  EXIT  time    0.00s  (  0.00s elapsed)
-  Total time    0.07s  (  0.07s elapsed)
-
-  %GC time       9.2%  (9.3% elapsed)
-
-  Alloc rate    216,670,627 bytes per MUT second
-
-  Productivity  89.0% of total user, 90.3% of total elapsed</code></pre>
-<p>test case 3 for naive case. Again, file descriptors are exhausted.</p>
-<pre><code>./allfirstlines_naive test03/ +RTS -sstderr 
-allfirstlines_naive: test03/0/1/1/1/1/1/1/1/1/0/1: openFile: resource exhausted (Too many open files)
-      32,198,888 bytes allocated in the heap
-       6,282,568 bytes copied during GC
-      16,901,268 bytes maximum residency (5 sample(s))
-       4,255,424 bytes maximum slop
-              22 MB total memory in use (0 MB lost due to fragmentation)
-
-  Generation 0:    50 collections,     0 parallel,  0.01s,  0.01s elapsed
-  Generation 1:     5 collections,     0 parallel,  0.01s,  0.01s elapsed
-
-  INIT  time    0.00s  (  0.00s elapsed)
-  MUT   time    0.13s  (  0.13s elapsed)
-  GC    time    0.02s  (  0.02s elapsed)
-  EXIT  time    0.00s  (  0.00s elapsed)
-  Total time    0.15s  (  0.15s elapsed)
-
-  %GC time      11.5%  (11.6% elapsed)
-
-  Alloc rate    239,243,962 bytes per MUT second
-
-  Productivity  87.8% of total user, 88.2% of total elapsed
-test case 3 for iteratee case. The GC time is greatly reduced since a layer is at most 2 files in it in this test case.
-
-./allfirstlines_iteratee test03/ +RTS -sstderr 
-      24,048,476 bytes allocated in the heap
-          67,792 bytes copied during GC
-          22,964 bytes maximum residency (1 sample(s))
-          20,068 bytes maximum slop
-               1 MB total memory in use (0 MB lost due to fragmentation)
-
-  Generation 0:    40 collections,     0 parallel,  0.00s,  0.00s elapsed
-  Generation 1:     1 collections,     0 parallel,  0.00s,  0.00s elapsed
-
-  INIT  time    0.00s  (  0.00s elapsed)
-  MUT   time    0.20s  (  0.20s elapsed)
-  GC    time    0.00s  (  0.00s elapsed)
-  EXIT  time    0.00s  (  0.00s elapsed)
-  Total time    0.20s  (  0.20s elapsed)
-
-  %GC time       0.4%  (0.4% elapsed)
-
-  Alloc rate    122,192,573 bytes per MUT second
-
-  Productivity  99.0% of total user, 99.3% of total elapsed</code></pre>
-<p>On one hand, this example serves as my excercise to help me understand iteratee, on the otherhand, it addresses the problem of lazy IO with such a simple concrete case, which is not seen on the web.</p>
-<p>I list other useful links for further info.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
         </main>
 
         <div class="pure-g">
@@ -723,7 +483,7 @@ test case 3 for iteratee case. The GC time is greatly reduced since a layer is a
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 56 of 57</div>
+            <div class="page-number is-center">Page 56 of 58</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>
