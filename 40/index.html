@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1582509898.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1622402780.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -53,15 +53,24 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-03-24-on-rust.html">On Rust</a></h1>
-    <div class="post-meta"><time datetime="2015-03-24 17:30">2015-03-24 17:30</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2015-03-25-python35.html">Features worth mentioning in Python 3.5</a></h1>
+    <div class="post-meta"><time datetime="2015-03-25 17:30">2015-03-25 17:30</time> </span>
     <div class="slot-content">
       <article>
-        <p>由於 Rust 1.0 鍵盤 Release Party 的錄影因為生於操作 Twitch 的關係而沒有保留，自己是感到蠻可惜的。在現在這個時間點 Rust 的中文介紹仍相當稀少的情況下，總覺得還是應該多打一些字來總結一下自己對這個新的語言的看法。本篇的內容主要還是 Release Party 那一天講的內容，那天有收看的 #cschat.tw 版友就可以直接跳過了。</p>
-<p>自己在介紹 Rust 這個語言的時候我總是會用一個一句話的版本，就是「C++ The Good Part」。我自己是從 Rust 0.4 開始追這個語言的發展，現今語言的樣貌距離那時候已經非常非常不一樣。這其中當然伴隨許多因素。包含開發過程中領導者的換人，Rust 的原作者也離開 Mozilla，還有從 Servo 那邊得到的 feedback 都影響著這個 development in open 的語言。當然參與的群眾主要也是以 C++ 為主力語言者為眾，所以最後的風格還是很能看到 C++11, C++14, C++17 的影子在的。不過好處是過程中一些 PL 背景的研究者參與，對於 Rust 的型態系統有所貢獻，讓語言的表達力可以維持在高檔並混入一些比較是研究前沿的東西，老實說在 1.0 看到 associated type 也是蠻意外的，這在之前只有在 Haskell 有看過。而 trait 長得也很像是 typeclasss （據說是很像 C++17 的 Concept）</p>
-<p>Rust 最具有創新意義的應該是他的 borrow checker 還有 lifetime inference 了吧。在其他主流語言中是沒看過有這種類似 linear type 的實作。雖然會帶給寫程式上的負擔，譬如說要硬是加個 block scope 來讓一些 borrow 失效。不過整體上來說是讓安全性大大提高的，畢竟整個語言就是以 memory safety 為優先而設計。不過這其中最有趣的是 lifetime, borrow 跟 closure 混雜在一起時候的概念。畢竟不像是有 GC 的語言，是另外自己實作語言的 stack 還有 heap。 Rust 的 stack 還有 heap 就真的是 C 一般系統的 stack 還有 heap。所以在處理 closure 的時候，究竟 closure 是不是在 stack 最上層被一個 function 回傳，還有是否能從一個 thread 轉移到另一個 thread 都是需要細心考慮的問題。而 Rust 用 trait 還有 trait object 來用型別盡可能地解決了這個問題。而大部分的工作都可以用型別推導來完成。</p>
-<p>另外 Rust 的 Module system 還有 crate package 也是解決了 C++ 長久以來比較不方便的地方。而 Rust 的 macro 也可以提供方便的 conditional compilation 等等問題。比起 C 的 define 要來得安全多了。而錯誤處理選擇用 Option 還有 IoResult 但卻沒有 exception 可能會讓不少人失望，這會讓開發過程要多打許多字。不過畢竟 Rust 牽扯到的是非常低階的層次，要用好 exception 會需要非常小心。就像某些團隊的 C++ guideline 會禁止用 exception 一樣，也是認知到你的團隊的生產力會被團隊中相對不熟悉語言本身問題的人所限制住。團隊中最弱的一個人亂用 exception 就會讓 bug 多出不少，與其用 guideline 沒有強制性，或是用社會性地方式去譴責這樣的行為，也許設計成在語言中會是一種保守但可以理解的選擇。畢竟當你團隊有 100 人以上的時候，機器還是比人可靠多了。</p>
-<p>至於 Rust 會不會發展起來，還很難說。目前社群中有不小的動能。而 Rust 的程式碼可以 compile 成 unmangled 讓 C++ 可以 link 也是讓 migration 容易許多。這些都是正向的發展動力。不過軟體的 networking effect 太強，沒有明顯顯著好的生態系統或是剛好打到市場需求點的話，沒有人先跳坑就會沒有進一步的正向循環，帶進錢跟貢獻者。而且同時 C++ 本身也在進步，所以很難說 Rust 是否會成功。更何況是 1.0 還有很多生態系還有編譯速度的問題有待改進。不過畢竟 Rust 這個語言的設計畢竟貼近於個人喜好，我還是希望他成功的，也因此才有這篇文章。如果對 Rust 有興趣想花點時間研究的話，歡迎到 freenode #rust.tw 聊聊天。</p>
+        <p>Yesterday Python 3.5 was released for its first beta. I think it’s a great release version with two important features I have been expected for a long time. They are Type Hinting and Await and Async syntax for coroutine. With these two features, I think programming in Python would be more productive in terms of safty and performance-wise.</p>
+<p>Before type hinting was part of the official PEP, I always went to mypy for type hinting. And it turns out the finalized PEP was strongly inspired by mypy. With a few of import you could mark your program like this.</p>
+<pre><code>def fib(n: int) -&gt; Iterator[int]: 
+  a, b = 0, 1 
+  while a &lt; n: 
+    yield a 
+    a, b = b, a+b</code></pre>
+<p>This would provide static checking tool and IDE more information to do the inference, and detect the potential error. But unfortunately, these information is still not accepted for generating more efficient bytecode or getting more performant JIT. Just like Facebook’s Hack language does providing gradual typing for PHP. I hope in the near future it would eventually reflect on runtime performance.</p>
+<p>Another is async and await syntax allowing you to mark function as coroutine.</p>
+<pre><code>async def read_data(db): 
+  data = await db.fetch('SELECT ...') 
+  ...</code></pre>
+<p>Previously you could achieve the same effect with enhanced generator with yield and yield from. But without a doubt, marking async and await would make the program easier to read.</p>
+<p>I am pretty looking forward to Python 3.5 being production ready.</p>
 
       </article>
     </div>
@@ -75,32 +84,15 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-03-10-view-toward-kafka.html">My view toward Apache Kafka</a></h1>
-    <div class="post-meta"><time datetime="2015-05-10 17:30">2015-05-10 17:30</time> </span>
+    <h1 class="post-title is-center"><a href="../posts/2015-03-24-on-rust.html">On Rust</a></h1>
+    <div class="post-meta"><time datetime="2015-03-24 17:30">2015-03-24 17:30</time> </span>
     <div class="slot-content">
       <article>
-        <p>Apache Kafka is a distributed, fault tolerent high throughput transaction log system. Most of the marketing materials coin it as a message broker or publish-subscribe system. I couldn’t say those claims are wrong because in most of the architectures it does serve as a centralized logging system, and pass the message between different parts of the architectural diagram. However, I like to say it as a transaction log system because its API is relatively low-level in semantic comparing to RabbitMQ and others systems that would first come up in your mind when mentioned for the (task) message queue. The offset of the consumers are managed by the consuemr themselves (though starting from 0.8, the offsets of simple consumers are stored in Zookeeper for simple use cases.) This distiction might be because just like any data store abstraction are leaky, the message queue system when put in different scenario, are also leaky. And Apache Kafka lies on the end of low-level API with high throuhput end of the spectrum.</p>
-<p>Apache Kafka is carefully well-designed and there have been several articles from its creator and Confluent, the company backing the Apache Kafka.</p>
-<p>The intrinsic difficulty of distributed systems also applied to Kafka. As Kyle Kingsbury pointed out. The claims that Kafka picks CA out of CAP theorem doesn’t make much sense, because the undefinedness during partition would eventually hurts the availability. Kafka is more like a CP system under certain constraints. And the singular point failure mode was indicated in the article.</p>
-<p>From my experience with Kafka, I would say it is quite stable to use, as long as you deploy it with the correct settings and architecture. And you python binding is good enough for minor stream processing cases. You don’t have to go for complex stream processing framework such as Apache Samza and Twitter’s Storm. If you are familiar with Haskell’s lazy evaluation. Any of the Kafka’s topic is just like a variable binding with a lazy stream behind. The variable is bound to a stream. And what you have to do is just use a pure function to transform the stream into another binding. I could denote them in let topic-2 = f . g $ topic-1. And with a few of sinking streams consuming the data into database or search engine’s index. This programming model ease the pain of data store replication, since the “thing” behind the variable are not in the same memory address space, and the cost of copy is huge.</p>
-<p>Kafka saves a lot of its states (consumer group offset, replica leader, partition infos) and configuration in Zookeeper. Therefore you must make sure Zookeeper doesn’t go wrong. And you could infer from that most of the operational task is to set a variable in Zookeeper. Like to reset an offset of a given consumer group and partition, it is setting a variable in Zookeeper directory. And to let it consume from start, you just delete that variable remember the offset of that consumer group.</p>
-<p>The following is my notes to common operational tasks.</p>
-<h3 id="create-topic">create topic</h3>
-<pre><code>./bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 4 --topic hello-world</code></pre>
-<h3 id="tail-messages-in-a-topic">tail messages in a topic</h3>
-<pre><code>bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic hello-world</code></pre>
-<h3 id="cat-messages-in-a-topic">cat messages in a topic</h3>
-<pre><code>bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic hello-world --from-beginning</code></pre>
-<h3 id="write-to-a-topic">write to a topic</h3>
-<pre><code>bin/kafka-console-producer.sh --zookeeper localhost:2181 --topic hello-world</code></pre>
-<h3 id="get-the-offset">get the offset</h3>
-<pre><code>bin/kafka-run-class.sh kafka.tools.GetOffsetShell --topic=hello-world --server=kafka://127.0.0.1:8001 --time=-1</code></pre>
-<h3 id="dump-segment-files">dump segment files</h3>
-<pre><code>bin/kafka-run-class.sh kafka.tools.DumpLogSegments kafka-logs/hello-world-0/00000000000034305339.kafka</code></pre>
-<h3 id="get-the-offset-before-a-certain-time">get the offset before a certain time</h3>
-<pre><code>bin/kafka-run-class.sh kafka.tools.GetOffsetShell --topic=hello-world --server=kafka://127.0.0.1:8001 --time=1406877452000 --offsets=1</code></pre>
-<h3 id="print-message-greater-than-an-offset">print message greater than an offset</h3>
-<pre><code>bin/kafka-run-class.sh kafka.tools.SimpleConsumerShell --server=kafka://127.0.0.1:8001 --topic=hello-world --offset=34305339 --fetchsize=5000 --print-message</code></pre>
+        <p>由於 Rust 1.0 鍵盤 Release Party 的錄影因為生於操作 Twitch 的關係而沒有保留，自己是感到蠻可惜的。在現在這個時間點 Rust 的中文介紹仍相當稀少的情況下，總覺得還是應該多打一些字來總結一下自己對這個新的語言的看法。本篇的內容主要還是 Release Party 那一天講的內容，那天有收看的 #cschat.tw 版友就可以直接跳過了。</p>
+<p>自己在介紹 Rust 這個語言的時候我總是會用一個一句話的版本，就是「C++ The Good Part」。我自己是從 Rust 0.4 開始追這個語言的發展，現今語言的樣貌距離那時候已經非常非常不一樣。這其中當然伴隨許多因素。包含開發過程中領導者的換人，Rust 的原作者也離開 Mozilla，還有從 Servo 那邊得到的 feedback 都影響著這個 development in open 的語言。當然參與的群眾主要也是以 C++ 為主力語言者為眾，所以最後的風格還是很能看到 C++11, C++14, C++17 的影子在的。不過好處是過程中一些 PL 背景的研究者參與，對於 Rust 的型態系統有所貢獻，讓語言的表達力可以維持在高檔並混入一些比較是研究前沿的東西，老實說在 1.0 看到 associated type 也是蠻意外的，這在之前只有在 Haskell 有看過。而 trait 長得也很像是 typeclasss （據說是很像 C++17 的 Concept）</p>
+<p>Rust 最具有創新意義的應該是他的 borrow checker 還有 lifetime inference 了吧。在其他主流語言中是沒看過有這種類似 linear type 的實作。雖然會帶給寫程式上的負擔，譬如說要硬是加個 block scope 來讓一些 borrow 失效。不過整體上來說是讓安全性大大提高的，畢竟整個語言就是以 memory safety 為優先而設計。不過這其中最有趣的是 lifetime, borrow 跟 closure 混雜在一起時候的概念。畢竟不像是有 GC 的語言，是另外自己實作語言的 stack 還有 heap。 Rust 的 stack 還有 heap 就真的是 C 一般系統的 stack 還有 heap。所以在處理 closure 的時候，究竟 closure 是不是在 stack 最上層被一個 function 回傳，還有是否能從一個 thread 轉移到另一個 thread 都是需要細心考慮的問題。而 Rust 用 trait 還有 trait object 來用型別盡可能地解決了這個問題。而大部分的工作都可以用型別推導來完成。</p>
+<p>另外 Rust 的 Module system 還有 crate package 也是解決了 C++ 長久以來比較不方便的地方。而 Rust 的 macro 也可以提供方便的 conditional compilation 等等問題。比起 C 的 define 要來得安全多了。而錯誤處理選擇用 Option 還有 IoResult 但卻沒有 exception 可能會讓不少人失望，這會讓開發過程要多打許多字。不過畢竟 Rust 牽扯到的是非常低階的層次，要用好 exception 會需要非常小心。就像某些團隊的 C++ guideline 會禁止用 exception 一樣，也是認知到你的團隊的生產力會被團隊中相對不熟悉語言本身問題的人所限制住。團隊中最弱的一個人亂用 exception 就會讓 bug 多出不少，與其用 guideline 沒有強制性，或是用社會性地方式去譴責這樣的行為，也許設計成在語言中會是一種保守但可以理解的選擇。畢竟當你團隊有 100 人以上的時候，機器還是比人可靠多了。</p>
+<p>至於 Rust 會不會發展起來，還很難說。目前社群中有不小的動能。而 Rust 的程式碼可以 compile 成 unmangled 讓 C++ 可以 link 也是讓 migration 容易許多。這些都是正向的發展動力。不過軟體的 networking effect 太強，沒有明顯顯著好的生態系統或是剛好打到市場需求點的話，沒有人先跳坑就會沒有進一步的正向循環，帶進錢跟貢獻者。而且同時 C++ 本身也在進步，所以很難說 Rust 是否會成功。更何況是 1.0 還有很多生態系還有編譯速度的問題有待改進。不過畢竟 Rust 這個語言的設計畢竟貼近於個人喜好，我還是希望他成功的，也因此才有這篇文章。如果對 Rust 有興趣想花點時間研究的話，歡迎到 freenode #rust.tw 聊聊天。</p>
 
       </article>
     </div>

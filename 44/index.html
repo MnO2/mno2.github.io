@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
-  <link rel="stylesheet" href="../stylesheets/customize-1582509898.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1622402780.css">
   <style>
     html, button, input, select, textarea,
     .pure-g [class *= "pure-u"] {
@@ -48,6 +48,36 @@
             </ul>
         </div>
         <main class="content" role="main">
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2015-02-26-haskell-one-liner.html">Haskell One Liners</a></h1>
+    <div class="post-meta"><time datetime="2015-02-26 17:30">2015-02-26 17:30</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>The scripting languages like Perl and Ruby are very well-known for expressing the data crunching task into one-liner. With their command line flags like -p, -e and default variable $_ with regular expression. The job just gets easier. I believe functional languages are also good at one-liner, since lambda-like structure are good in data transformation. Here is a few I would do with Haskell.</p>
+<h3 id="number-each-line-of-files">number each line of files</h3>
+<pre><code>ghc -e &quot;print . (zip [1..]) . lines =&lt;&lt; getContents&quot;
+ghc -e &quot;print . (filter (/= '\n'))  =&lt;&lt; getContents&quot;</code></pre>
+<h3 id="count-lines">count lines</h3>
+<pre><code>ghc -e &quot;print . length . lines =&lt;&lt; getContents&quot;</code></pre>
+<h3 id="print-specific-line">print specific line</h3>
+<pre><code>ghc -e &quot;print . (filter (\x -&gt; (fst x) == 1)) . (zip [1..]) . lines =&lt;&lt; getContents&quot;</code></pre>
+<h3 id="regular-expression-is-relatively-painful-in-haskell.-in-order-to-use-it-you-have-to-add-the-modules-you-would-like-to-load-in-evaluation-mode-first.">Regular expression is relatively painful in Haskell. In order to use it you have to add the modules you would like to load in evaluation mode first.</h3>
+<pre><code>:m +Text.Regex</code></pre>
+<p>Then hit with POSIX regular expression syntax.</p>
+<pre><code>ghc -e 'print . (map (\s -&gt; subRegex (mkRegex &quot;^[[:space:]]+&quot;) s &quot;&quot;)) . lines =&lt;&lt; getContents'</code></pre>
+<p>I would add more if I can think of others.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
             
                 <article class="post">
                     <div class="pure-g">
@@ -214,33 +244,6 @@ int main(int argc, char *argv[])
 
     return 0;
 }</code></pre>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2015-02-20-korean-keyboard.html">Korean Keyboard Layout</a></h1>
-    <div class="post-meta"><time datetime="2015-02-20 17:30">2015-02-20 17:30</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>Since the last article talking about the IPA, it is time to target a specific language. Wikipedia is a good resource of phonology chart, like you could find IPA for Korean and Korean Phonology article, which would give you a brief of what this language’s phonetic structure is. Once you could pronounce then you would gradually learn it.</p>
-<p>Another thing is typing alphabet out on the computer. Korean has different keyboard kayout. Like the traditional Set-2 and Set-3 layout. They are drafted when the PC was getting more wide spread. Basically they are different ways of mapping Han-gul charaters onto the keyboard buttons. If you are going to adopt them, you have to memorize the keyboard layout without pegging into any of your previous experience. I would suggest to use another keyboard layout: HNC Romaja, Which puts the Han-gul into corresponding roman alphabet button, so when you hit ‘a’, it shows ‘ㅏ’. Much like you would type hiragana in Japanese.</p>
-<p>You could set the keyboard layout in Mac’s Settings -&gt; Keyboard -&gt; Input Method -&gt; Korean -&gt; HNC Romaja</p>
-<p><img src="../images/legacy/0*E8N_vIczJHa09YUf.jpg" /></p>
-<p>Here is a few examples with han-gul and its typing sequence.</p>
-<pre><code>안 녕 하 세 요 xan niex ha sei xyo
-안 녕 히 계 세 요 xan niex hi gyei sei xyo
-감 사 합 니 다 gam sa ham ni da</code></pre>
-<p>And internet slang</p>
-<pre><code>ㅋ ㅋ ㅋ k k k</code></pre>
 
       </article>
     </div>
