@@ -10,7 +10,7 @@
     </author>
     <updated>2021-12-29T00:00:00Z</updated>
     <entry>
-    <title>zw-fast-quantile: Approximate Quantile for high-speed data stream</title>
+    <title>zw-fast-quantile: Approximate Quantile for high-speed data stream in Rust</title>
     <link href="https://blog.paulme.ng/posts/2021-12-29-zw-fast-quantile%3A-approximate-quantile-for-high-speed-data-stream.html" />
     <id>https://blog.paulme.ng/posts/2021-12-29-zw-fast-quantile%3A-approximate-quantile-for-high-speed-data-stream.html</id>
     <published>2021-12-29T00:00:00Z</published>
