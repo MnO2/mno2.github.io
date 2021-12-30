@@ -53,6 +53,58 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="./posts/2021-12-29-zw-fast-quantile%3A-approximate-quantile-for-high-speed-data-stream.html">zw-fast-quantile: Approximate Quantile for high-speed data stream</a></h1>
+    <div class="post-meta"><time datetime="2021-12-29 23:54">2021-12-29 23:54</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>A couple of weeks ago I exchanged messages with <a href="https://github.com/ljw1004">ljw1004</a>, where he was surveying fast quantiles implementation in rust. He conducted a thorough <a href="https://github.com/postmates/quantiles/issues/32">benchmark</a> against the GK01 and CKMS algorithms in the <a href="https://github.com/postmates/quantiles">postmates/quantiles</a> crate, in order to understand the tradeoffs among the error rate, memory usage and the update/query time. He mentioned the Zhang Wang algorithm in a <a href="https://github.com/postmates/quantiles/issues/33">literature review</a>, where I later found that it was actually adopted in the boosted tree implementation in <a href="https://android.googlesource.com/platform/external/tensorflow/+/6341b8975b7660244e1ca3003bfce5371f1fd167/tensorflow/core/kernels/boosted_trees/quantiles/weighted_quantiles_stream.h#30">Tensorflow</a>. I got intrigued and decided to roll my sleeves and give it a shot to implement the algorithm in rust</p>
+<p>I spent a few days to read the <a href="http://web.cs.ucla.edu/~weiwang/paper/SSDBM07_2.pdf">paper</a> and read the reference implementation done by <a href="https://github.com/jasonge27/fastQuantile">jasonge27</a> in C++. The C++ implementation only implemented the fixed size approach in the paper but lack the generalized approach to support the online streaming update. I read the paper carefully and implement the generalized algorithm and then we have <a href="https://github.com/MnO2/zw-fast-quantile">zw-fast-quantile</a> crate.</p>
+<p>The naive benchmark with criterion shows that the update operation is 2.6x faster than GK01 implementation in <a href="https://github.com/postmates/quantiles">postmates/quantiles</a></p>
+<pre><code>zw unbound quantile update
+                        time:   [60.780 us 60.855 us 60.936 us]
+                        change: [-1.4032% -0.9510% -0.5005%] (p = 0.00 &lt; 0.05)
+                        Change within noise threshold.
+Found 8 outliers among 100 measurements (8.00%)
+  2 (2.00%) high mild
+  6 (6.00%) high severe</code></pre>
+<pre><code>gk quantile update      time:   [156.84 us 157.02 us 157.24 us]
+                        change: [-0.1907% -0.0503% +0.0969%] (p = 0.50 &gt; 0.05)
+                        No change in performance detected.
+Found 11 outliers among 100 measurements (11.00%)
+  6 (6.00%) high mild
+  5 (5.00%) high severe</code></pre>
+<p>and query operation is 1.5x faster than GK01</p>
+<pre><code>zw unbound quantile query
+                        time:   [229.62 ns 230.16 ns 230.77 ns]
+                        change: [+1.3422% +1.8105% +2.2504%] (p = 0.00 &lt; 0.05)
+                        Performance has regressed.
+Found 11 outliers among 100 measurements (11.00%)
+  3 (3.00%) high mild
+  8 (8.00%) high severe</code></pre>
+<pre><code>gk quantile query       time:   [350.21 ns 350.48 ns 350.76 ns]
+                        change: [-0.4638% -0.3109% -0.1670%] (p = 0.00 &lt; 0.05)
+                        Change within noise threshold.
+Found 8 outliers among 100 measurements (8.00%)
+  1 (1.00%) low severe
+  2 (2.00%) high mild
+  5 (5.00%) high severe</code></pre>
+<p>It matches with the emprical study from the paper that it is able to achieve 200-300x speedup over GK01.</p>
+<p>To benchmark the memory usage, by storing complete 100M values in the <code>Vec</code> and calculating the quantiles is using up <code>7812k</code> of heap, and with the error rate set to <code>0.01</code> the <code>zw-fast-quantile</code> is only using up <code>1947k</code> of heap. It looks like it fulfills the goal of approximate quantile by saving the storage size without sacrificing the precision too much.</p>
+<p>Implementing <code>zw-fast-quantile</code> is a lot of fun and I learned a lot. By reading the review <a href="https://arxiv.org/pdf/2004.08255.pdf">paper</a> now I understand we can categorize the approximate quantile algorithm by different use cases. They could be 1. Streaming Model: Your data would arrive one by one and you might not know the size of your stream beforehand. You should be able to calculate the result in one pass without blowing up the memory. You might also improve the algorithm complexity if you know that you just gonna query the quantiles for the trailing N values. 2. Distributed Model: where you have a network of nodes, each of them have some values. However, the communication cost is high and you would like to avoid the communication cost as much as possible. 3. Update Time: In the real-time application like video/audio streaming, your data update would be very fast and it requires you the low latency on your update time. You would like to strike a balance between update time and the space complexity and accuracy. 4. Data Skewness: The famous t-digest would leverage on the fact where the error percentage is more imporatnt to the 99th percentile than 50th percentile. By leveraging the data skewness you can invent another set of algorithms.</p>
+<p><code>zw-fast-quantile</code> is falling on the category 3, and it is good to know that it influenced the implementation in Tensorflow’s boosted trees. It could be another handy algorithm put in your toolbox and use it when the use case is right.</p>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
     <h1 class="post-title is-center"><a href="./posts/2021-05-30-%E5%B0%8D%E6%96%BC%E6%8A%95%E8%B3%87%E6%83%B3%E6%B3%95%E7%9A%84%E4%B8%80%E4%BA%9B%E8%BD%89%E8%AE%8A.html">對於投資想法的一些轉變</a></h1>
     <div class="post-meta"><time datetime="2021-05-30 15:21">2021-05-30 15:21</time> </span>
     <div class="slot-content">
@@ -87,63 +139,6 @@
 
                 </article>
             
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="./posts/2020-02-23-pull-yourself-out-of-the-tarpit.html">Pull yourself out of the tarpit</a></h1>
-    <div class="post-meta"><time datetime="2020-02-23 13:29">2020-02-23 13:29</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>I had experienced burned-out in the past two years. The symptoms of burned-out could include</p>
-<ul>
-<li>Don’t want to go to work, questioning yourself continuing doing certain things.</li>
-<li>Unmotivated. You used to be into something, maybe travel, then suddenly you stopped enjoying it. It has become your new normal and you need next big in life. You can’t find your purpose.</li>
-<li>Feeling stuck in life. You are an analytical personality and you try to break down the problem into pieces but still unable to find out a solution to break out of the status-quo.</li>
-</ul>
-<p>I explored and came out my own methodology, I have tried it out on my friends seeking my advice and the experiments so far look positive. It’s not for every one, but if you are from similar background as mine, you might find the methodology helpful. My background is:</p>
-<ol type="1">
-<li>Analytical personality, with strong belief in Science or the philosophy foundation established by Karl Popper / Thomas Kuhn.</li>
-<li>Agnosticism or Atheism, where you don’t lie your belief system on “believing in god” as the first principle and derive that these all difficulties in life are challenges designed from god, and you believe that eventually you would make through this.</li>
-</ol>
-<p>I noticed that my methodology is very software operational influenced, or could be logically structured like this:</p>
-<ol type="1">
-<li>Mitigate the problem. At least stop bleeding.</li>
-<li>Analyse the root cause.</li>
-<li>Explore and re-establish your logical/belief network (or software)</li>
-</ol>
-<p>The first step of mitigating the problem is to make sure you are not sick (that could be measured by modern medicine). Not to jump into the topic of Materialism v.s. Spiritualism, we definitely agree that your body would play a role affecting how you think, or if you’re still able to think rationally. Ruling out the possibility of depression etc would be the first step.</p>
-<p>After making sure you’re not sick, you could use body hacking to make yourself better.</p>
-<ol type="1">
-<li>Start activity that make your body generate Dopamine without too many side effects. Like excercise. You might feel like doing nothing but you have to force yourself to start it from very small, even just walking 10 minutes, and slowly increase the activity. It’s the same way to treat procrastination.</li>
-<li>Jam your brain’s attention. Your attention is limited. And when you are down your attention would be focus on negative thoughts and emotions. However, the right way is not to ask yourself not to think about it. That would backfire. The correct way would be doing something jam your full attention bandwidth, so it leaves no space to negative thoughts. That’s how travel to some where you’re unfamiliar would work, because your day-to-day attention would be jammed by new information like “how do I get to the next destination?”, “where’s the super market close to my hostel?”</li>
-</ol>
-<p>Once you finished the mitigation step, we would need to find out the root cause of the problems. And usually you would be stucked at these steps and you have no idea how to make a breakthrough.</p>
-<ol type="1">
-<li>The sequence of outcomes doesn’t match what you’ve expected, which frustrated you.</li>
-<li>You lost motivation, and not sure what’s the meaning of doing certain things though you could find some weak reasons.</li>
-<li>The constraints are too many and you’re not able to solve them all.</li>
-</ol>
-<p>Before jumping into the detail, I’d like to address what’s the foundation / framework on tackling these problem. It’s the logic system borrowed from Philosophy and Mathematics. Like dealing with any problem in life you must admit a foundation where you could build solid ground on. To me it is the logic rules and axiom, even the modern theology is built on logic and axiom. I don’t see any better foundation you could rely upon at this moment. The difference and the key part is to know yourself well, since that would play a key role to know what your axiom are. For example: Your personality is like Alex Honnold in the documentary film: Free Solo where you have a big heart for adventure. You can’t tell why since that’s a part of yourself. It is what it is and you can’t ask further, that’s your axiom and it would be the starting point for reasoning in your logic system. It would be another story if your personality is conservative on risk. When facing on the same type of scenario, the same logic rules with different axiom could lead to very different reasonable action items. They are true respectively in their own logic system. Understanding this fact would aslo help you whether to take advice from others. Their advice could be very helpful in their own background but may not apply that well in your system.</p>
-<p>Apart from the logic system mentioned above, I also borrowed probabilistic thinking from the master poker players and investing guru. If you read enough you’d notice that the probablistic thinking they are not only applied well in those domains. Your daily life are challenged by a lot of uncertainty and unsure, where they are subject to certain known or unknown distribution. But people rarely see it that way, they would see they did something wrong when the outcome was not right. It might be true, but you have to take a grain of sale on that where you need to guess what’s the oracle distribution behind the world you’re facing and you still might face bad outcome with certain probability even you are doing the right thing. It might just you’re just unlucky for the time being. And the reasonable action is to keep doing it until it reverses to the mean.</p>
-<p>Beyond that, sometimes the feedback loop are unnoticeable in incremental amount. The typical tasks like these are language learning and gym training. You have to sort of “believe” that eventually it would work out and stick with it for a time window until you make it. You have to be able to identify the difficulties you are facing is just a part of that kind.</p>
-<p>With the above said, now we could tackle the three scenarios mentioned above to find out the root cause.</p>
-<ol type="1">
-<li>Make sure if you are just unlucky for this sequence of bad outcomes, is it significant enough to make you question maybe your view on the oracle distribution might be wrong, if it is then change your view, and start with a new distribution hypothesis and change your action accordingly. Then test them out with your future efforts. The world is not fixed in stone and keep changing, so the oracle distribution might over changes over time, it is called non-strationary distribution in Mathematics</li>
-<li>If you start to question what the meaning of working on taks A. Usually you’re asking the wrong question. You would never asked yourself what the meaning is to have Hamburger for dinner if you’re up to it, since your body feel like it. That means your axiom mismatches with what you thought you are. You start to cheat on yourself’s feeling. The correct question is, how should I follow my body tells me but at the same time I could make enough of money, support myself etc. That’s the constraints put by reality. Wasting time on finding the meaning is looking for the solutions in the wrong direction.</li>
-<li>If you’ve ever felt too many constraints in life: Like you are married and have two kids, and you still feel like you’d like to climb the corporate ladder and make good progress in your career. It’s like the tasks you faced in corporate life, make a priority and drop some of the contraints. People tend to have more in life but not aware that more values in life usually they would conflict with each others in unexpected ways, or resource contention. Even for very generalized concepts like democracy and freedom could result into dark corners where you have to make a trade-off. Once you re-examine the contraints, and re-examine your logic rules in your system. You could probably find a way to work-around the “bug”. It’s pretty much debugging software products, where you could leverage on debugging skill by removing certain constraints and see if the output would change if not subjecting to heisenbug.</li>
-</ol>
-<p>Usually you would know the action items once you identify the root cause. Sometimes it is not that easy. However, the world is big, I would like to lay my belief not on deity but the fact that the world is big and believing that the difficulty you face today might have been resolved by somebody else in the world before. Read more blog posts and books to learn from others’ expereience. Especially the brighter ones. I like Bill Gates’ method to reset, where he would bring tens of books and lock himself into an isolated woodhouse in the forest and focus himself on the topic. I also tried this method by myself. I read the tens of books from business people, or the topics that I wouldn’t usually touch to explore the inspiration from others. And they might share the misearble situation they faced before and when realizing those, you would feel you are in a much better position. It would do good on seal healing the wound. This method create positive optionality. Traveling to challenging place would sort of play the same type of roles, but mostly distraction since those wouldn’t bring knowledge from reading a book.</p>
-<p>Again, these are the framework I adopted, and I assume the methodology would only apply to certain group of audience. I kind of abstract the process how people self cure the mental problems over the years and come up with this framework. I don’t know how far it could apply but it works well for myself and a few samples around me. Hope that is helpful.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
         </main>
 
         <div class="pure-g">
@@ -168,7 +163,7 @@
         <div class="pure-g">
           <div class="pure-u-md-1-5"></div>
           <div class="pure-u-1 pure-u-md-3-5">
-            <div class="page-number is-center">Page 1 of 58</div>
+            <div class="page-number is-center">Page 1 of 59</div>
             <footer class="site-footer">
               <div class="inner is-center">
                 <section class="copyright">All contents are copyrighted by Paul Meng, CC BY-NC-SA © 2019</section>

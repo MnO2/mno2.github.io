@@ -8,8 +8,51 @@
         <name>Paul Meng</name>
         <email>me@paulme.ng</email>
     </author>
-    <updated>2021-05-30T00:00:00Z</updated>
+    <updated>2021-12-29T00:00:00Z</updated>
     <entry>
+    <title>zw-fast-quantile: Approximate Quantile for high-speed data stream</title>
+    <link href="https://blog.paulme.ng/posts/2021-12-29-zw-fast-quantile%3A-approximate-quantile-for-high-speed-data-stream.html" />
+    <id>https://blog.paulme.ng/posts/2021-12-29-zw-fast-quantile%3A-approximate-quantile-for-high-speed-data-stream.html</id>
+    <published>2021-12-29T00:00:00Z</published>
+    <updated>2021-12-29T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>A couple of weeks ago I exchanged messages with <a href="https://github.com/ljw1004">ljw1004</a>, where he was surveying fast quantiles implementation in rust. He conducted a thorough <a href="https://github.com/postmates/quantiles/issues/32">benchmark</a> against the GK01 and CKMS algorithms in the <a href="https://github.com/postmates/quantiles">postmates/quantiles</a> crate, in order to understand the tradeoffs among the error rate, memory usage and the update/query time. He mentioned the Zhang Wang algorithm in a <a href="https://github.com/postmates/quantiles/issues/33">literature review</a>, where I later found that it was actually adopted in the boosted tree implementation in <a href="https://android.googlesource.com/platform/external/tensorflow/+/6341b8975b7660244e1ca3003bfce5371f1fd167/tensorflow/core/kernels/boosted_trees/quantiles/weighted_quantiles_stream.h#30">Tensorflow</a>. I got intrigued and decided to roll my sleeves and give it a shot to implement the algorithm in rust</p>
+<p>I spent a few days to read the <a href="http://web.cs.ucla.edu/~weiwang/paper/SSDBM07_2.pdf">paper</a> and read the reference implementation done by <a href="https://github.com/jasonge27/fastQuantile">jasonge27</a> in C++. The C++ implementation only implemented the fixed size approach in the paper but lack the generalized approach to support the online streaming update. I read the paper carefully and implement the generalized algorithm and then we have <a href="https://github.com/MnO2/zw-fast-quantile">zw-fast-quantile</a> crate.</p>
+<p>The naive benchmark with criterion shows that the update operation is 2.6x faster than GK01 implementation in <a href="https://github.com/postmates/quantiles">postmates/quantiles</a></p>
+<pre><code>zw unbound quantile update
+                        time:   [60.780 us 60.855 us 60.936 us]
+                        change: [-1.4032% -0.9510% -0.5005%] (p = 0.00 &lt; 0.05)
+                        Change within noise threshold.
+Found 8 outliers among 100 measurements (8.00%)
+  2 (2.00%) high mild
+  6 (6.00%) high severe</code></pre>
+<pre><code>gk quantile update      time:   [156.84 us 157.02 us 157.24 us]
+                        change: [-0.1907% -0.0503% +0.0969%] (p = 0.50 &gt; 0.05)
+                        No change in performance detected.
+Found 11 outliers among 100 measurements (11.00%)
+  6 (6.00%) high mild
+  5 (5.00%) high severe</code></pre>
+<p>and query operation is 1.5x faster than GK01</p>
+<pre><code>zw unbound quantile query
+                        time:   [229.62 ns 230.16 ns 230.77 ns]
+                        change: [+1.3422% +1.8105% +2.2504%] (p = 0.00 &lt; 0.05)
+                        Performance has regressed.
+Found 11 outliers among 100 measurements (11.00%)
+  3 (3.00%) high mild
+  8 (8.00%) high severe</code></pre>
+<pre><code>gk quantile query       time:   [350.21 ns 350.48 ns 350.76 ns]
+                        change: [-0.4638% -0.3109% -0.1670%] (p = 0.00 &lt; 0.05)
+                        Change within noise threshold.
+Found 8 outliers among 100 measurements (8.00%)
+  1 (1.00%) low severe
+  2 (2.00%) high mild
+  5 (5.00%) high severe</code></pre>
+<p>It matches with the emprical study from the paper that it is able to achieve 200-300x speedup over GK01.</p>
+<p>To benchmark the memory usage, by storing complete 100M values in the <code>Vec</code> and calculating the quantiles is using up <code>7812k</code> of heap, and with the error rate set to <code>0.01</code> the <code>zw-fast-quantile</code> is only using up <code>1947k</code> of heap. It looks like it fulfills the goal of approximate quantile by saving the storage size without sacrificing the precision too much.</p>
+<p>Implementing <code>zw-fast-quantile</code> is a lot of fun and I learned a lot. By reading the review <a href="https://arxiv.org/pdf/2004.08255.pdf">paper</a> now I understand we can categorize the approximate quantile algorithm by different use cases. They could be 1. Streaming Model: Your data would arrive one by one and you might not know the size of your stream beforehand. You should be able to calculate the result in one pass without blowing up the memory. You might also improve the algorithm complexity if you know that you just gonna query the quantiles for the trailing N values. 2. Distributed Model: where you have a network of nodes, each of them have some values. However, the communication cost is high and you would like to avoid the communication cost as much as possible. 3. Update Time: In the real-time application like video/audio streaming, your data update would be very fast and it requires you the low latency on your update time. You would like to strike a balance between update time and the space complexity and accuracy. 4. Data Skewness: The famous t-digest would leverage on the fact where the error percentage is more imporatnt to the 99th percentile than 50th percentile. By leveraging the data skewness you can invent another set of algorithms.</p>
+<p><code>zw-fast-quantile</code> is falling on the category 3, and it is good to know that it influenced the implementation in Tensorflow’s boosted trees. It could be another handy algorithm put in your toolbox and use it when the use case is right.</p>
+]]></summary>
+</entry>
+<entry>
     <title>對於投資想法的一些轉變</title>
     <link href="https://blog.paulme.ng/posts/2021-05-30-%E5%B0%8D%E6%96%BC%E6%8A%95%E8%B3%87%E6%83%B3%E6%B3%95%E7%9A%84%E4%B8%80%E4%BA%9B%E8%BD%89%E8%AE%8A.html" />
     <id>https://blog.paulme.ng/posts/2021-05-30-%E5%B0%8D%E6%96%BC%E6%8A%95%E8%B3%87%E6%83%B3%E6%B3%95%E7%9A%84%E4%B8%80%E4%BA%9B%E8%BD%89%E8%AE%8A.html</id>
@@ -663,30 +706,6 @@ And finally:
 <p>而 2,3,4 都是比較偏量化的策略，是有研究論文支持的，如果能在全球法規足夠完善的地方去分散小部位，統計上來講應該是勝率夠高的。用量化的好處是不會做出太笨的事，然後也不會花太多時間，screener 篩出來後還是會看一下 corporate governance 這塊，如果沒太大問題就可以考慮。這樣我人腦的部分只要先練習出比人家更能看出 corporate governance 的問題就能贏過市場上大部分人，而 corporate governance 這一塊也是機構的機器人還無法量化的部分，所以暫時不會被機器人打敗。越涉及到 Unknown and Unknowable 的部分就越不會被量化策略基金威脅到。</p>
 <p>當我閱讀越多的感想，我越覺得除了少數的例外，成功的投資人都是成功的生意人。其實投資也是在拚生意的眼光，就算是做房地產，我知道有一派的投資客也是靠老屋翻修，或是翻修成社區型住宿來賺取比較高的報酬，畢竟房地產也是有他的邏輯，不可能永遠無腦資金行情上漲。我看到賺的好的幾乎都不是純的投金錢而已，都是由翻修等動作的經營本質。而股票中 Activist 的行動也是類似，採取經營權把不適合的管理層換掉來解放價值，甚至像是 Carl Icahn 就有養自己專門的團隊在拿下企業後去整頓。而巴菲特用保險公司去投資 Float，也只是把保險公司的本質做到最完善，很多人想要仿照買了保險公司想如法炮製但卻失敗，因為管不好保險公司。新一代的人我有看到不用保險公司而用 Domain Name 註冊公司，也就是 SaaS 公司來達到同樣的目的，也是先收錢在辦事，但比起經營保險公司簡單很多，是蠻聰明的做法。</p>
 <p>希望有毅力定期寫讀物心得..</p>
-]]></summary>
-</entry>
-<entry>
-    <title>Kelly Criterion 與 Portfolio Management 的思考</title>
-    <link href="https://blog.paulme.ng/posts/2019-10-19-kelly-criterion-%E8%88%87-portfolio-management-%E7%9A%84%E6%80%9D%E8%80%83.html" />
-    <id>https://blog.paulme.ng/posts/2019-10-19-kelly-criterion-%E8%88%87-portfolio-management-%E7%9A%84%E6%80%9D%E8%80%83.html</id>
-    <published>2019-10-19T00:00:00Z</published>
-    <updated>2019-10-19T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<p>最近一直對 Portfolio Management 方面還有看事情角度有蠻多疑問，看了一些投資機構的文章以及去爬知名投資人的寫作，最終的結論還是要看每個人的個性。不過從一些從 Kelly Criterion 角度出發的<a href="https://intrinsicinvesting.com/2019/09/03/position-sizing-why-conviction-matters/">文章</a>還是多少有些幫助的。這篇把看過的一些東西記錄下來。</p>
-<p>Kelly Criterion 是被 Monish Pabrai 寫進書裡才比較出名，很多知名投資人都有用。最初也是 Ed Thorp，一個戰勝賭場的 MIT 教授發揚光大的。主要是用在賭場中，但他用在投資裡面有缺陷，主要因為</p>
-<ol type="1">
-<li>投資許多情況下機率的事件分佈無法衡量</li>
-<li>回報也是未知數，並不見得是贏了是固定的倍數</li>
-</ol>
-<p>所以現實中多辦用到 1/4 Kelly 就已經很多了。甚至有變形，使用最多願意輸的錢 * Kelly 算出來的比例。</p>
-<p>而減小 Kelly 的倍數而不要下過大的賭注是因為整個市場（不只股市）有厚尾跟黑天鵝的特性。有一些投資人就是專門做黑天鵝的，像是 Anti-Fragile 的作者 Nassim Taleb 他之前就有一個基金是做 Options 來賭黑天鵝，他也是這麼發家的。另一個算是做黑天鵝的是索羅斯，而且他又是賭特別難以捉摸的總體經濟部分，他也有對於世界運作的一套反身性哲學。他們的系統都太難學了，運作的方式也是要大資金一般人根本沒辦法複製。</p>
-<p>有一個容易忽略掉的一點就是漏看了細節。儘管巴菲特跟他風格的投資人如果是非常確定的時候會下大注，但一個關鍵點就是他們下大注常常其實也是為了拿到董事會的席位，獲得內線跟投票權，甚至是決定權。這樣其實是更安全的，因為你找到機會後可以然公司照你的方向改變，而不是希望公司的管理層聽你的建議而已。這是我這次在一篇一篇看巴菲特早年合夥人時代的信發現的。他的 Sanborn Map Corp. 就是這樣操作。而對於資金量沒有辦法買到董事席位的投資人，就算你是搭其他 Activist Investor 的順風車，你也應該要不要賭過大的部位因為你沒有董事會投票權，你的生存是操在別人手上。並且加入一些技術分析的手段來保障不可知的情況，像是別人有內線在市場上倒貨。我以前對技術分析覺得不合時宜，因為</p>
-<ol type="1">
-<li>現在都是機器人量化了，技術指標那些在北美市場早就被套利完了，幾乎是不太可能有用</li>
-<li>對於流動性股票強的股票也因為關注過多，資訊很快就會反應。不做毫秒級根本沒有意義。但那些 high frequency trading 的機構都已經做完了。</li>
-</ol>
-<p>這次看到 Michael Burry 早年在 MSN 的文章，我還蠻驚訝他居然會用簡單的技術分析當作進入點還有加入停損。他說是因為 practical reasons，主要是避免 fundamental 分析的缺陷還有自己可能的錯誤，在他用了簡單的 trading 規則加上停損規則之後，他的 portfolio 沒有因為單一部位爆炸而爆炸過。所以可以推測在超早期他曾經也因為單一部位爆炸而讓整個 portfolio 炸過。只有對於像是 Asset play 還有雪球股他說不會停損。對於他的說法我覺得很合理。</p>
-<p>而 Monish Pabrai 的作法就是儘管再看好也只會下 10%，不過我之前看到他 AER 的部位都 40% 了，但那應該是漲上去的結果，另一方面也是他並不是所有部位都在美國，我們並不知道他美國以外部位的大小。所以他的做法其實比較像是最多願意輸的錢 * Kelly 算出來的比例。</p>
-<p>有想到更多的話再更新..</p>
 ]]></summary>
 </entry>
 

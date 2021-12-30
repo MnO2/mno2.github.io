@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+    <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140890995-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-140890995-1');
+  </script>
+  <meta charset="utf-8">
+  <title>zw-fast-quantile: Approximate Quantile for high-speed data stream</title>
+  <link rel="canonical" href="https://blog.paulme.ng" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="AhCspkSlkxfv5A28XyOOTijnA59_q-V8rJzKakb4CFA" />
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <meta property="og:title" content="zw-fast-quantile: Approximate Quantile for high-speed data stream" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://blog.paulme.ng" />
+
+  <link href="https://fonts.googleapis.com/css?family=EB+Garamond|Roboto&display=swap" rel="stylesheet"> 
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+TC&display=optional" rel="stylesheet"> 
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css" integrity="sha384-oAOxQR6DkCoMliIh8yFnu25d7Eq/PHS21PClpwjOTeU2jRSq11vu66rf90/cZr47" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="../stylesheets/customize-1622403341.css">
+  <style>
+    html, button, input, select, textarea,
+    .pure-g [class *= "pure-u"] {
+      font-family: 'Roboto', 'Noto Sans TC', 'Noto Sans JP', sans-serif;
+    }
+
+    .post-title {
+      font-family: 'EB Garamond', 'Noto Sans TC', 'Noto Sans JP', serif;
+    }
+  </style>
+</head>
+
+    <body>
+        <div class="pure-menu pure-menu-horizontal">
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item"><a href="../archive.html" class="pure-menu-link">Archive</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <div class="content">
+              <div class="pure-g">
+                <div class="pure-u-md-1-5"></div>
+                <div class="pure-u-1 pure-u-md-3-5">
+                  <h1 class="post-title is-center">zw-fast-quantile: Approximate Quantile for high-speed data stream</h1>
+                  <div class="slot-content">
+                    <article>
+                      <p>A couple of weeks ago I exchanged messages with <a href="https://github.com/ljw1004">ljw1004</a>, where he was surveying fast quantiles implementation in rust. He conducted a thorough <a href="https://github.com/postmates/quantiles/issues/32">benchmark</a> against the GK01 and CKMS algorithms in the <a href="https://github.com/postmates/quantiles">postmates/quantiles</a> crate, in order to understand the tradeoffs among the error rate, memory usage and the update/query time. He mentioned the Zhang Wang algorithm in a <a href="https://github.com/postmates/quantiles/issues/33">literature review</a>, where I later found that it was actually adopted in the boosted tree implementation in <a href="https://android.googlesource.com/platform/external/tensorflow/+/6341b8975b7660244e1ca3003bfce5371f1fd167/tensorflow/core/kernels/boosted_trees/quantiles/weighted_quantiles_stream.h#30">Tensorflow</a>. I got intrigued and decided to roll my sleeves and give it a shot to implement the algorithm in rust</p>
+<p>I spent a few days to read the <a href="http://web.cs.ucla.edu/~weiwang/paper/SSDBM07_2.pdf">paper</a> and read the reference implementation done by <a href="https://github.com/jasonge27/fastQuantile">jasonge27</a> in C++. The C++ implementation only implemented the fixed size approach in the paper but lack the generalized approach to support the online streaming update. I read the paper carefully and implement the generalized algorithm and then we have <a href="https://github.com/MnO2/zw-fast-quantile">zw-fast-quantile</a> crate.</p>
+<p>The naive benchmark with criterion shows that the update operation is 2.6x faster than GK01 implementation in <a href="https://github.com/postmates/quantiles">postmates/quantiles</a></p>
+<pre><code>zw unbound quantile update
+                        time:   [60.780 us 60.855 us 60.936 us]
+                        change: [-1.4032% -0.9510% -0.5005%] (p = 0.00 &lt; 0.05)
+                        Change within noise threshold.
+Found 8 outliers among 100 measurements (8.00%)
+  2 (2.00%) high mild
+  6 (6.00%) high severe</code></pre>
+<pre><code>gk quantile update      time:   [156.84 us 157.02 us 157.24 us]
+                        change: [-0.1907% -0.0503% +0.0969%] (p = 0.50 &gt; 0.05)
+                        No change in performance detected.
+Found 11 outliers among 100 measurements (11.00%)
+  6 (6.00%) high mild
+  5 (5.00%) high severe</code></pre>
+<p>and query operation is 1.5x faster than GK01</p>
+<pre><code>zw unbound quantile query
+                        time:   [229.62 ns 230.16 ns 230.77 ns]
+                        change: [+1.3422% +1.8105% +2.2504%] (p = 0.00 &lt; 0.05)
+                        Performance has regressed.
+Found 11 outliers among 100 measurements (11.00%)
+  3 (3.00%) high mild
+  8 (8.00%) high severe</code></pre>
+<pre><code>gk quantile query       time:   [350.21 ns 350.48 ns 350.76 ns]
+                        change: [-0.4638% -0.3109% -0.1670%] (p = 0.00 &lt; 0.05)
+                        Change within noise threshold.
+Found 8 outliers among 100 measurements (8.00%)
+  1 (1.00%) low severe
+  2 (2.00%) high mild
+  5 (5.00%) high severe</code></pre>
+<p>It matches with the emprical study from the paper that it is able to achieve 200-300x speedup over GK01.</p>
+<p>To benchmark the memory usage, by storing complete 100M values in the <code>Vec</code> and calculating the quantiles is using up <code>7812k</code> of heap, and with the error rate set to <code>0.01</code> the <code>zw-fast-quantile</code> is only using up <code>1947k</code> of heap. It looks like it fulfills the goal of approximate quantile by saving the storage size without sacrificing the precision too much.</p>
+<p>Implementing <code>zw-fast-quantile</code> is a lot of fun and I learned a lot. By reading the review <a href="https://arxiv.org/pdf/2004.08255.pdf">paper</a> now I understand we can categorize the approximate quantile algorithm by different use cases. They could be 1. Streaming Model: Your data would arrive one by one and you might not know the size of your stream beforehand. You should be able to calculate the result in one pass without blowing up the memory. You might also improve the algorithm complexity if you know that you just gonna query the quantiles for the trailing N values. 2. Distributed Model: where you have a network of nodes, each of them have some values. However, the communication cost is high and you would like to avoid the communication cost as much as possible. 3. Update Time: In the real-time application like video/audio streaming, your data update would be very fast and it requires you the low latency on your update time. You would like to strike a balance between update time and the space complexity and accuracy. 4. Data Skewness: The famous t-digest would leverage on the fact where the error percentage is more imporatnt to the 99th percentile than 50th percentile. By leveraging the data skewness you can invent another set of algorithms.</p>
+<p><code>zw-fast-quantile</code> is falling on the category 3, and it is good to know that it influenced the implementation in Tensorflow’s boosted trees. It could be another handy algorithm put in your toolbox and use it when the use case is right.</p>
+
+                    </article>
+                  </div>
+                </div>
+                <div class="pure-u-md-1-5"></div>
+              </div>
+            </div>
+        </div>
+    </body>
+</html>
