@@ -53,6 +53,125 @@
                     <div class="pure-g">
   <div class="pure-u-md-1-5"></div>
   <div class="pure-u-1 pure-u-md-3-5">
+    <h1 class="post-title is-center"><a href="../posts/2019-12-29-linux-materials-in-the-past-few-weeks.html">Linux materials I read in the past few weeks</a></h1>
+    <div class="post-meta"><time datetime="2019-12-29 22:14">2019-12-29 22:14</time> </span>
+    <div class="slot-content">
+      <article>
+        <p>I’ve been watching videos and books to get myself familiar with eBPF tooling, more toward Linux network stack and VFS. This post serves as a note on what I’ve learned.</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/bj3qdEDbCD4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+</iframe>
+<p>Brendan Gregg has listed the command line tools that are useful for analyzing a Linux instance if he has to ssh into the instance. They could be preliminary analysis to quickly get a feel on what’s going on on a specific instance.</p>
+<ol type="1">
+<li>uptime</li>
+<li>dmesg -T | tail</li>
+<li>vmstat 1</li>
+<li>mpstat -P ALL 1</li>
+<li>pidstat 1</li>
+<li>iostat -xz 1</li>
+<li>free -m</li>
+<li>sar -n DEV 1</li>
+<li>sar -n TCP,ETCP 1</li>
+<li>top</li>
+</ol>
+<p>To dig deeper into the detail, these eBPF-based tooling would be helpful.</p>
+<ol type="1">
+<li>execsnoop</li>
+<li>opensnoop</li>
+<li>ext4slower</li>
+<li>biolatency</li>
+<li>biosnoop</li>
+<li>cachestat</li>
+<li>tcpconnect</li>
+<li>tcpaccept</li>
+<li>tcpretrans</li>
+<li>gethostlatency</li>
+<li>runqlat</li>
+<li>profile</li>
+</ol>
+<p>When the information you are trying to get are not there, and <code>strace</code> is not enough. The following tools could be helpful to peek into the critical paths in the kernel modules.</p>
+<ol type="1">
+<li>trace</li>
+<li>argdist</li>
+</ol>
+<p>A nice book to read is a <a href="https://www.amazon.com/Performance-Tools-Addison-Wesley-Professional-Computing-ebook-dp-B081ZDXNL3/dp/B081ZDXNL3">new book</a> authored by Brendan.</p>
+<p>While studying for the SRE materials, I also found Cloudflare has many good blog posts that I could learn from.</p>
+<p>A blog post on how to optimize for <a href="https://blog.cloudflare.com/http-2-prioritization-with-nginx/">http2</a> stack gives really good insight on how the Linux network stack works.</p>
+<pre><code>net.core.default_qdisc = fq
+net.ipv4.tcp_congestion_control = bbr
+net.ipv4.tcp_notsent_lowat = 16384</code></pre>
+<p>Their interview questions also makes you start to question yourself if you really know the modern TCP/IP stack.</p>
+<pre><code>Archaeology
+
+    What is the lowest TCP port number?
+
+    The TCP frame has an URG pointer field, when is it used?
+
+    Can the RST packet have a payload?
+
+    When is the &quot;flow&quot; field in IPv6 used?
+
+    What does the IP_FREEBIND socket option do?
+
+Forgotten Quirks
+
+    What does the PSH flag actually do?
+
+    The TCP timestamp is implicated in SYN cookies. How?
+
+    Can a &quot;UDP&quot; packet have a checksum field set to zero?
+
+    How does TCP simultaneous open work? Does it actually work?
+
+Fragmentation and Congestion
+
+    What is a stupid window syndrome?
+
+    What are the CWE and ECE flags in TCP header?
+
+    What is the IP ID field and what does it have to do with DF bit? Why do some packets have a non-zero IP ID and a DF set?
+
+Fresh Ideas
+
+    Can a SYN packet have a payload? (hint: new RFC proposals)
+
+    Can a SYN+ACK packet have a payload?
+
+ICMP Path MTU
+
+    ICMP packet-too-big messages are returned by routers and contain a part of the original packet in the payload. What is the minimal length of this payload that is accepted by Linux?
+
+    When an ICMP packet-too-big message is returned by an intermediate router it will have the source IP of that router. In practice though, we often see a source IP of the ICMP message to be identical to the destination IP of the original packet. Why could that happen?
+
+Linux Configuration
+
+    Linux has a &quot;tcp_no_metrics_save&quot; sysctl setting. What does it save and for how long?
+
+    Linux uses two queues to handle incoming TCP connections: the SYN queue and the accept queue. What is the length of the SYN queue?
+
+    What happens if the SYN queue grows too large and overflows?
+
+Touching the router
+
+    What are BGP bogons, and why are they less of a problem now?
+
+    TCP has an extension which adds MD5 checksums to packets. When is it useful?
+
+And finally:
+
+    What are the differences in checksumming algorithms in IPv4 and IPv6?</code></pre>
+
+      </article>
+    </div>
+  </div>
+  <div class="pure-u-md-1-5"></div>
+</div>
+
+                </article>
+            
+                <article class="post">
+                    <div class="pure-g">
+  <div class="pure-u-md-1-5"></div>
+  <div class="pure-u-1 pure-u-md-3-5">
     <h1 class="post-title is-center"><a href="../posts/2019-11-19-global-deep-value-strategy.html">Global Deep Value Strategy</a></h1>
     <div class="post-meta"><time datetime="2019-11-19 23:58">2019-11-19 23:58</time> </span>
     <div class="slot-content">
@@ -152,36 +271,6 @@
 </table>
 <p>For the top 20 there are some overlaps, but the rankings that was in the low Shiller 10 year CAPE are ranked lower. This ranking somehow matches with some of my private findings of good value company globally. I would argue this ranking should be a relative good pool to fish. But not the simply low multiple ranking. With that said, I didn’t do thorough research to do back-testing etc. It’s simply my hunch though.</p>
 <p>This is just a rundown of my thoughts, not a rigorous research.</p>
-
-      </article>
-    </div>
-  </div>
-  <div class="pure-u-md-1-5"></div>
-</div>
-
-                </article>
-            
-                <article class="post">
-                    <div class="pure-g">
-  <div class="pure-u-md-1-5"></div>
-  <div class="pure-u-1 pure-u-md-3-5">
-    <h1 class="post-title is-center"><a href="../posts/2019-11-18-the-man-who-solved-the-market.html">The Man Who Solved The Market</a></h1>
-    <div class="post-meta"><time datetime="2019-11-18 21:00">2019-11-18 21:00</time> </span>
-    <div class="slot-content">
-      <article>
-        <p>To me this is the book of the year 2019.</p>
-<p>I can barely recall when was the first time I heard about the name of Renaissance Technologies. It is probably back in 2010 when I got intrigued by the world of Quant and I was reading Derman’s book: My life as a Quant. I googled a little bit of the development of the financial modeling and tried to know the landscape of the hedge funds that are quantitative funds. It didn’t take too long to run into the name of Jim Simons. As a STEM student growing up in Asia, his associate with Shiing-shen Chern and Chern–Simons theory immediately brought my attention. By further digging up the techniques adopted by Renaissance Technologies. The names of Peter Brown and Robert Mercer came up, they are the students of Frederick Jelinek, a figure you must know if you were in my topic of research: Speech Recognition. The rumor that they were using Hidden Markov Model at the time of early 90s excited me, where HMM was the model you could not skip in my field. Most of the research was trying to build adds-on to the core HMM infrastructure.</p>
-<p>This book isn’t about to tell you about the skills adopted by Renaissance Technmologies, but a biography of Jim Simons by Gregory Zuckerman. Renaissance Technologies has stayed low-key for a long time and their secretive style makes few people know the history of the fund. Gregory did a good job to piece together the history, the challenges and the crisis where Jim has faced, and key figures helped establish the foundation of the company. It shed more humanity colors to the stereotype that a group of mathematicians and scientists should be run the company rationally and pursue the path of philosopher king as described by Plato. However, it is far from what was happening in the fund. Drama and crisis was no different from other companies.</p>
-<p>The book is so much fun to read and I would like to put down a few notes and thoughts in bullet points.</p>
-<ul>
-<li>It sounds to me the most important thing to quantitative fund is cost estimation with control and risk management, unlike the most of the people intuitively think it is the precision of the prediction. It reads like Renaissance Technologies have its moat because its early setback so Simons was more risk-aware than others like LTCM, so they are less susceptible to the tail risk.</li>
-<li>On the cost end, apart from hiring the talents to discover signals, a new breed of quantitative fund like World Quant is to shift the cost of the mathematicians and scientist to Asia, where they only need to pay half of the salary than in the USA, which reduce the expense ratio for a fund to succeed. It sounds so much like running a bank where the metric is to check the expense rate.</li>
-<li>The early pioneers of the quant is more connected than I thought, Kelly’s criterion was known and was applied by Berlekamp to their trading models.</li>
-<li>They also look for the statistically significant signals that don’t necessarily obvious in its logical cause, which is a surprise to me. But it seems that it made them a moat since they have a scaling bet strategy that could safely try it out and shrink it back if the signal fade away.</li>
-<li>Ed Thorp was almost to invest in Renaissance Technology, but he decided not to when he found Jim was a chain smoker.</li>
-<li>Statistical Arbitrage, though so obvious on the paper, there are so many details to take care to put into the practice it seems.</li>
-<li>George Soros and Jim Simons are neighbors. In the congress hearing during the financial crisis, you could see that Soros and Jim were sitting together in the picture. It seems that Jim agrees with the worldview of Soros. In the epilogue, a MIT student asked Jim which investor’s advice they should listen to on the path of learning investment. Jim pondered and replied George Soros. The same answer was given by Nassim Taleb.</li>
-</ul>
 
       </article>
     </div>
